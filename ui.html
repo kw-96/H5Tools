@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>渠道美术-H5延展工具</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+    /* 基础样式 */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Sans SC', 'Source Han Sans CN', '思源黑体 CN', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1d1d1f;
+      background-color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden; /* 隐藏水平滚动条 */
+    }
+    
+    /* 隐藏滚动条但保持滚动功能 */
+    ::-webkit-scrollbar {
+      width: 0; /* 针对Webkit浏览器 */
+      height: 0;
+      background: transparent;
+    }
+    
+    /* Firefox滚动条隐藏 */
+    * {
+      scrollbar-width: none; /* Firefox */
+    }
+    
+    /* IE滚动条隐藏 */
+    * {
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+  
+    /* 主容器布局设置 */
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        overflow-x: hidden;
+        height: 100vh; /* 设置为视口高度 */
+        display: flex;
+        flex-direction: column;
+        padding-top: 46px; /* 为固定的标签栏留出空间 */
+        box-sizing: border-box;
+        padding-bottom: 40px; /* 底部留出空间 */
+      }
+  
+    /* 顶部标签容器 */
+    .tab-container {
+      display: flex; /* 使用弹性布局 */
+      width: 100%; /* 宽度占满父容器 */
+      justify-content: space-between; /* 子元素之间平均分配空间 */
+      background-color: rgba(255, 255, 255, 0.72); /* 半透明白色背景 */
+      backdrop-filter: blur(20px); /* 背景模糊效果 */
+      -webkit-backdrop-filter: blur(20px); /* Safari浏览器兼容性 */
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* 底部添加细边框 */
+      padding: 8px 0; /* 上下内边距 */
+      overflow-x: hidden; /* 隐藏水平溢出 */
+      box-sizing: border-box; /* 边框和内边距包含在宽度内 */
+      position: fixed; /* 固定定位 */
+      top: 0; /* 顶部对齐 */
+      left: 0; /* 左侧对齐 */
+      right: 0; /* 右侧对齐 */
+      z-index: 1000; /* 确保tab在内容之上 */
+    }
+  
+    /* 标签样式 */
+    .tab {
+      display: flex; /* 使用弹性布局 */
+      flex-direction: column; /* 垂直排列子元素 */
+      align-items: center; /* 水平居中对齐 */
+      justify-content: center; /* 垂直居中对齐 */
+      flex: 1; /* 平均分配可用空间 */
+      width: 25%; /* 四个tab，每个占25%宽度 */
+      padding: 8px 4px; /* 内边距设置 */
+      border-radius: 8px; /* 圆角边框 */
+      transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1); /* 平滑过渡效果 */
+      cursor: pointer; /* 鼠标悬停时显示手型光标 */
+      color: #86868b; /* 文字颜色 */
+      position: relative; /* 相对定位，为可能的绝对定位子元素做准备 */
+    }
+  
+    .tab svg {
+      width: 20px;
+      height: 20px;
+      margin-bottom: 4px;
+    }
+  
+    .tab-label {
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 2px;
+      opacity: 0.8;
+    }
+  
+    /* 活动标签样式 */
+    .tab.active {
+      color: #0071e3;
+    }
+  
+    .tab:hover {
+      color: #0071e3;
+      background-color: rgba(0, 113, 227, 0.05);
+    }
+  
+    /* 内容区域 */
+    .tab-content {
+      display: none;
+      padding: 0 16px;
+      margin: 30px auto 0px; /* 顶部空间为标签栏高度 */
+      width: 100%;
+      box-sizing: border-box;
+      background-color: #ffffff;
+      overflow-y: auto; /* 允许垂直滚动 */
+      overflow-x: hidden; /* 隐藏水平滚动条 */
+
+    }
+  
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+      position: relative; /* 确保活动内容正确定位 */
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  
+    /* 表单控件 */
+    .form-group {
+      margin-bottom: 14px;
+    }
+  
+    /* 行布局样式 */
+    .row-layout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+  
+    .row-layout label {
+      flex: 0 0 auto;
+      margin-bottom: 0;
+      margin-right: 16px;
+      min-width: 70px; /* 最小标签宽度 */
+      width: 25%; /* 标签宽度百分比 */
+      max-width: 90px; /* 最大标签宽度 */
+    }
+  
+    .row-layout .color-input-group,
+    .row-layout .file-upload-btn {
+      flex: 1;
+      width: 75%;
+    }
+  
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1d1f;
+    }
+
+    /* 非交互式标签样式 */
+    .non-interactive-label {
+      pointer-events: none; /* 禁用鼠标事件 */
+      cursor: default; /* 设置默认光标样式 */
+    }
+  
+    input[type="number"], input[type="color"], input[type="text"], .text-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+  
+    input[type="number"]:focus, input[type="color"]:focus, input[type="text"]:focus, .text-input:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+  
+    /* 颜色选择器样式 */
+    .color-input-group {
+      display: flex;
+      align-items: center;
+      min-width: 120px;
+    }
+  
+    input[type="color"] {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+  
+    input.color-value {
+      margin-left: 8px;
+      font-size: 13px;
+      color: #666;
+      width: 80px;
+      padding: 4px 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      background-color: #ffffff;
+    }
+  
+    input.color-value:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+    }
+  
+    /* 展开动画效果 */
+    .version-content {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      padding-left: 24px;
+    }
+
+    .version-content.active {
+      max-height: 800px;
+      opacity: 1;
+      padding-bottom: 15px;
+    }
+
+    /* 上传按钮样式 */
+    .file-upload-btn {
+      flex: 1;
+      width: 100%;
+    }
+    
+    .upload-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #f5f5f7;
+      border: 1px dashed rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      color: #666;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: center;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    
+    .upload-btn:hover {
+      background-color: #efefef;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 创建按钮容器样式 */
+    .create-btn-container {
+      display: flex;
+      justify-content: center;
+      padding: 0px 0 24px 0;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    /* 按钮组样式 */
+    .button-group {
+      /* 按钮组布局样式 */
+      display: flex;
+      /* 设置按钮之间的间距 */
+      gap: 12px;
+      /* 设置按钮组与上方元素的距离 */
+      margin-top: 24px;
+      /* 水平居中按钮组 */
+      justify-content: center;
+      /* 设置按钮组宽度为100% */
+      width: 100%;
+      /* 限制按钮组最大宽度为320px */
+      max-width: 320px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    button#create {
+      background-color: #0071e3;
+      color: white;
+      min-width: 150px;
+    }
+    
+    button#create:hover {
+      background-color: #0077ed;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+    }
+    
+    button#create:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    
+    button#cancel {
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+    }
+    
+    button#cancel:hover {
+      background-color: #e8e8ed;
+    }
+    
+    /* 内容板块样式 */
+    .form-section {
+      width: 100%;
+      padding: 16px 0;
+      margin-bottom: 0;
+      box-sizing: border-box;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-section:last-child {
+      border-bottom: none;
+    }
+    
+    .form-section .form-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* 板块标题样式 */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+    
+    .section-title {
+      color: inherit;
+    }
+    
+    /* 折叠控制按钮样式 */
+    .collapse-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: transparent;
+      border: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 14px;
+      color: #86868b;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    /* SVG图标样式 */
+    .collapse-btn svg {
+      color: inherit;
+      fill: currentColor;
+    }
+
+    /* 确保SVG路径颜色正确继承 */
+    .chevron-icon {
+      color: inherit;
+      fill: currentColor;
+      stroke: currentColor;
+    }
+    
+    .collapse-btn:hover {
+      background-color: #f5f5f7;
+    }
+    
+    .collapse-btn.collapsed {
+      transform: rotate(180deg);
+    }
+    
+    /* 可折叠的内容区域 */
+    .collapsible-content {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .collapsible-content.collapsed {
+      max-height: 0;
+    }
+    
+    /* 下拉选择器样式 */
+    .dropdown-selector {
+      position: relative;
+      min-width: 120px;
+      max-width: 140px;
+      z-index: 10;
+    }
+    
+    .section-dropdown {
+      /* 下拉选择器的基本样式 */
+      appearance: none;
+      -webkit-appearance: none;
+      /* 内边距设置，所有边距均衡 */
+      padding: 6px 10px;
+      /* 圆角边框 */
+      border-radius: 6px;
+      /* 边框样式 */
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      /* 字体样式继承自父元素 */
+      font-family: inherit;
+      /* 字体大小和粗细 */
+      font-size: 14px;
+      font-weight: 600;
+      /* 文字颜色 */
+      color: #1d1d1f;
+      /* 背景色，带有轻微透明度 */
+      background-color: rgba(255, 255, 255, 0.8);
+      /* 鼠标样式为指针 */
+      cursor: pointer;
+      /* 宽度占满容器 */
+      /* width: 100%; */
+      /* 过渡效果，使样式变化更平滑 */
+      transition: all 0.2s ease;
+      /* 添加轻微阴影效果 */
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* 主题切换按钮样式 */
+    .theme-switcher {
+      margin-bottom: 20px;
+    }
+
+    .theme-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background-color: #f0f0f0;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      color: #333;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .theme-btn i {
+      font-size: 14px;
+    }
+
+    .theme-btn.active {
+      background-color: #0071e3;
+      color: white;
+      border-color: #0071e3;
+    }
+
+    .theme-btn:hover:not(.active) {
+      background-color: #e5e5e5;
+    }
+
+    /* 版本信息样式 */
+    .page-footer {
+      width: 100%; /* 设置页脚宽度为100% */
+      padding: 10px 10px; /* 设置内边距 */
+      background-color: rgba(255, 255, 255, 0.72); /* 设置背景色为半透明白色 */
+      backdrop-filter: blur(20px); /* 添加背景模糊效果 */
+      -webkit-backdrop-filter: blur(20px); /* 为WebKit浏览器添加背景模糊效果 */
+      border-top: 1px solid rgba(0, 0, 0, 0.1); /* 添加顶部边框 */
+      position: fixed; /* 固定定位 */
+      bottom: 0; /* 固定在底部 */
+      left: 0; /* 固定在左侧 */
+      z-index: 100; /* 设置层级 */
+      box-sizing: border-box; /* 使用border-box盒模型 */
+    }
+    
+    .version-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      color: #86868b;
+      font-size: 13px;
+    }
+
+    .version-number {
+      color: #86868b;
+    }
+
+    .version-author {
+      color: #86868b;
+    }
+    
+    /* 深色模式下的页脚样式 */
+    body.dark-theme .page-footer {
+      background-color: rgba(30, 30, 32, 0.72);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* 奖品网格样式 */
+    .prize-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px; /* 设置间距 */
+      margin-top: 10px;
+    }
+    
+    .grid-item {
+      flex: 0 0 calc(33.333% - 6px); /* 一行三个，考虑间距 */
+      box-sizing: border-box;
+    }
+    
+    .img-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .grid-btn {
+      width: 100%;
+      aspect-ratio: 1/1; /* 保持正方形 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f7;
+      border: 1px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      transition: all 0.2s;
+    }
+    
+    .grid-btn:hover {
+      background-color: #efefef;
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .upload-icon {
+      font-size: 20px;
+      color: #86868b;
+      position: absolute;
+      z-index: 1;
+    }
+    
+    .preview-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+    }
+    
+    .preview-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .prize-label {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #86868b;
+      text-align: center;
+      width: 100%;
+    }
+    
+    /* 游戏图标上传和预览样式 */
+    .img-upload-wrapper {
+      flex: 1;
+      width: 100%;
+    }
+    
+    .img-preview-btn {
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      justify-content: flex-start;
+    }
+    
+    .img-preview-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f7;
+      border: 1px dashed rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    
+    .img-preview-container:hover {
+      background-color: #efefef;
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .img-preview-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .upload-icon-text {
+      font-size: 24px;
+      color: #86868b;
+    }
+    
+    /* 深色模式下的图片预览样式 */
+    body.dark-theme .img-preview-container {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    body.dark-theme .img-preview-container:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    body.dark-theme .upload-icon-text {
+      color: #a1a1a6;
+    }
+    
+    /* 深色主题样式 */
+    body.dark-theme {
+      color: #f5f5f7;
+      background-color: #1d1d1f;
+    }
+    
+    /* 深色模式下的奖品网格样式 */
+    body.dark-theme .grid-btn {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    body.dark-theme .grid-btn:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    body.dark-theme .upload-icon {
+      color: #a1a1a6;
+    }
+    
+    body.dark-theme .prize-label {
+      color: #a1a1a6;
+    }
+
+    body.dark-theme .tab-container {
+      background-color: rgba(30, 30, 32, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .tab:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-theme .tab-content {
+      background-color: #1d1d1f;
+    }
+
+    body.dark-theme .form-section {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* 添加深色模式下的标题颜色 */
+    body.dark-theme .section-header,
+    body.dark-theme .section-title {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme label {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme input[type="number"],
+    body.dark-theme input[type="text"],
+    body.dark-theme .text-input {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+    
+    body.dark-theme input[type="text"]:focus,
+    body.dark-theme .text-input:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+    }
+
+    body.dark-theme .upload-btn {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .upload-btn:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-theme .section-dropdown {
+      background-color: rgba(44, 44, 46, 0.8);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .collapse-btn {
+      border-color: #3a3a3c;
+      color: #f5f5f7;
+    }
+
+    /* 深色模式下的SVG图标 */
+    body.dark-theme .collapse-btn svg,
+    body.dark-theme .chevron-icon {
+      color: #f5f5f7;
+      fill: #f5f5f7;
+    }
+
+    body.dark-theme .theme-btn:not(.active) {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .theme-btn:hover:not(.active) {
+      background-color: #3a3a3c;
+    }
+
+    body.dark-theme button#cancel {
+      background-color: #2c2c2e;
+      color: #f5f5f7;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- 主容器 -->
+  <div class="container">
+    <!-- 标签页容器 -->
+    <div class="tab-container">
+      <!-- 创建原型标签页 -->
+      <div class="tab active" data-tab="prototype">
+        <!-- SVG图标：创建原型 -->
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.4375 8C10.3004 8 11 8.69956 11 9.5625V18.4375C11 19.3004 10.3004 20 9.4375 20H1.5625C0.699555 20 0 19.3004 0 18.4375V9.5625C0 8.69956 0.699555 8 1.5625 8H9.4375Z" />
+          <path d="M18.4375 8C19.3004 8 20 8.69956 20 9.5625V18.4375C20 19.3004 19.3004 20 18.4375 20H14.5625C13.6996 20 13 19.3004 13 18.4375V9.5625C13 8.69956 13.6996 8 14.5625 8H18.4375Z" />
+          <path d="M18.4375 0C19.3004 0 20 0.699555 20 1.5625V4.6875C20 5.55044 19.3004 6.25 18.4375 6.25H1.5625C0.699555 6.25 0 5.55044 0 4.6875V1.5625C0 0.699555 0.699555 0 1.5625 0H18.4375Z" />
+        </svg>
+        <span class="tab-label">创建原型</span>
+      </div>
+      <!-- 延展渠道标签页 -->
+      <div class="tab" data-tab="extension">
+        <!-- SVG图标：延展渠道 -->
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1.6875 3.09375V7.25175H0V3.09375C0 2.27324 0.325948 1.48633 0.906138 0.906138C1.48633 0.325948 2.27324 0 3.09375 0H7.25175V1.6875H3.09375C2.3175 1.6875 1.6875 2.3175 1.6875 3.09375ZM16.3125 3.09375V7.25175H18V3.09375C18 2.27324 17.6741 1.48633 17.0939 0.906138C16.5137 0.325948 15.7268 0 14.9063 0H10.7483V1.6875H14.9063C14.9738 1.6875 15.0413 1.692 15.1054 1.701L11.3175 5.49113L12.51 6.68363L16.3001 2.89462C16.3091 2.95988 16.3136 3.02625 16.3136 3.09375H16.3125ZM7.26638 11.9273L2.89462 16.299C2.95875 16.308 3.02625 16.3136 3.09375 16.3136H7.25175V18H3.09375C2.27324 18 1.48633 17.6741 0.906138 17.0939C0.325948 16.5137 0 15.7268 0 14.9063V10.7471H1.6875V14.9063C1.6875 14.9738 1.692 15.039 1.701 15.1043L6.07275 10.7325L7.26525 11.925L7.26638 11.9273ZM16.3125 14.9063C16.3125 15.6836 15.6825 16.3125 14.9063 16.3125H10.7483V18H14.9063C15.7268 18 16.5137 17.6741 17.0939 17.0939C17.6741 16.5137 18 15.7268 18 14.9063V10.7483H16.3125V14.9074V14.9063Z" />
+        </svg>
+        <span class="tab-label">延展渠道</span>
+      </div>
+      <!-- 工具集标签页 -->
+      <div class="tab" data-tab="tools">
+        <!-- SVG图标：工具集 -->
+        <svg width="20" height="20" viewBox="0 0 18 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9.0211 0.000215872C8.85591 -0.00344549 8.69292 0.0395296 8.55 0.124432L0.450001 4.91307C0.313036 4.99406 0.199328 5.11059 0.120328 5.25091C0.0413283 5.39123 -0.000174042 5.5504 5.4908e-07 5.71237V15.2896C-0.000174121 15.4516 0.0413281 15.6108 0.120328 15.7511C0.199328 15.8914 0.313036 16.008 0.450001 16.0889L8.54121 20.8722C8.54449 20.8742 8.54669 20.8774 8.55 20.8794C8.55608 20.8831 8.56315 20.8848 8.56934 20.8884C8.62739 20.9204 8.68869 20.9457 8.75215 20.964C8.76179 20.9667 8.77056 20.9707 8.78027 20.973C8.85101 20.9909 8.92361 21 8.99649 21H9H9.00352C9.07521 20.9997 9.14662 20.9906 9.21621 20.973C9.22527 20.9709 9.23358 20.9682 9.24258 20.9658H9.2461C9.31219 20.9463 9.37589 20.9191 9.43594 20.8848C9.44029 20.8822 9.4457 20.882 9.45 20.8794L17.55 16.0871C17.829 15.9212 18 15.6158 18 15.2932V5.70877V5.70697C17.9994 5.62978 17.9894 5.55297 17.9701 5.47834C17.9695 5.47594 17.969 5.47354 17.9684 5.47114C17.9677 5.46876 17.9673 5.46632 17.9666 5.46394C17.9469 5.39105 17.9186 5.32091 17.8822 5.25511L17.8805 5.25331L17.8787 5.24971C17.7998 5.10996 17.6865 4.99387 17.55 4.91307L9.45 0.124432C9.31946 0.0468548 9.17197 0.00413969 9.0211 0.000215872ZM9 1.98588L15.3 5.71237L8.55 9.6999C8.271 9.86581 8.1 10.1692 8.1 10.501V18.4833L1.8 14.7586V6.24344L9 1.98588ZM16 8.5V15L11.5 17.5V11L16 8.5Z" />
+        </svg>
+        <span class="tab-label">工具集</span>
+      </div>
+      <!-- 设置标签页 -->
+      <div class="tab" data-tab="settings">
+        <!-- SVG图标：设置 -->
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M9 5.375C9.96141 5.375 10.8837 5.7567 11.5635 6.43652C12.2433 7.11634 12.625 8.03859 12.625 9C12.625 9.96141 12.2433 10.8837 11.5635 11.5635C10.8837 12.2433 9.96141 12.625 9 12.625C8.52396 12.625 8.05211 12.5308 7.6123 12.3486C7.17272 12.1665 6.77299 11.8999 6.43652 11.5635C6.10005 11.227 5.83354 10.8273 5.65137 10.3877C5.46919 9.94789 5.375 9.47604 5.375 9C5.375 8.52396 5.46919 8.05211 5.65137 7.6123C5.83354 7.17272 6.10005 6.773 6.43652 6.43652C6.77299 6.10005 7.17272 5.83354 7.6123 5.65137C8.05211 5.46919 8.52396 5.375 9 5.375ZM9 6.625C8.37011 6.625 7.76571 6.87491 7.32031 7.32031C6.87491 7.76571 6.625 8.37011 6.625 9C6.625 9.62989 6.87491 10.2343 7.32031 10.6797C7.76571 11.1251 8.37011 11.375 9 11.375C9.31189 11.375 9.62103 11.3137 9.90918 11.1943C10.1972 11.075 10.4592 10.9002 10.6797 10.6797C10.9002 10.4592 11.075 10.1972 11.1943 9.90918C11.3137 9.62103 11.375 9.31189 11.375 9C11.375 8.68811 11.3137 8.37897 11.1943 8.09082C11.075 7.80276 10.9002 7.5408 10.6797 7.32031C10.4592 7.09983 10.1972 6.92502 9.90918 6.80566C9.62103 6.68631 9.31189 6.625 9 6.625Z" />
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9033 0.875C13.0982 0.875123 14.1924 1.5455 14.7363 2.6084L17.2627 7.55176C17.7277 8.46176 17.7277 9.53924 17.2627 10.4482L14.7363 15.3916C14.4696 15.9134 14.0634 16.3514 13.5635 16.6572C13.0637 16.963 12.4892 17.1251 11.9033 17.125H6.15039C5.56895 17.1249 4.99815 16.9655 4.50098 16.6641C4.00384 16.3626 3.59895 15.9305 3.33008 15.415L0.75 10.4717C0.512884 10.0173 0.388672 9.5125 0.388672 9C0.388672 8.4875 0.512884 7.98266 0.75 7.52832L3.33008 2.58398C3.59902 2.06878 4.00399 1.63721 4.50098 1.33594C4.99814 1.03464 5.56905 0.874986 6.15039 0.875H11.9033ZM6.15039 2.125C5.43044 2.125 4.7705 2.52516 4.43848 3.16309L1.8584 8.10645C1.71432 8.38235 1.63867 8.68874 1.63867 9C1.63867 9.31126 1.71432 9.61765 1.8584 9.89355L4.43848 14.8369C4.60171 15.1498 4.84762 15.4117 5.14941 15.5947C5.45122 15.7777 5.79746 15.875 6.15039 15.875H11.9033C12.6291 15.8749 13.2931 15.469 13.623 14.8232L16.1504 9.87891C16.2894 9.60685 16.3613 9.30553 16.3613 9C16.3613 8.69447 16.2894 8.39315 16.1504 8.12109L13.623 3.17676C13.4611 2.86011 13.2145 2.59478 12.9111 2.40918C12.6077 2.2236 12.259 2.12494 11.9033 2.125H6.15039Z" />
+        </svg>
+        <span class="tab-label">设置</span>
+      </div>
+    </div>
+
+    <!-- 创建原型内容 -->
+    <div class="tab-content active" id="prototype-content">
+      <!-- 页面基础设置板块 -->
+      <div class="form-section">
+        <div class="form-group row-layout">
+          <label class="non-interactive-label">页面底色</label>
+          <div class="color-input-group">
+            <input type="color" id="pageColor" value="#D9D9D9">
+            <input type="text" class="color-value" value="#D9D9D9" maxlength="7">
+          </div>
+        </div>
+        
+        <div class="form-group row-layout">
+          <label class="non-interactive-label">页面背景</label>
+          <div class="file-upload-btn">
+            <input type="file" id="pageBackground" accept="image/*" style="display:none">
+            <button class="upload-btn" onclick="document.getElementById('pageBackground').click()">点击上传</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 页面内容板块 -->
+      <div class="form-section">
+        <!-- 头图 -->
+        <div class="form-group row-layout">
+          <label class="non-interactive-label">头图</label>
+          <div class="file-upload-btn">
+            <input type="file" id="headerImage" accept="image/*" style="display:none">
+            <button class="upload-btn" onclick="document.getElementById('headerImage').click()">点击上传</button>
+          </div>
+        </div>
+        
+        <!-- 标题 -->
+        <div class="form-group row-layout">
+          <label class="non-interactive-label">标题</label>
+          <div class="file-upload-btn">
+            <input type="file" id="titleUpload" accept="image/*" style="display:none">
+            <button class="upload-btn" onclick="document.getElementById('titleUpload').click()">点击上传</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 单按钮版板块 -->
+      <div class="form-section">
+        <!-- 单按钮版标题 -->
+        <div class="section-header">
+          <div class="dropdown-selector">
+            <select id="buttonVersionSelect" class="section-dropdown">
+              <option value="singleButton">游戏信息-单按钮版</option>
+              <option value="doubleButton">游戏信息-双按钮版</option>
+              <option value="imageButton">游戏信息-带icon版</option>
+            </select>
+          </div>
+          <div class="option-controls">
+            <button class="collapse-btn" data-target="buttonVersionContent">
+              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
+                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 按钮内容容器 -->
+        <div id="buttonVersionContent" class="collapsible-content">
+          <!-- 单按钮版内容 (默认显示) -->
+          <div class="version-content active" id="singleButtonContent">
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">按钮样式</label>
+              <div class="file-upload-btn">
+                <input type="file" id="moduleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn wide-btn" onclick="document.getElementById('moduleUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 双按钮版内容 -->
+          <div class="version-content" id="doubleButtonContent">
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">左侧按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="leftBtnUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('leftBtnUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">右侧按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="rightBtnUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('rightBtnUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <div class="form-group row-layout">
+              <label for="btnSpacing">按钮间距</label>
+              <input type="number" id="btnSpacing" value="10" min="0" max="50" class="number-input">
+            </div>
+          </div>
+          
+          <!-- 游戏icon版内容 -->
+          <div class="version-content" id="imageButtonContent">
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">游戏icon</label>
+              <div class="img-upload-wrapper">
+                <input type="file" id="gameIconUpload" accept="image/*" class="game-icon-upload" style="display:none">
+                <div class="img-preview-btn" onclick="document.getElementById('gameIconUpload').click()">
+                  <div class="img-preview-container" id="gameIconPreview">
+                    <span class="upload-icon-text">+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">游戏名称</label>
+              <div class="file-upload-btn">
+                <input type="file" id="btnImageUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">点击上传</button>
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文案</label>
+              <div class="file-upload-btn">
+                <input type="file" id="btnImageUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文字颜色</label>
+              <div class="color-input-group">
+                <input type="color" id="btnTextColor" value="#FFFFFF">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="btnImageUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">点击上传</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 抽奖模块板块 -->
+      <div class="form-section">
+        <!-- 抽奖模块标题 -->
+        <div class="section-header">
+          <div class="dropdown-selector">
+            <select id="moduleTypeSelect" class="section-dropdown">
+              <option value="lotteryModule">抽奖模块</option>
+              <option value="signInModule">签到模块</option>
+              <option value="collectModule">集卡模块</option>
+            </select>
+          </div>
+          <div class="option-controls">
+            <button class="collapse-btn" data-target="moduleTypeContent">
+              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
+                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 模块内容容器 -->
+        <div id="moduleTypeContent" class="collapsible-content">
+          <!-- 抽奖模块内容 (默认显示) -->
+          <div class="version-content active" id="lotteryModuleContent">
+            <!-- 大标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">大标题</label>
+              <input type="text" id="bigTitleInput" class="text-input" placeholder="请输入大标题文本">
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">大标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="derivedItemUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('derivedItemUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 小标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">小标题</label>
+              <div class="file-upload-btn">
+                <input type="file" id="smallTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('smallTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 九宫格背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">九宫格背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="nineGridBg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('nineGridBg').click()">点击上传</button>
+              </div>
+            </div>
+
+            <!-- 抽奖按钮 -->
+            <div class="form-group  row-layout">
+              <label class="non-interactive-label">抽奖按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="drawBtn" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('drawBtn').click()">点击上传</button>
+              </div>
+            </div>
+
+            <!-- 奖品背景 -->
+            <div class="form-group  row-layout">
+              <label class="non-interactive-label">奖品背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="prizeBg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('prizeBg').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 奖品图 -->
+            <div class="form-group  row-layout">
+              <label class="non-interactive-label">奖品图</label>
+              <div class="prize-grid">
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize01" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize01').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品01</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize02" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize02').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品02</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize03" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize03').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品03</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize04" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize04').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品04</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize05" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize05').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品05</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize06" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize06').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品06</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize07" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize07').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品07</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prize08" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prize08').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">奖品08</div>
+                  </div>
+                </div>
+                <div class="grid-item">
+                  <div class="img-upload-container">
+                    <input type="file" id="prizeThank" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="document.getElementById('prizeThank').click()">
+                      <div class="preview-container"></div>
+                      <span class="upload-icon">+</span>
+                    </button>
+                    <div class="prize-label">谢谢参与</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 签到模块内容 -->
+          <div class="version-content" id="signInModuleContent">
+            <!-- 签到标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题图片</label>
+              <div class="file-upload-btn">
+                <input type="file" id="signInTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('signInTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 签到背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">背景图片</label>
+              <div class="file-upload-btn">
+                <input type="file" id="signInBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('signInBgUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 签到天数 -->
+            <div class="form-group row-layout">
+              <label for="daysCount">签到天数</label>
+              <input type="number" id="daysCount" value="7" min="3" max="31" class="number-input">
+            </div>
+            
+            <!-- 日期图标 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">日期图标</label>
+              <div class="file-upload-btn">
+                <input type="file" id="dayIconUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('dayIconUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 签到按钮 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">签到按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="signInBtnUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('signInBtnUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 集卡模块内容 -->
+          <div class="version-content" id="collectModuleContent">
+            <!-- 集卡标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">集卡标题</label>
+              <div class="file-upload-btn">
+                <input type="file" id="collectTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('collectTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 集卡背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">背景图片</label>
+              <div class="file-upload-btn">
+                <input type="file" id="collectBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('collectBgUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 卡片数量 -->
+            <div class="form-group row-layout">
+              <label for="cardsCount">卡片数量</label>
+              <input type="number" id="cardsCount" value="5" min="3" max="12" class="number-input">
+            </div>
+            
+            <!-- 卡片样式 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">卡片样式</label>
+              <div class="radio-group row-layout">
+                <div class="radio-item">
+                  <input type="radio" id="cardStyle1" name="cardStyle" value="style1" checked>
+                  <label for="cardStyle1">方形</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="cardStyle2" name="cardStyle" value="style2">
+                  <label for="cardStyle2">圆角</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio" id="cardStyle3" name="cardStyle" value="style3">
+                  <label for="cardStyle3">自定义</label>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 卡片背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">卡片背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="cardBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('cardBgUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 合成按钮 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">合成按钮</label>
+              <div class="file-upload-btn">
+                <input type="file" id="combineButtonUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('combineButtonUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活动内容模块 -->
+      <div class="form-section">
+        <!-- 活动内容标题 -->
+        <div class="section-header">
+          <div class="dropdown-selector">
+            <select id="ruleTypeSelect" class="section-dropdown">
+              <option value="activityRules">活动内容01</option>
+              <option value="prizeRules">活动内容02</option>
+              <option value="userGuide">活动内容03</option>
+            </select>
+          </div>
+          <div class="option-controls">
+            <button class="collapse-btn" data-target="ruleTypeContent">
+              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
+                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 活动内容容器 -->
+        <div id="ruleTypeContent" class="collapsible-content">
+          <!-- 活动规则内容 (默认显示) -->
+          <div class="version-content active" id="activityRulesContent">
+            <!-- 大标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">大标题</label>
+              <div class="file-upload-btn">
+                <input type="file" id="activityRuleTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('activityRuleTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="activityRuleItemUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('activityRuleItemUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 文字 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文字内容</label>
+              <div class="file-upload-btn">
+                <input type="file" id="activityRuleTextUpload" accept="image/*" style="display:none">
+                <button class="upload-btn text-upload-btn" onclick="document.getElementById('activityRuleTextUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 奖品规则内容 -->
+          <div class="version-content" id="prizeRulesContent">
+            <!-- 大标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">大标题</label>
+              <div class="file-upload-btn">
+                <input type="file" id="prizeRuleTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('prizeRuleTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="prizeRuleItemUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('prizeRuleItemUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 文字 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文字内容</label>
+              <div class="file-upload-btn">
+                <input type="file" id="prizeRuleTextUpload" accept="image/*" style="display:none">
+                <button class="upload-btn text-upload-btn" onclick="document.getElementById('prizeRuleTextUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 用户指南内容 -->
+          <div class="version-content" id="userGuideContent">
+            <!-- 大标题 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">大标题</label>
+              <div class="file-upload-btn">
+                <input type="file" id="userGuideTitleUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('userGuideTitleUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" id="userGuideItemUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('userGuideItemUpload').click()">点击上传</button>
+              </div>
+            </div>
+            
+            <!-- 文字 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文字内容</label>
+              <div class="file-upload-btn">
+                <input type="file" id="userGuideTextUpload" accept="image/*" style="display:none">
+                <button class="upload-btn text-upload-btn" onclick="document.getElementById('userGuideTextUpload').click()">点击上传</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 活动规则板块 -->
+      <div class="form-section">
+        <!-- 活动规则标题 -->
+        <div class="section-header">
+          <span class="section-title">活动规则</span>
+          <div class="option-controls">
+            <button class="collapse-btn" data-target="footerContent">
+              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
+                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 活动规则内容容器 -->
+        <div id="footerContent" class="collapsible-content">
+          <!-- 标题背景 -->
+          <div class="form-group row-layout">
+            <label class="non-interactive-label">标题背景</label>
+            <div class="file-upload-btn">
+              <input type="file" id="footerImageUpload" accept="image/*" style="display:none">
+              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">点击上传</button>
+            </div>
+          </div>
+          
+          <!-- 文案 -->
+          <div class="form-group row-layout">
+            <label class="non-interactive-label">文案</label>
+            <div class="file-upload-btn">
+              <input type="file" id="footerBgUpload" accept="image/*" style="display:none">
+              <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">点击上传</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- 尾版板块 -->
+      <div class="form-section">
+        <!-- 尾版标题 -->
+        <div class="section-header">
+          <span class="section-title">尾版</span>
+          <div class="option-controls">
+            <button class="collapse-btn" data-target="footerContent">
+              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
+                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 尾版内容容器 -->
+        <div id="footerContent" class="collapsible-content">
+          <!-- LOGO -->
+          <div class="form-group row-layout">
+            <label class="non-interactive-label">LOGO</label>
+            <div class="file-upload-btn">
+              <input type="file" id="footerImageUpload" accept="image/*" style="display:none">
+              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">点击上传</button>
+            </div>
+          </div>
+          
+          <!-- 尾版背景 -->
+          <div class="form-group row-layout">
+            <label class="non-interactive-label">尾版背景</label>
+            <div class="file-upload-btn">
+              <input type="file" id="footerBgUpload" accept="image/*" style="display:none">
+              <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">点击上传</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- 创建按钮容器 -->
+      <div class="create-btn-container">
+        <div class="button-group">
+          <button class="create-btn" id="create">创建原型</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 延展渠道内容 -->
+    <div class="tab-content" id="extension-content">
+      <div class="empty-state">
+        <i class="bi bi-box-seam empty-icon"></i>
+        <h3>暂无可用渠道</h3>
+        <p>可通过创建原型进行渠道生成</p>
+        <p class="gray-text">敬请期待</p>
+      </div>
+    </div>
+
+    <!-- 工具集内容 -->
+    <div class="tab-content" id="tools-content">
+      <div class="empty-state">
+        <i class="bi bi-tools empty-icon"></i>
+        <h3>工具库开发中</h3>
+        <p>更多实用设计工具正在开发中</p>
+        <p class="gray-text">敬请期待</p>
+      </div>
+    </div>
+
+    <!-- 设置内容 -->
+    <div class="tab-content" id="settings-content">
+      <div class="form-section">
+        <!-- 主题切换 -->
+        <div class="form-group row-layout theme-switcher">
+          <label>切换主题</label>
+          <div class="theme-buttons">
+            <button id="lightTheme" class="theme-btn active">
+              <!-- <i class="bi bi-sun"></i> -->
+              <span>浅色模式</span>
+            </button>
+            <button id="darkTheme" class="theme-btn">
+              <!-- <i class="bi bi-moon"></i> -->
+              <span>深色模式</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+  </div>
+  
+  <!-- 页脚版本信息 -->
+  <div class="page-footer">
+    <div class="version-info">
+      <span class="version-number">1.0.0</span>
+      <span class="version-author">渠道美术制作</span>
+    </div>
+  </div>
+
+  <!-- JavaScript 部分 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab切换功能
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      // 初始化标签状态 - 确保只有一个标签是活动的
+      function initializeTabs() {
+        // 获取当前活动标签
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+          const activeTabId = activeTab.getAttribute('data-tab');
+          
+          // 隐藏所有内容区域
+          tabContents.forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // 只显示当前活动标签对应的内容
+          const activeContent = document.getElementById(`${activeTabId}-content`);
+          if (activeContent) {
+            activeContent.classList.add('active');
+          } else {
+            console.warn('未找到对应的内容区域:', activeTabId);
+            tabs[0]?.classList.add('active');
+            document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
+          }
+        }
+      }
+      
+      // 页面加载时初始化标签状态
+      initializeTabs();
+      
+      // 默认激活第一个标签（如果当前没有激活项）
+      if (!document.querySelector('.tab.active')) {
+        tabs[0]?.classList.add('active');
+        const firstContent = document.getElementById(`${tabs[0]?.dataset.tab}-content`);
+        firstContent?.classList.add('active');
+      }
+      
+      // 为所有标签添加点击事件
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          // 移除所有选项卡的活动状态
+          tabs.forEach(t => t.classList.remove('active'));
+          
+          // 添加当前选项卡的活动状态
+          this.classList.add('active');
+          
+          // 隐藏所有内容区域（包括设置页）
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          
+          // 显示当前选项卡对应的内容区域
+          const tabId = this.getAttribute('data-tab');
+        if (!tabId) {
+          console.error('无效的标签ID');
+          return;
+        }
+        const targetContent = document.getElementById(`${tabId}-content`);
+        if (!targetContent) {
+          console.error('找不到内容区域:', tabId);
+          this.classList.remove('active');
+          tabs[0]?.classList.add('active');
+          document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
+          return;
+        }
+          if (targetContent) {
+            targetContent.classList.add('active');
+          }
+        });
+      });
+      
+      // 按钮版本选择功能
+      const buttonVersionSelect = document.getElementById('buttonVersionSelect');
+      const buttonVersionContents = document.querySelectorAll('#buttonVersionContent .version-content');
+      
+      buttonVersionSelect.addEventListener('change', function() {
+        // 隐藏所有按钮版本内容
+        buttonVersionContents.forEach(content => content.classList.remove('active'));
+        
+        // 显示选中的按钮版本内容
+        document.getElementById(`${this.value}Content`).classList.add('active');
+      });
+      
+      // 模块类型选择功能
+      const moduleTypeSelect = document.getElementById('moduleTypeSelect');
+      const moduleTypeContents = document.querySelectorAll('#moduleTypeContent .version-content');
+      
+      moduleTypeSelect.addEventListener('change', function() {
+        // 隐藏所有模块类型内容
+        moduleTypeContents.forEach(content => content.classList.remove('active'));
+        
+        // 显示选中的模块类型内容
+        document.getElementById(`${this.value}Content`).classList.add('active');
+      });
+      
+      // 规则类型选择功能
+      const ruleTypeSelect = document.getElementById('ruleTypeSelect');
+      const ruleTypeContents = document.querySelectorAll('#ruleTypeContent .version-content');
+      
+      ruleTypeSelect.addEventListener('change', function() {
+        // 隐藏所有规则类型内容
+        ruleTypeContents.forEach(content => content.classList.remove('active'));
+        
+        // 显示选中的规则类型内容
+        document.getElementById(`${this.value}Content`).classList.add('active');
+      });
+      
+      // 折叠面板功能
+      const collapseButtons = document.querySelectorAll('.collapse-btn');
+      
+      collapseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const targetId = this.getAttribute('data-target');
+          const contentElement = document.getElementById(targetId);
+          
+          // 切换按钮样式
+          this.classList.toggle('collapsed');
+          
+          // 切换内容区域的折叠状态
+          contentElement.classList.toggle('collapsed');
+        });
+      });
+      
+      // 颜色选择器同步功能
+      const colorInputs = document.querySelectorAll('input[type="color"]');
+      
+      colorInputs.forEach(colorInput => {
+        const colorValueInput = colorInput.nextElementSibling;
+        
+        colorInput.addEventListener('input', function() {
+          colorValueInput.value = this.value.toUpperCase();
+        });
+        
+        colorValueInput.addEventListener('input', function() {
+          if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+            colorInput.value = this.value;
+          }
+        });
+      });
+
+      // 主题切换功能
+      const lightThemeBtn = document.getElementById('lightTheme');
+      const darkThemeBtn = document.getElementById('darkTheme');
+      
+      // 检查系统主题
+      function checkSystemTheme() {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          applyDarkTheme();
+          darkThemeBtn.classList.add('active');
+          lightThemeBtn.classList.remove('active');
+        } else {
+          applyLightTheme();
+          lightThemeBtn.classList.add('active');
+          darkThemeBtn.classList.remove('active');
+        }
+      }
+      
+      // 应用浅色主题
+      function applyLightTheme() {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+      }
+      
+      // 应用深色主题
+      function applyDarkTheme() {
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+      }
+      
+      // 初始检查系统主题
+      checkSystemTheme();
+      
+      // 监听系统主题变化
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkSystemTheme);
+      }
+      
+      // 点击浅色主题按钮
+      lightThemeBtn.addEventListener('click', function() {
+        applyLightTheme();
+        lightThemeBtn.classList.add('active');
+        darkThemeBtn.classList.remove('active');
+      });
+      
+      // 点击深色主题按钮
+      darkThemeBtn.addEventListener('click', function() {
+        applyDarkTheme();
+        darkThemeBtn.classList.add('active');
+        lightThemeBtn.classList.remove('active');
+      });
+
+      // 奖品图片上传和预览功能
+      const prizeUploads = document.querySelectorAll('.prize-upload');
+      
+      prizeUploads.forEach(upload => {
+        upload.addEventListener('change', function(event) {
+          if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            const btn = document.querySelector(`button[onclick="document.getElementById('${this.id}').click()"]`);
+            const previewContainer = btn.querySelector('.preview-container');
+            const uploadIcon = btn.querySelector('.upload-icon');
+            
+            reader.onload = function(e) {
+              // 清除旧预览
+              while (previewContainer.firstChild) {
+                previewContainer.removeChild(previewContainer.firstChild);
+              }
+              
+              // 创建新图片预览
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.alt = "Prize preview";
+              previewContainer.appendChild(img);
+              
+              // 隐藏上传图标
+              uploadIcon.style.display = 'none';
+              
+              // 更改按钮样式
+              btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+            };
+            
+            reader.readAsDataURL(this.files[0]);
+          }
+        });
+      });
+
+      // 游戏图标上传和预览功能
+      const gameIconUpload = document.getElementById('gameIconUpload');
+      if (gameIconUpload) {
+        gameIconUpload.addEventListener('change', function(event) {
+          if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            const previewContainer = document.getElementById('gameIconPreview');
+            
+            reader.onload = function(e) {
+              // 清除旧预览内容
+              previewContainer.innerHTML = '';
+              
+              // 创建新图片预览
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.alt = "Game Icon Preview";
+              previewContainer.appendChild(img);
+              
+              // 更改容器样式
+              previewContainer.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+            };
+            
+            reader.readAsDataURL(this.files[0]);
+          }
+        });
+      }
+
+    });
+  </script>
+</body>
+</html>
+
+

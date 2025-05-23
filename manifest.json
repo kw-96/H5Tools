@@ -1,0 +1,20 @@
+{
+  "name": "渠道美术-H5延展工具",
+  "id": "1506134894807361987",
+  "api": "1.0.0",
+  "main": "code.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "editorType": [
+    "figma"
+  ],
+  "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css",
+      "https://www.w3.org/2000/svg",
+      "https://fonts.googleapis.com/"
+    ]
+  }
+}
