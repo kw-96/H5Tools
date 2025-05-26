@@ -4,11 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
-    @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
-    /* 基础样式 */
+    
+    /* 通知样式 */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background-color: #333;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 9999;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+    
+    .notification.success {
+      background-color: #34c759;
+    }
+    
+    .notification.error {
+      background-color: #ff3b30;
+    }
+    
+    .notification.warning {
+      background-color: #ff9500;
+    }
+    
+    .notification.info {
+      background-color: #0071e3;
+    }
+    
+    /* 基础样式和布局 */
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      box-sizing: border-box;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      background: transparent;
+    }
+    
     body {
       margin: 0;
       padding: 0;
@@ -17,170 +61,139 @@
       background-color: #ffffff;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden; /* 隐藏水平滚动条 */
+      overflow-x: hidden;
     }
     
-    /* 隐藏滚动条但保持滚动功能 */
-    ::-webkit-scrollbar {
-      width: 0; /* 针对Webkit浏览器 */
-      height: 0;
-      background: transparent;
+    .container {
+      max-width: 100%;
+      margin: 0 auto;
+      overflow-x: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-top: 46px;
+      padding-bottom: 40px;
     }
     
-    /* Firefox滚动条隐藏 */
-    * {
-      scrollbar-width: none; /* Firefox */
-    }
-    
-    /* IE滚动条隐藏 */
-    * {
-      -ms-overflow-style: none; /* IE and Edge */
-    }
-  
-    /* 主容器布局设置 */
-      .container {
-        max-width: 100%;
-        margin: 0 auto;
-        overflow-x: hidden;
-        height: 100vh; /* 设置为视口高度 */
-        display: flex;
-        flex-direction: column;
-        padding-top: 46px; /* 为固定的标签栏留出空间 */
-        box-sizing: border-box;
-        padding-bottom: 40px; /* 底部留出空间 */
-      }
-  
-    /* 顶部标签容器 */
+    /* 标签页和导航 */
     .tab-container {
-      display: flex; /* 使用弹性布局 */
-      width: 100%; /* 宽度占满父容器 */
-      justify-content: space-between; /* 子元素之间平均分配空间 */
-      background-color: rgba(255, 255, 255, 0.72); /* 半透明白色背景 */
-      backdrop-filter: blur(20px); /* 背景模糊效果 */
-      -webkit-backdrop-filter: blur(20px); /* Safari浏览器兼容性 */
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* 底部添加细边框 */
-      padding: 8px 0; /* 上下内边距 */
-      overflow-x: hidden; /* 隐藏水平溢出 */
-      box-sizing: border-box; /* 边框和内边距包含在宽度内 */
-      position: fixed; /* 固定定位 */
-      top: 0; /* 顶部对齐 */
-      left: 0; /* 左侧对齐 */
-      right: 0; /* 右侧对齐 */
-      z-index: 1000; /* 确保tab在内容之上 */
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 8px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
-  
-    /* 标签样式 */
+    
     .tab {
-      display: flex; /* 使用弹性布局 */
-      flex-direction: column; /* 垂直排列子元素 */
-      align-items: center; /* 水平居中对齐 */
-      justify-content: center; /* 垂直居中对齐 */
-      flex: 1; /* 平均分配可用空间 */
-      width: 25%; /* 四个tab，每个占25%宽度 */
-      padding: 8px 4px; /* 内边距设置 */
-      border-radius: 8px; /* 圆角边框 */
-      transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1); /* 平滑过渡效果 */
-      cursor: pointer; /* 鼠标悬停时显示手型光标 */
-      color: #86868b; /* 文字颜色 */
-      position: relative; /* 相对定位，为可能的绝对定位子元素做准备 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      width: 25%;
+      padding: 8px 4px;
+      border-radius: 8px;
+      transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+      cursor: pointer;
+      color: #86868b;
     }
-  
+    
     .tab svg {
       width: 20px;
       height: 20px;
       margin-bottom: 4px;
     }
-  
+    
     .tab-label {
       font-size: 11px;
       font-weight: 500;
       margin-top: 2px;
       opacity: 0.8;
     }
-  
-    /* 活动标签样式 */
+    
     .tab.active {
       color: #0071e3;
     }
-  
+    
     .tab:hover {
       color: #0071e3;
       background-color: rgba(0, 113, 227, 0.05);
     }
-  
+    
     /* 内容区域 */
     .tab-content {
       display: none;
       padding: 0 16px;
-      margin: 30px auto 0px; /* 顶部空间为标签栏高度 */
+      margin: 30px auto 0px;
       width: 100%;
-      box-sizing: border-box;
       background-color: #ffffff;
-      overflow-y: auto; /* 允许垂直滚动 */
-      overflow-x: hidden; /* 隐藏水平滚动条 */
-
+      overflow-y: auto;
+      overflow-x: hidden;
     }
-  
+    
     .tab-content.active {
       display: block;
       animation: fadeIn 0.3s ease-in-out;
-      position: relative; /* 确保活动内容正确定位 */
+      position: relative;
     }
-  
+    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
-  
+    
     /* 表单控件 */
     .form-group {
       margin-bottom: 14px;
     }
-  
-    /* 行布局样式 */
+    
     .row-layout {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
     }
-  
-    .row-layout label {
-      flex: 0 0 auto;
-      margin-bottom: 0;
-      margin-right: 16px;
-      min-width: 70px; /* 最小标签宽度 */
-      width: 25%; /* 标签宽度百分比 */
-      max-width: 90px; /* 最大标签宽度 */
-    }
-  
-    .row-layout .color-input-group,
-    .row-layout .file-upload-btn {
-      flex: 1;
-      width: 75%;
-    }
-  
+    
     label {
       display: block;
       font-size: 14px;
       font-weight: 500;
       color: #1d1d1f;
     }
-
-    /* 非交互式标签样式 */
-    .non-interactive-label {
-      pointer-events: none; /* 禁用鼠标事件 */
-      cursor: default; /* 设置默认光标样式 */
+    
+    .row-layout label {
+      flex: 0 0 auto;
+      margin: 0 16px 0 0;
+      min-width: 70px;
+      width: 25%;
+      max-width: 90px;
     }
-  
-    input[type="number"], input[type="color"], input[type="text"], .text-input, .text-area {
+    
+    .non-interactive-label {
+      pointer-events: none;
+      cursor: default;
+    }
+    
+    /* 输入控件 */
+    input[type="number"], 
+    input[type="color"], 
+    input[type="text"], 
+    .text-input, 
+    .text-area {
       width: 100%;
       padding: 10px 12px;
       font-size: 14px;
       border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       background-color: #ffffff;
-      box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.05);
       transition: all 0.2s;
       appearance: none;
       -webkit-appearance: none;
@@ -192,20 +205,21 @@
       font-family: inherit;
       line-height: 1.5;
     }
-  
-    input[type="number"]:focus, input[type="color"]:focus, input[type="text"]:focus, .text-input:focus, .text-area:focus {
+    
+    input:focus, .text-input:focus, .text-area:focus {
       outline: none;
       border-color: #0071e3;
       box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
     }
-  
-    /* 颜色选择器样式 */
+    
+    /* 颜色选择器 */
     .color-input-group {
       display: flex;
       align-items: center;
       min-width: 120px;
+      flex: 1;
     }
-  
+    
     input[type="color"] {
       width: 24px;
       height: 24px;
@@ -213,9 +227,8 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      vertical-align: middle;
     }
-  
+    
     input.color-value {
       margin-left: 8px;
       font-size: 13px;
@@ -226,30 +239,10 @@
       border-radius: 4px;
       background-color: #ffffff;
     }
-  
-    input.color-value:focus {
-      outline: none;
-      border-color: #0071e3;
-      box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
-    }
-  
-    /* 展开动画效果 */
-    .version-content {
-      max-height: 0;
-      opacity: 0;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-      padding-left: 24px;
-    }
-
-    .version-content.active {
-      max-height: 800px;
-      opacity: 1;
-      padding-bottom: 15px;
-    }
-
-    /* 上传按钮样式 */
-    .file-upload-btn {
+    
+    /* 上传和预览组件 */
+    .file-upload-btn, 
+    .img-upload-wrapper {
       flex: 1;
       width: 100%;
     }
@@ -265,7 +258,7 @@
       font-size: 14px;
       text-align: center;
       transition: all 0.2s;
-      box-sizing: border-box;
+      position: relative;
     }
     
     .upload-btn:hover {
@@ -273,113 +266,193 @@
       border-color: rgba(0, 0, 0, 0.2);
     }
     
-    /* 内联预览图片的容器 */
-    .img-preview-inline {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
+    /* 折叠内容区域 */
+    .version-content {
+      max-height: 0;
+      opacity: 0;
       overflow: hidden;
-      border-radius: 8px;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      padding-left: 24px;
+    }
+
+    .version-content.active {
+      max-height: 800px;
+      opacity: 1;
+      padding-bottom: 15px;
     }
     
-    .img-preview-inline img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+    .collapsible-content {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
     }
     
-    .upload-icon-inline {
-      font-size: 24px;
-      color: #86868b;
+    .collapsible-content.collapsed {
+      max-height: 0;
     }
     
-    .upload-text {
-      position: relative;
-      z-index: 2;
-    }
-    
-    .upload-btn {
-      position: relative;
-    }
-    
-    body.dark-theme .upload-icon-inline {
-      color: #a1a1a6;
-    }
-    
-    /* 创建按钮容器样式 */
-    .create-btn-container {
-      display: flex;
-      justify-content: center;
-      padding: 0px 0 24px 0;
-      width: 100%;
-      margin: 0 auto;
-    }
-    
-    /* 按钮组样式 */
-    .button-group {
-      /* 按钮组布局样式 */
-      display: flex;
-      /* 设置按钮之间的间距 */
-      gap: 12px;
-      /* 设置按钮组与上方元素的距离 */
-      margin-top: 24px;
-      /* 水平居中按钮组 */
-      justify-content: center;
-      /* 设置按钮组宽度为100% */
-      width: 100%;
-      /* 限制按钮组最大宽度为320px */
-      max-width: 320px;
-    }
-    
-    button {
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    button#create {
-      background-color: #0071e3;
-      color: white;
-      min-width: 150px;
-    }
-    
-    button#create:hover {
-      background-color: #0077ed;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
-    }
-    
-    button#create:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-    
-    button#cancel {
-      background-color: #f5f5f7;
-      color: #1d1d1f;
-    }
-    
-    button#cancel:hover {
-      background-color: #e8e8ed;
-    }
-    
-    /* 内容板块样式 */
-    .form-section {
+    /* 板块和模块样式 */
+    .form-section, .module {
       width: 100%;
       padding: 16px 0;
       margin-bottom: 0;
-      box-sizing: border-box;
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    /* 模块管理相关样式 */
+    .module-management {
+      margin-bottom: 20px;
+    }
+    
+    /* 模块列表头部样式 */
+    .module-list-header {
+      display: flex;                                /* 使用弹性布局 */
+      justify-content: space-between;                /* 两端对齐 */
+      align-items: center;                           /* 垂直居中对齐 */
+      margin: 24px 0 12px 0;                         /* 设置上下外边距 */
+      padding-bottom: 8px;                           /* 底部内边距 */
+      font-weight: 600;                              /* 字体加粗 */
+    }
+    
+    .module-count {
+      font-size: 14px;
+      color: #86868b;
+      font-weight: normal;
+    }
+    
+    .dropdown-selector-wide {
+      flex: 1;
+      min-width: 200px;
+      max-width: 100%;
+    }
+    
+    .dropdown-selector-wide .section-dropdown {
+      width: 100%;
+    }
+    
+    .module-action-row {
+      justify-content: center;
+      margin-top: 10px;
+    }
+    
+    .action-btn {
+      background-color: #0071e3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+      background-color: #0077ed;
+      transform: translateY(-1px);
+    }
+    
+    .add-module-btn {
+      min-width: 150px;
+    }
+    
+    .empty-modules-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+      color: #86868b;
+      border: 2px dashed rgba(0,0,0,0.1);
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    
+    .empty-modules-message svg {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .empty-modules-message p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+    
+    .empty-modules-message .hint-text {
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    
+    /* 模块相关样式 */
+    .module {
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 10px;
+      margin-bottom: 16px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background-color: #f5f5f7;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .module-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: #1d1d1f;
+    }
+    
+    .module-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .module-content {
+      padding: 16px;
+      transition: max-height 0.3s ease, opacity 0.2s ease;
+    }
+    
+    .module-collapsed .module-content {
+      max-height: 0;
+      opacity: 0;
+      padding: 0 16px;
+      overflow: hidden;
+    }
+    
+    .module-collapsed .collapse-btn i {
+      transform: rotate(180deg);
+    }
+    
+    /* 深色主题适配 - 模块管理 */
+    body.dark-theme .module {
+      background-color: #1d1d1f;
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    body.dark-theme .module-header {
+      background-color: #2c2c2e;
+      border-color: rgba(255,255,255,0.05);
+    }
+    
+    body.dark-theme .module-title {
+      color: #f5f5f7;
+    }
+    
+    body.dark-theme .empty-modules-message {
+      border-color: rgba(255,255,255,0.1);
+      color: #a1a1a6;
     }
     
     .form-section:last-child {
@@ -390,7 +463,6 @@
       margin-bottom: 0;
     }
     
-    /* 板块标题样式 */
     .section-header {
       display: flex;
       align-items: center;
@@ -405,247 +477,31 @@
       color: inherit;
     }
     
-    /* 折叠控制按钮样式 */
-    .collapse-btn {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background-color: transparent;
-      border: 1px solid #e5e5e5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      font-size: 14px;
-      color: #86868b;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
-
-    /* SVG图标样式 */
-    .collapse-btn svg {
-      color: inherit;
-      fill: currentColor;
-    }
-
-    /* 确保SVG路径颜色正确继承 */
-    .chevron-icon {
-      color: inherit;
-      fill: currentColor;
-      stroke: currentColor;
-    }
-    
-    .collapse-btn:hover {
-      background-color: #f5f5f7;
-    }
-    
-    .collapse-btn.collapsed {
-      transform: rotate(180deg);
-    }
-    
-    /* 可折叠的内容区域 */
-    .collapsible-content {
-      max-height: 1000px;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    
-    .collapsible-content.collapsed {
-      max-height: 0;
-    }
-    
-    /* 下拉选择器样式 */
-    .dropdown-selector {
-      position: relative;
-      min-width: 120px;
-      max-width: 140px;
-      z-index: 10;
-    }
-    
-    .section-dropdown {
-      /* 下拉选择器的基本样式 */
-      appearance: none;
-      -webkit-appearance: none;
-      /* 内边距设置，所有边距均衡 */
-      padding: 6px 10px;
-      /* 圆角边框 */
-      border-radius: 6px;
-      /* 边框样式 */
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      /* 字体样式继承自父元素 */
-      font-family: inherit;
-      /* 字体大小和粗细 */
-      font-size: 14px;
-      font-weight: 600;
-      /* 文字颜色 */
-      color: #1d1d1f;
-      /* 背景色，带有轻微透明度 */
-      background-color: rgba(255, 255, 255, 0.8);
-      /* 鼠标样式为指针 */
-      cursor: pointer;
-      /* 宽度占满容器 */
-      /* width: 100%; */
-      /* 过渡效果，使样式变化更平滑 */
-      transition: all 0.2s ease;
-      /* 添加轻微阴影效果 */
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    /* 主题切换按钮样式 */
-    .theme-switcher {
-      margin-bottom: 20px;
-    }
-
-    .theme-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .theme-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background-color: #f0f0f0;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 6px;
-      color: #333;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .theme-btn i {
-      font-size: 14px;
-    }
-
-    .theme-btn.active {
-      background-color: #0071e3;
-      color: white;
-      border-color: #0071e3;
-    }
-
-    .theme-btn:hover:not(.active) {
-      background-color: #e5e5e5;
-    }
-
-    /* 版本信息样式 */
-    .page-footer {
-      width: 100%; /* 设置页脚宽度为100% */
-      padding: 10px 10px; /* 设置内边距 */
-      background-color: rgba(255, 255, 255, 0.72); /* 设置背景色为半透明白色 */
-      backdrop-filter: blur(20px); /* 添加背景模糊效果 */
-      -webkit-backdrop-filter: blur(20px); /* 为WebKit浏览器添加背景模糊效果 */
-      border-top: 1px solid rgba(0, 0, 0, 0.1); /* 添加顶部边框 */
-      position: fixed; /* 固定定位 */
-      bottom: 0; /* 固定在底部 */
-      left: 0; /* 固定在左侧 */
-      z-index: 100; /* 设置层级 */
-      box-sizing: border-box; /* 使用border-box盒模型 */
-    }
-    
-    .version-info {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      color: #86868b;
-      font-size: 13px;
-    }
-
-    .version-number {
-      color: #86868b;
-    }
-
-    .version-author {
-      color: #86868b;
-    }
-    
-    /* 深色模式下的页脚样式 */
-    body.dark-theme .page-footer {
-      background-color: rgba(30, 30, 32, 0.72);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* 奖品网格样式 */
-    .prize-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px; /* 设置间距 */
-      margin-top: 10px;
-    }
-    
-    .grid-item {
-      flex: 0 0 calc(33.333% - 6px); /* 一行三个，考虑间距 */
-      box-sizing: border-box;
-    }
-    
-    .img-upload-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .grid-btn {
-      width: 100%;
-      aspect-ratio: 1/1; /* 保持正方形 */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f5f5f7;
-      border: 1px dashed rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      transition: all 0.2s;
-    }
-    
-    .grid-btn:hover {
-      background-color: #efefef;
-      border-color: rgba(0, 0, 0, 0.3);
-    }
-    
-    .upload-icon {
-      font-size: 20px;
-      color: #86868b;
-      position: absolute;
-      z-index: 1;
-    }
-    
+    /* 图片预览 */
+    .img-preview-inline, 
     .preview-container {
+      width: 100%;
+      height: 100%;
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 0;
+      overflow: hidden;
     }
     
-    .preview-container img {
+    .img-preview-inline {
+      pointer-events: none;
+      border-radius: 8px;
+    }
+    
+    .img-preview-inline img, 
+    .preview-container img, 
+    .img-preview-container img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-    }
-    
-    .prize-label {
-      margin-top: 4px;
-      font-size: 12px;
-      color: #86868b;
-      text-align: center;
-      width: 100%;
-    }
-    
-    /* 游戏图标上传和预览样式 */
-    .img-upload-wrapper {
-      flex: 1;
-      width: 100%;
     }
     
     .img-preview-btn {
@@ -674,84 +530,300 @@
       border-color: rgba(0, 0, 0, 0.3);
     }
     
-    .img-preview-container img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
+    /* 按钮和控件 */
+    .control-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid #e5e5e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 14px;
+      color: #86868b;
+      cursor: pointer;
+      transition: all 0.2s;
+      background-color: transparent;
     }
     
-    .upload-icon-text {
-      font-size: 24px;
+    .control-btn:hover {
+      background-color: #f5f5f7;
+    }
+    
+    .collapse-btn {
+      transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+    
+    .collapse-btn svg, .chevron-icon {
+      color: inherit;
+      fill: currentColor;
+      stroke: currentColor;
+    }
+    
+    .collapse-btn.collapsed {
+      transform: rotate(180deg);
+    }
+    
+    .add-btn {
+      margin-right: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1;
+    }
+    
+    .add-btn:hover {
+      background-color: rgba(0, 113, 227, 0.1);
+      border-color: #0071e3;
+      color: #0071e3;
+    }
+    
+    .add-btn[onclick*="removeModule"]:hover {
+      background-color: rgba(255, 59, 48, 0.1);
+      border-color: #ff3b30;
+      color: #ff3b30;
+    }
+    
+    .option-controls {
+      display: flex;
+      align-items: center;
+    }
+    
+    /* 模块标题和内容 */
+    .module-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-right: 4px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    /* 下拉选择器 */
+    .dropdown-selector {
+      position: relative;
+      min-width: 120px;
+      max-width: 140px;
+      z-index: 10;
+    }
+    
+    .section-dropdown {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1d1d1f;
+      background-color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    /* 主题切换和页脚 */
+    .theme-switcher {
+      margin-bottom: 20px;
+    }
+    
+    .theme-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background-color: #f0f0f0;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      color: #333;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .theme-btn.active {
+      background-color: #0071e3;
+      color: white;
+      border-color: #0071e3;
+    }
+    
+    .theme-btn:hover:not(.active) {
+      background-color: #e5e5e5;
+    }
+    
+    .page-footer {
+      width: 100%;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+    
+    .version-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      color: #86868b;
+      font-size: 13px;
+    }
+    
+    /* 奖品网格 */
+    .prize-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .grid-item {
+      flex: 0 0 calc(33.333% - 6px);
+    }
+    
+    .img-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .grid-btn {
+      width: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f7;
+      border: 1px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      padding: 0;
+      transition: all 0.2s;
+    }
+    
+    .grid-btn:hover {
+      background-color: #efefef;
+      border-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .upload-icon, .upload-icon-text, .upload-icon-inline {
+      font-size: 20px;
       color: #86868b;
     }
     
-    /* 深色模式下的图片预览样式 */
-    body.dark-theme .img-preview-container {
-      background-color: #2c2c2e;
-      border-color: rgba(255, 255, 255, 0.2);
+    .upload-icon {
+      position: absolute;
+      z-index: 1;
     }
     
-    body.dark-theme .img-preview-container:hover {
-      background-color: #3a3a3c;
-      border-color: rgba(255, 255, 255, 0.3);
+    .upload-icon-text, .upload-icon-inline {
+      font-size: 24px;
     }
     
-    body.dark-theme .upload-icon-text {
-      color: #a1a1a6;
+    .prize-label {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #86868b;
+      text-align: center;
+      width: 100%;
     }
     
-    /* 深色主题样式 */
+    /* 创建按钮 */
+    .create-btn-container {
+      display: flex;
+      justify-content: center;
+      padding: 0 0 24px 0;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: center;
+      width: 100%;
+      max-width: 320px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    button#create {
+      background-color: #0071e3;
+      color: white;
+      min-width: 150px;
+    }
+    
+    button#create:hover {
+      background-color: #0077ed;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+    }
+    
+    button#cancel {
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+    }
+    
+    button#cancel:hover {
+      background-color: #e8e8ed;
+    }
+    
+    /* 深色主题适配 */
     body.dark-theme {
       color: #f5f5f7;
       background-color: #1d1d1f;
     }
     
-    /* 深色模式下的奖品网格样式 */
-    body.dark-theme .grid-btn {
-      background-color: #2c2c2e;
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    body.dark-theme .grid-btn:hover {
-      background-color: #3a3a3c;
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-    
-    body.dark-theme .upload-icon {
-      color: #a1a1a6;
-    }
-    
-    body.dark-theme .prize-label {
-      color: #a1a1a6;
-    }
-
     body.dark-theme .tab-container {
       background-color: rgba(30, 30, 32, 0.72);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom-color: rgba(255, 255, 255, 0.1);
     }
-
+    
     body.dark-theme .tab:hover {
       background-color: rgba(255, 255, 255, 0.05);
     }
-
+    
     body.dark-theme .tab-content {
       background-color: #1d1d1f;
     }
-
-    body.dark-theme .form-section {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
+    body.dark-theme .form-section,
+    body.dark-theme .module {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
     }
     
-    /* 添加深色模式下的标题颜色 */
     body.dark-theme .section-header,
-    body.dark-theme .section-title {
+    body.dark-theme .section-title,
+    body.dark-theme label,
+    body.dark-theme .module-title {
       color: #f5f5f7;
     }
-
-    body.dark-theme label {
-      color: #f5f5f7;
-    }
-
+    
     body.dark-theme input[type="number"],
     body.dark-theme input[type="text"],
     body.dark-theme .text-input,
@@ -761,57 +833,71 @@
       color: #f5f5f7;
     }
     
-    body.dark-theme input[type="text"]:focus,
+    body.dark-theme input:focus,
     body.dark-theme .text-input:focus,
     body.dark-theme .text-area:focus {
       border-color: #0071e3;
       box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
     }
-
-    body.dark-theme .upload-btn {
+    
+    body.dark-theme .upload-btn,
+    body.dark-theme .grid-btn,
+    body.dark-theme .img-preview-container,
+    body.dark-theme .add-btn,
+    body.dark-theme .theme-btn:not(.active),
+    body.dark-theme button#cancel {
       background-color: #2c2c2e;
       border-color: rgba(255, 255, 255, 0.1);
       color: #f5f5f7;
     }
-
-    body.dark-theme .upload-btn:hover {
+    
+    body.dark-theme .upload-btn:hover,
+    body.dark-theme .grid-btn:hover,
+    body.dark-theme .img-preview-container:hover,
+    body.dark-theme .theme-btn:hover:not(.active),
+    body.dark-theme button#cancel:hover {
       background-color: #3a3a3c;
       border-color: rgba(255, 255, 255, 0.2);
     }
-
+    
+    body.dark-theme .control-btn {
+      border-color: #3a3a3c;
+      color: #a1a1a6;
+    }
+    
+    body.dark-theme .control-btn:hover {
+      background-color: #2c2c2e;
+    }
+    
+    body.dark-theme .add-btn:hover {
+      background-color: rgba(0, 113, 227, 0.2);
+      border-color: #0071e3;
+      color: #0071e3;
+    }
+    
+    body.dark-theme .add-btn[onclick*="removeModule"]:hover {
+      background-color: rgba(255, 69, 58, 0.1);
+      border-color: #ff453a;
+      color: #ff453a;
+    }
+    
     body.dark-theme .section-dropdown {
       background-color: rgba(44, 44, 46, 0.8);
       border-color: rgba(255, 255, 255, 0.15);
       color: #f5f5f7;
     }
-
-    body.dark-theme .collapse-btn {
-      border-color: #3a3a3c;
-      color: #f5f5f7;
+    
+    body.dark-theme .page-footer {
+      background-color: rgba(30, 30, 32, 0.72);
+      border-top-color: rgba(255, 255, 255, 0.1);
     }
-
-    /* 深色模式下的SVG图标 */
-    body.dark-theme .collapse-btn svg,
-    body.dark-theme .chevron-icon {
-      color: #f5f5f7;
-      fill: #f5f5f7;
+    
+    body.dark-theme .prize-label,
+    body.dark-theme .upload-icon,
+    body.dark-theme .upload-icon-text,
+    body.dark-theme .upload-icon-inline {
+      color: #a1a1a6;
     }
-
-    body.dark-theme .theme-btn:not(.active) {
-      background-color: #2c2c2e;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f7;
-    }
-
-    body.dark-theme .theme-btn:hover:not(.active) {
-      background-color: #3a3a3c;
-    }
-
-    body.dark-theme button#cancel {
-      background-color: #2c2c2e;
-      color: #f5f5f7;
-    }
-
   </style>
 </head>
 <body>
@@ -910,7 +996,7 @@
             </select>
           </div>
           <div class="option-controls">
-            <button class="collapse-btn" data-target="buttonVersionContent">
+            <button class="control-btn collapse-btn" data-target="buttonVersionContent">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -1005,42 +1091,92 @@
         </div>
       </div>
 
-      <!-- 抽奖模块板块 -->
-      <div class="form-section">
-        <!-- 抽奖模块标题 -->
+      <!-- 模块管理区域 -->
+      <div class="form-section module-management">
+        <!-- 模块选择和添加区域 -->
         <div class="section-header">
-          <div class="dropdown-selector">
-            <select id="moduleTypeSelect" class="section-dropdown">
-              <option value="lotteryModule">抽奖模块</option>
-              <option value="signInModule">签到模块</option>
-              <option value="collectModule">集卡模块</option>
-            </select>
+          <span class="section-title">自定义模块</span>
+        </div>
+        <div class="module-selection-content">
+          <div class="form-group row-layout">
+            <label for="moduleTypeSelect">模块类型</label>
+            <div class="dropdown-selector-wide">
+              <select id="moduleTypeSelect" class="section-dropdown">
+                <option value="lotteryModule">九宫格抽奖</option>
+                <option value="signInModule">每日签到</option>
+                <option value="collectModule">集卡活动</option>
+                <option value="activityRules">活动内容</option>
+              </select>
+            </div>
           </div>
-          <div class="option-controls">
-            <button class="collapse-btn" data-target="moduleTypeContent">
-              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
-                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
-              </svg>
+          <div class="form-group row-layout module-action-row">
+            <button id="addModuleBtn" class="action-btn add-module-btn">
+              添加模块
             </button>
           </div>
         </div>
         
-        <!-- 模块内容容器 -->
-        <div id="moduleTypeContent" class="collapsible-content">
-          <!-- 抽奖模块内容 (默认显示) -->
-          <div class="version-content active" id="lotteryModuleContent">
+        <!-- 已添加模块列表 -->
+        <div class="module-list-header">
+          <span>已添加模块</span>
+          <div class="module-count"><span id="moduleCounter">0</span> 个模块</div>
+        </div>
+        
+        <div id="modulesContainer">
+          <!-- 模块将动态添加到此处 -->
+          <div class="empty-modules-message" id="emptyModulesMessage">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 16px; opacity: 0.5;">
+              <path d="M7.752.066a.5.5 0 0 1 .496 0l3.75 2.143a.5.5 0 0 1 .252.434v3.995l3.498 2A.5.5 0 0 1 16 9.07v4.286a.5.5 0 0 1-.252.434l-3.75 2.143a.5.5 0 0 1-.496 0l-3.502-2-3.502 2a.5.5 0 0 1-.496 0l-3.75-2.143A.5.5 0 0 1 0 13.357V9.071a.5.5 0 0 1 .252-.434L3.75 6.638V2.643a.5.5 0 0 1 .252-.434L7.752.066ZM4.25 7.504 1.508 9.071l2.742 1.567 2.742-1.567L4.25 7.504ZM7.5 9.933l-2.75 1.571v3.134l2.75-1.571V9.933Zm1 3.134 2.75 1.571v-3.134L8.5 9.933v3.134Zm.508-3.996 2.742 1.567 2.742-1.567-2.742-1.567-2.742 1.567Zm2.242-2.433V3.504L8.5 5.076V8.21l2.75-1.572ZM7.5 8.21V5.076L4.75 3.504v3.134L7.5 8.21ZM5.258 2.643 8 4.21l2.742-1.567L8 1.076 5.258 2.643ZM15 9.933l-2.75 1.571v3.134L15 13.067V9.933ZM3.75 14.638v-3.134L1 9.933v3.134l2.75 1.571Z"/>
+            </svg>
+            <p>尚未添加任何模块</p>
+            <p class="hint-text">请从上方选择模块类型并添加</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 模块模板库 (隐藏) -->
+      <div id="moduleTemplates" style="display: none;">
+        <!-- 固定模块-九宫格抽奖模板 -->
+        <div class="module-template" id="lotteryModuleTemplate">
+          <div class="module-header">
+            <div class="module-title">九宫格抽奖</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="module-content">
             <!-- 大标题 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题</label>
-              <input type="text" id="bigTitleInput" class="text-input" placeholder="请输入大标题文本">
+              <input type="text" class="text-input big-title-input" placeholder="请输入大标题文本">
             </div>
             
             <!-- 标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="derivedItemUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('derivedItemUpload').click()">点击上传</button>
+                <input type="file" class="derived-item-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
@@ -1048,37 +1184,37 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">九宫格背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="nineGridBg" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('nineGridBg').click()">点击上传</button>
+                <input type="file" class="nine-grid-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
 
             <!-- 抽奖按钮 -->
-            <div class="form-group  row-layout">
+            <div class="form-group row-layout">
               <label class="non-interactive-label">抽奖按钮</label>
               <div class="file-upload-btn">
-                <input type="file" id="drawBtn" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('drawBtn').click()">点击上传</button>
+                <input type="file" class="draw-btn" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
 
             <!-- 奖品背景 -->
-            <div class="form-group  row-layout">
+            <div class="form-group row-layout">
               <label class="non-interactive-label">奖品背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="prizeBg" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('prizeBg').click()">点击上传</button>
+                <input type="file" class="prize-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
             <!-- 奖品图 -->
-            <div class="form-group  row-layout">
+            <div class="form-group row-layout">
               <label class="non-interactive-label">奖品图</label>
               <div class="prize-grid">
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize01" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize01').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1087,8 +1223,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize02" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize02').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1097,8 +1233,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize03" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize03').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1107,8 +1243,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize04" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize04').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1117,8 +1253,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize05" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize05').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1127,8 +1263,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize06" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize06').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1137,8 +1273,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize07" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize07').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1147,8 +1283,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prize08" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prize08').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1157,8 +1293,8 @@
                 </div>
                 <div class="grid-item">
                   <div class="img-upload-container">
-                    <input type="file" id="prizeThank" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="document.getElementById('prizeThank').click()">
+                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
+                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
                       <div class="preview-container"></div>
                       <span class="upload-icon">+</span>
                     </button>
@@ -1168,15 +1304,43 @@
               </div>
             </div>
           </div>
-          
-          <!-- 签到模块内容 -->
-          <div class="version-content" id="signInModuleContent">
+        </div>
+        
+        <!-- 固定模块-签到模板 -->
+        <div class="module-template" id="signInModuleTemplate">
+          <div class="module-header">
+            <div class="module-title">每日签到</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="module-content">
             <!-- 签到标题 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">标题图片</label>
               <div class="file-upload-btn">
-                <input type="file" id="signInTitleUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('signInTitleUpload').click()">点击上传</button>
+                <input type="file" class="sign-in-title-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
@@ -1184,23 +1348,23 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
-                <input type="file" id="signInBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('signInBgUpload').click()">点击上传</button>
+                <input type="file" class="sign-in-bg-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
             <!-- 签到天数 -->
             <div class="form-group row-layout">
-              <label for="daysCount">签到天数</label>
-              <input type="number" id="daysCount" value="7" min="3" max="31" class="number-input">
+              <label>签到天数</label>
+              <input type="number" class="days-count" value="7" min="3" max="31" class="number-input">
             </div>
             
             <!-- 日期图标 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">日期图标</label>
               <div class="file-upload-btn">
-                <input type="file" id="dayIconUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('dayIconUpload').click()">点击上传</button>
+                <input type="file" class="day-icon-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
@@ -1208,20 +1372,48 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">签到按钮</label>
               <div class="file-upload-btn">
-                <input type="file" id="signInBtnUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('signInBtnUpload').click()">点击上传</button>
+                <input type="file" class="sign-in-btn-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
           </div>
-          
-          <!-- 集卡模块内容 -->
-          <div class="version-content" id="collectModuleContent">
+        </div>
+        
+        <!-- 固定模块-集卡模板 -->
+        <div class="module-template" id="collectModuleTemplate">
+          <div class="module-header">
+            <div class="module-title">集卡活动</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="module-content">
             <!-- 集卡标题 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">集卡标题</label>
               <div class="file-upload-btn">
-                <input type="file" id="collectTitleUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('collectTitleUpload').click()">点击上传</button>
+                <input type="file" class="collect-title-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
@@ -1229,15 +1421,15 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
-                <input type="file" id="collectBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('collectBgUpload').click()">点击上传</button>
+                <input type="file" class="collect-bg-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
             <!-- 卡片数量 -->
             <div class="form-group row-layout">
-              <label for="cardsCount">卡片数量</label>
-              <input type="number" id="cardsCount" value="5" min="3" max="12" class="number-input">
+              <label>卡片数量</label>
+              <input type="number" class="cards-count" value="5" min="3" max="12" class="number-input">
             </div>
             
             <!-- 卡片样式 -->
@@ -1245,16 +1437,16 @@
               <label class="non-interactive-label">卡片样式</label>
               <div class="radio-group row-layout">
                 <div class="radio-item">
-                  <input type="radio" id="cardStyle1" name="cardStyle" value="style1" checked>
-                  <label for="cardStyle1">方形</label>
+                  <input type="radio" name="cardStyle" value="style1" checked>
+                  <label>方形</label>
                 </div>
                 <div class="radio-item">
-                  <input type="radio" id="cardStyle2" name="cardStyle" value="style2">
-                  <label for="cardStyle2">圆角</label>
+                  <input type="radio" name="cardStyle" value="style2">
+                  <label>圆角</label>
                 </div>
                 <div class="radio-item">
-                  <input type="radio" id="cardStyle3" name="cardStyle" value="style3">
-                  <label for="cardStyle3">自定义</label>
+                  <input type="radio" name="cardStyle" value="style3">
+                  <label>自定义</label>
                 </div>
               </div>
             </div>
@@ -1263,8 +1455,8 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">卡片背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="cardBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('cardBgUpload').click()">点击上传</button>
+                <input type="file" class="card-bg-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
             
@@ -1272,51 +1464,55 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">合成按钮</label>
               <div class="file-upload-btn">
-                <input type="file" id="combineButtonUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('combineButtonUpload').click()">点击上传</button>
+                <input type="file" class="combine-button-upload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 活动内容模块 -->
-      <div class="form-section">
-        <!-- 活动内容标题 -->
-        <div class="section-header">
-          <div class="dropdown-selector">
-            <select id="ruleTypeSelect" class="section-dropdown">
-              <option value="activityRules">活动内容01</option>
-              <option value="prizeRules">活动内容02</option>
-              <option value="userGuide">活动内容03</option>
-            </select>
+        <!-- 活动内容模板 -->
+        <div class="module-template" id="activityRulesTemplate">
+          <div class="module-header">
+            <div class="module-title">活动内容</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                  <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div class="option-controls">
-            <button class="collapse-btn" data-target="ruleTypeContent">
-              <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
-                <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- 活动内容01容器 -->
-        <div id="ruleTypeContent" class="collapsible-content">
-          <!-- 活动内容01 (默认显示) -->
-          <div class="version-content active" id="activityRulesContent">
+          <div class="module-content">
             <!-- 大标题文案 -->
             <div class="form-group row-layout">
-              <label for="activityRuleTitleInput">大标题</label>
-              <input type="text" id="activityRuleTitleInput" class="text-input" placeholder="请输入大标题文本">
+              <label>大标题</label>
+              <input type="text" class="activity-rule-title-input text-input" placeholder="请输入大标题文本">
             </div>
             
             <!-- 大标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="activityRuleItemUpload" accept="image/*" style="display:none" onchange="previewImage(this, 'activityRuleItemPreview')">
-                <button class="upload-btn" onclick="document.getElementById('activityRuleItemUpload').click()">
-                  <div class="img-preview-inline" id="activityRuleItemPreview">
+                <input type="file" class="activity-rule-item-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
                 </button>
@@ -1325,17 +1521,17 @@
 
             <!-- 小标题文案 -->
             <div class="form-group row-layout">
-              <label for="smallTitleInput">小标题</label>
-              <input type="text" id="smallTitleInput" class="text-input" placeholder="请输入小标题文本">
+              <label>小标题</label>
+              <input type="text" class="small-title-input text-input" placeholder="请输入小标题文本">
             </div>
 
             <!-- 小标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">小标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" id="smallTitleUpload" accept="image/*" style="display:none" onchange="previewImage(this, 'smallTitlePreview')">
-                <button class="upload-btn" onclick="document.getElementById('smallTitleUpload').click()">
-                  <div class="img-preview-inline" id="smallTitlePreview">
+                <input type="file" class="small-title-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
                 </button>
@@ -1344,81 +1540,22 @@
             
             <!-- 文字 -->
             <div class="form-group row-layout">
-              <label for="activityRuleTextInput">正文</label>
-              <textarea id="activityRuleTextInput" class="text-area" placeholder="请输入活动正文内容"></textarea>
+              <label>正文</label>
+              <textarea class="activity-rule-text-input text-area" placeholder="请输入活动正文内容"></textarea>
             </div>
 
             <!-- 图片 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">图片</label>
               <div class="file-upload-btn">
-                <input type="file" id="activityRuleTextUpload" accept="image/*" style="display:none">
-                <button class="upload-btn text-upload-btn" onclick="document.getElementById('activityRuleTextUpload').click()">点击上传</button>
-              </div>
-            </div>
-
-          </div>
-          
-          <!-- 活动内容02 -->
-          <div class="version-content" id="prizeRulesContent">
-            <!-- 大标题 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">大标题</label>
-              <div class="file-upload-btn">
-                <input type="file" id="prizeRuleTitleUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('prizeRuleTitleUpload').click()">点击上传</button>
-              </div>
-            </div>
-            
-            <!-- 标题背景 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">标题背景</label>
-              <div class="file-upload-btn">
-                <input type="file" id="prizeRuleItemUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('prizeRuleItemUpload').click()">点击上传</button>
-              </div>
-            </div>
-            
-            <!-- 文字 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">文字内容</label>
-              <div class="file-upload-btn">
-                <input type="file" id="prizeRuleTextUpload" accept="image/*" style="display:none">
-                <button class="upload-btn text-upload-btn" onclick="document.getElementById('prizeRuleTextUpload').click()">点击上传</button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 活动内容03 -->
-          <div class="version-content" id="userGuideContent">
-            <!-- 大标题 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">大标题</label>
-              <div class="file-upload-btn">
-                <input type="file" id="userGuideTitleUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('userGuideTitleUpload').click()">点击上传</button>
-              </div>
-            </div>
-            
-            <!-- 标题背景 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">标题背景</label>
-              <div class="file-upload-btn">
-                <input type="file" id="userGuideItemUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('userGuideItemUpload').click()">点击上传</button>
-              </div>
-            </div>
-            
-            <!-- 文字 -->
-            <div class="form-group row-layout">
-              <label class="non-interactive-label">文字内容</label>
-              <div class="file-upload-btn">
-                <input type="file" id="userGuideTextUpload" accept="image/*" style="display:none">
-                <button class="upload-btn text-upload-btn" onclick="document.getElementById('userGuideTextUpload').click()">点击上传</button>
+                <input type="file" class="activity-rule-text-upload" accept="image/*" style="display:none">
+                <button class="upload-btn text-upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
               </div>
             </div>
           </div>
         </div>
+        
+        <!-- 更多模板可继续添加 -->
       </div>
 
       <!-- 活动规则板块 -->
@@ -1427,7 +1564,7 @@
         <div class="section-header">
           <span class="section-title">活动规则</span>
           <div class="option-controls">
-            <button class="collapse-btn" data-target="footerContent">
+            <button class="control-btn collapse-btn" data-target="rulesContent">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -1436,7 +1573,14 @@
         </div>
         
         <!-- 活动规则内容容器 -->
-        <div id="footerContent" class="collapsible-content">
+        <div id="rulesContent" class="collapsible-content">
+
+          <!-- 标题文案 -->
+          <div class="form-group row-layout">
+            <label class="non-interactive-label">标题文案</label>
+            <input type="text" id="titleText" class="text-input" placeholder="请输入标题文案">
+          </div>
+
           <!-- 标题背景 -->
           <div class="form-group row-layout">
             <label class="non-interactive-label">标题背景</label>
@@ -1446,13 +1590,10 @@
             </div>
           </div>
           
-          <!-- 文案 -->
+          <!-- 活动规则内容 -->
           <div class="form-group row-layout">
-            <label class="non-interactive-label">文案</label>
-            <div class="file-upload-btn">
-              <input type="file" id="footerBgUpload" accept="image/*" style="display:none">
-              <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">点击上传</button>
-            </div>
+            <label class="non-interactive-label">活动规则</label>
+            <textarea id="activityRules" class="text-area" placeholder="请输入活动规则内容"></textarea>
           </div>
           
         </div>
@@ -1464,7 +1605,7 @@
         <div class="section-header">
           <span class="section-title">尾版</span>
           <div class="option-controls">
-            <button class="collapse-btn" data-target="footerContent">
+            <button class="control-btn collapse-btn" data-target="footerAreaContent">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -1473,13 +1614,17 @@
         </div>
         
         <!-- 尾版内容容器 -->
-        <div id="footerContent" class="collapsible-content">
+        <div id="footerAreaContent" class="collapsible-content">
           <!-- LOGO -->
           <div class="form-group row-layout">
             <label class="non-interactive-label">LOGO</label>
             <div class="file-upload-btn">
-              <input type="file" id="footerImageUpload" accept="image/*" style="display:none">
-              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">点击上传</button>
+              <input type="file" id="footerLogoUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+              <button class="upload-btn" onclick="document.getElementById('footerLogoUpload').click()">
+                <div class="img-preview-inline">
+                  <span class="upload-icon-inline">+</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -1506,7 +1651,9 @@
     <!-- 延展渠道内容 -->
     <div class="tab-content" id="extension-content">
       <div class="empty-state">
-        <i class="bi bi-box-seam empty-icon"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="empty-icon" viewBox="0 0 16 16">
+          <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+        </svg>
         <h3>暂无可用渠道</h3>
         <p>可通过创建原型进行渠道生成</p>
         <p class="gray-text">敬请期待</p>
@@ -1516,7 +1663,9 @@
     <!-- 工具集内容 -->
     <div class="tab-content" id="tools-content">
       <div class="empty-state">
-        <i class="bi bi-tools empty-icon"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="empty-icon" viewBox="0 0 16 16">
+          <path d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3c0-.269-.035-.53-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814L1 0Zm9.646 10.646a.5.5 0 0 1 .708 0l2.914 2.915a.5.5 0 0 1-.707.707l-2.915-2.914a.5.5 0 0 1 0-.708ZM3 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026L3 11Z"/>
+        </svg>
         <h3>工具库开发中</h3>
         <p>更多实用设计工具正在开发中</p>
         <p class="gray-text">敬请期待</p>
@@ -1554,27 +1703,582 @@
 
   <!-- JavaScript 部分 -->
   <script>
-
-    // 预览上传的图片
-    function previewImage(input, previewId) {
-      const preview = document.getElementById(previewId);
-      preview.innerHTML = '<span class="upload-icon-inline">+</span>'; // 重置预览区域
-      
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
+    /**
+     * 与Figma插件通信
+     */
+    // 全局变量存储图片数据
+    const imageData = {
+      pageBackground: null,
+      headerImage: null,
+      titleUpload: null,
+      gameIcon: null,
+      btnImage: null,
+      footerLogo: null,
+      footerBg: null,
+      rulesBg: null
+    };
+    
+    // 模块图片数据存储
+    const moduleImageData = {};
+    
+    // 发送消息到Figma插件
+    function postMessageToPlugin(type, data) {
+      parent.postMessage({ pluginMessage: { type, ...data } }, '*');
+    }
+    
+    // 初始化与插件通信
+    window.onload = function() {
+      // 监听来自插件的消息
+      window.onmessage = function(event) {
+        const message = event.data.pluginMessage;
+        if (!message) return;
         
+        console.log('收到插件消息:', message);
+        
+        switch (message.type) {
+          case 'init':
+            // 处理初始数据
+            handleInitData(message.data);
+            break;
+          case 'creation-success':
+            showNotification('原型创建成功！', 'success');
+            break;
+          case 'creation-error':
+            showNotification('创建失败: ' + message.message, 'error');
+            break;
+          case 'save-success':
+            showNotification('配置已保存', 'success');
+            break;
+          case 'save-error':
+            showNotification('保存失败: ' + message.message, 'error');
+            break;
+          case 'load-config-success':
+            if (message.config) {
+              loadSavedConfig(message.config);
+              showNotification('配置加载成功', 'success');
+            }
+            break;
+          case 'load-config-error':
+            showNotification('加载配置失败: ' + message.message, 'warning');
+            break;
+        }
+      };
+      
+      // 告知插件UI已加载完成
+      postMessageToPlugin('ui-loaded', {});
+    };
+    
+    // 处理初始数据
+    function handleInitData(data) {
+      console.log('初始化数据:', data);
+      // 这里可以根据数据设置一些UI元素的初始状态
+    }
+    
+    // 显示通知
+    function showNotification(message, type = 'info') {
+      // 创建一个新的div元素作为通知
+      const notification = document.createElement('div');
+      // 设置通知元素的类名，包括通用的'notification'类和特定类型的类（如'success'、'error'等）
+      notification.className = `notification ${type}`;
+      // 设置通知元素的文本内容为传入的消息
+      notification.textContent = message;
+      
+      // 添加到body
+      document.body.appendChild(notification);
+      
+      // 淡入效果
+      setTimeout(() => {
+        // 设置通知元素的不透明度为1，使其完全可见
+        notification.style.opacity = '1';
+        // 重置通知元素的垂直位置，使其回到原始位置（无位移）
+        notification.style.transform = 'translateY(0)';
+      }, 10); // 延迟10毫秒执行，以确保DOM更新并应用初始样式
+      
+      // 几秒后自动淡出
+      setTimeout(() => {
+        // 设置通知元素的透明度为0，开始淡出效果
+        notification.style.opacity = '0';
+        // 向上移动通知元素，创造一个滑出效果
+        notification.style.transform = 'translateY(-20px)';
+        
+        // 移除元素
+        setTimeout(() => {
+          // 从DOM中完全移除通知元素
+          document.body.removeChild(notification);
+        }, 300); // 300毫秒后执行，与CSS过渡效果的持续时间匹配
+      }, 5000); // 5000毫秒（3秒）后开始淡出过程
+    }
+    
+    // 收集表单数据
+    function collectFormData() {
+      const config = {
+        // 基础设置
+        pageTitle: document.title || "未命名H5活动页",
+        pageBgColor: document.querySelector('#pageColor').value || "#D9D9D9",
+        pageBgImage: imageData.pageBackground,
+        
+        // 头图设置
+        headerImage: imageData.headerImage,
+        
+        // 游戏设置
+        gameIcon: imageData.gameIcon,
+        gameName: document.querySelector('#gameNameInput')?.value || "",
+        gameDesc: document.querySelector('#gameCopyInput')?.value || "",
+        buttonVersion: document.querySelector('#buttonVersionSelect')?.value || "imageButton",
+        buttonText: document.querySelector('#buttonTextInput')?.value || "立即下载",
+        buttonBgColor: document.querySelector('#btnTextColor')?.value || "#FFFFFF",
+        buttonImage: imageData.btnImage,
+        
+        // 自定义模块
+        modules: collectModulesData(),
+        
+        // 活动规则
+        rulesTitle: document.querySelector('#titleText')?.value || "",
+        rulesBgImage: imageData.rulesBg,
+        rulesContent: document.querySelector('#activityRules')?.value || "",
+        
+        // 尾版
+        footerLogo: imageData.footerLogo,
+        footerBg: imageData.footerBg
+      };
+      
+      return config;
+    }
+    
+    // 收集模块数据
+    function collectModulesData() {
+      const modules = [];
+      const moduleElements = document.querySelectorAll('#modulesContainer .module');
+      
+      moduleElements.forEach((moduleEl, index) => {
+        const moduleType = moduleEl.className.includes('lottery') ? 'nineGrid' :
+                          moduleEl.className.includes('signIn') ? 'signIn' :
+                          moduleEl.className.includes('collect') ? 'collectCards' :
+                          moduleEl.className.includes('activity') ? 'activityRules' : '';
+        
+        if (!moduleType) return;
+        
+        const moduleId = moduleEl.id || `module-${index}`;
+        const moduleTitle = moduleEl.querySelector('.module-title')?.textContent || "模块" + (index + 1);
+        
+        // 根据模块类型收集不同的内容
+        let moduleContent = {};
+        
+        switch(moduleType) {
+          case 'nineGrid':
+            moduleContent = collectNineGridData(moduleEl, moduleId);
+            break;
+          case 'signIn':
+            moduleContent = collectSignInData(moduleEl, moduleId);
+            break;
+          case 'collectCards':
+            moduleContent = collectCollectCardsData(moduleEl, moduleId);
+            break;
+          case 'activityRules':
+            moduleContent = collectActivityRulesData(moduleEl, moduleId);
+            break;
+        }
+        
+        modules.push({
+          id: moduleId,
+          type: moduleType,
+          title: moduleTitle,
+          content: moduleContent
+        });
+      });
+      
+      return modules;
+    }
+    
+    // 收集九宫格模块数据
+    function collectNineGridData(moduleEl, moduleId) {
+      return {
+        mainTitle: moduleEl.querySelector('.big-title-input')?.value || "抽奖活动",
+        titleBgImage: moduleImageData[`${moduleId}-titlebg`] || null,
+        gridBgImage: moduleImageData[`${moduleId}-gridbg`] || null,
+        drawButtonImage: moduleImageData[`${moduleId}-drawbtn`] || null,
+        prizeBgImage: moduleImageData[`${moduleId}-prizebg`] || null,
+        prizes: collectPrizes(moduleEl, moduleId)
+      };
+    }
+    
+    // 收集签到模块数据
+    function collectSignInData(moduleEl, moduleId) {
+      return {
+        titleImage: moduleImageData[`${moduleId}-title`] || null,
+        bgImage: moduleImageData[`${moduleId}-bg`] || null,
+        daysCount: parseInt(moduleEl.querySelector('.days-count')?.value || "7"),
+        dayIcon: moduleImageData[`${moduleId}-dayicon`] || null,
+        signButton: moduleImageData[`${moduleId}-signbtn`] || null
+      };
+    }
+    
+    // 收集集卡模块数据
+    function collectCollectCardsData(moduleEl, moduleId) {
+      return {
+        titleImage: moduleImageData[`${moduleId}-title`] || null,
+        bgImage: moduleImageData[`${moduleId}-bg`] || null,
+        cardsCount: parseInt(moduleEl.querySelector('.cards-count')?.value || "5"),
+        cardStyle: moduleEl.querySelector('input[name="cardStyle"]:checked')?.value || "style1",
+        cardBg: moduleImageData[`${moduleId}-cardbg`] || null,
+        combineButton: moduleImageData[`${moduleId}-combinebtn`] || null
+      };
+    }
+    
+    // 收集活动内容模块数据
+    function collectActivityRulesData(moduleEl, moduleId) {
+      return {
+        mainTitle: moduleEl.querySelector('.activity-rule-title-input')?.value || "",
+        mainTitleBg: moduleImageData[`${moduleId}-titlebg`] || null,
+        subTitle: moduleEl.querySelector('.small-title-input')?.value || "",
+        subTitleBg: moduleImageData[`${moduleId}-subtitlebg`] || null,
+        text: moduleEl.querySelector('.activity-rule-text-input')?.value || "",
+        image: moduleImageData[`${moduleId}-image`] || null
+      };
+    }
+    
+    // 收集奖品数据
+    function collectPrizes(moduleEl, moduleId) {
+      const prizes = [];
+      const prizeElements = moduleEl.querySelectorAll('.prize-grid .grid-item');
+      
+      prizeElements.forEach((prizeEl, index) => {
+        prizes.push({
+          image: moduleImageData[`${moduleId}-prize-${index}`] || null,
+          name: prizeEl.querySelector('.prize-label')?.textContent || `奖品${index + 1}`
+        });
+      });
+      
+      return prizes;
+    }
+    
+    // 处理图片文件上传
+    function handleImageUpload(file, storageKey) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith('image/')) {
+          return reject('请上传有效的图片文件');
+        }
+        
+        const reader = new FileReader();
         reader.onload = function(e) {
-          preview.innerHTML = '';
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          preview.appendChild(img);
+          const arrayBuffer = e.target.result;
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          if (storageKey.startsWith('module-')) {
+            moduleImageData[storageKey] = uint8Array;
+          } else {
+            imageData[storageKey] = uint8Array;
+          }
+          
+          resolve(uint8Array);
         };
         
-        reader.readAsDataURL(input.files[0]);
+        reader.onerror = function() {
+          reject('读取图片文件失败');
+        };
+        
+        reader.readAsArrayBuffer(file);
+      });
+    }
+    
+    // 加载保存的配置
+    function loadSavedConfig(config) {
+      console.log('加载配置:', config);
+      // 这里可以根据配置设置UI元素的状态
+      // 实际实现需要根据完整的表单结构进行
+    }
+    
+    /**
+     * 工具函数
+     */
+
+    // 图片预览函数 - 接受输入元素和预览ID
+    function previewImage(input, previewElement) {
+      // 处理字符串类型的预览元素(ID)
+      if (typeof previewElement === 'string') {
+        const preview = document.getElementById(previewElement);
+        if (preview) {
+          handlePreview(input, preview);
+        }
+      } 
+      // 处理DOM元素类型的预览元素
+      else if (previewElement instanceof Element) {
+        handlePreview(input, previewElement);
+      }
+      
+      // 内部处理函数
+      function handlePreview(input, preview) {
+        // 重置预览区域
+        preview.innerHTML = '<span class="upload-icon-inline">+</span>';
+        
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = "Preview";
+            preview.appendChild(img);
+          };
+          
+          reader.readAsDataURL(input.files[0]);
+        }
       }
     }
 
+    // 删除模块
+    function removeModule(moduleId) {
+      const module = document.getElementById(moduleId);
+      if (module) {
+        // 添加删除动画
+        module.style.opacity = '0';
+        module.style.transform = 'translateY(-10px)';
+        module.style.transition = 'all 0.2s ease';
+        
+        // 动画完成后移除元素
+        setTimeout(() => module.remove(), 200);
+      }
+    }
+
+    /**
+     * 模块管理
+     */
+    
+    // 模块计数器
+    let moduleCounter = 0;
+    let fixedModuleCounter = 0;
+    
+    // 模块管理初始化
+    function initModuleManagement() {
+      const addModuleBtn = document.getElementById('addModuleBtn');
+      const moduleTypeSelect = document.getElementById('moduleTypeSelect');
+      const modulesContainer = document.getElementById('modulesContainer');
+      const emptyMessage = document.getElementById('emptyModulesMessage');
+      
+      // 监听添加模块按钮点击
+      if (addModuleBtn) {
+        addModuleBtn.addEventListener('click', function() {
+          const selectedModuleType = moduleTypeSelect.value;
+          addModule(selectedModuleType);
+        });
+      }
+      
+      // 检查是否存在已添加的模块
+      checkEmptyModules();
+      
+      // 添加模块的方法
+      function addModule(moduleType) {
+        // 获取对应模板
+        const templateId = moduleType + 'Template';
+        const template = document.getElementById(templateId);
+        
+        if (!template) {
+          console.error('找不到模板:', templateId);
+          return;
+        }
+        
+        // 创建新模块
+        const newModule = template.cloneNode(true);
+        newModule.id = `module-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        newModule.classList.remove('module-template');
+        newModule.classList.add('module');
+        
+        // 绑定控制按钮事件
+        bindModuleControls(newModule);
+        
+        // 添加到容器
+        modulesContainer.appendChild(newModule);
+    
+        // 隐藏空模块提示
+        checkEmptyModules();
+    
+        // 滚动到新添加的模块
+        setTimeout(() => {
+          newModule.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    
+        // 触发模块添加事件，用于初始化上传事件监听
+        dispatchModuleAddedEvent(newModule.id);
+      }
+      
+      // 绑定模块控制按钮事件
+      function bindModuleControls(module) {
+        // 删除按钮
+        const deleteBtn = module.querySelector('.delete-btn');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', function() {
+            // 添加删除动画
+            module.style.opacity = '0';
+            module.style.transform = 'translateY(-10px)';
+            module.style.transition = 'all 0.3s ease';
+            
+            // 删除后检查是否需要显示空模块提示
+            setTimeout(() => {
+              module.remove();
+              checkEmptyModules();
+            }, 300);
+          });
+        }
+        
+        // 折叠按钮
+        const collapseBtn = module.querySelector('.collapse-btn');
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', function() {
+            module.classList.toggle('module-collapsed');
+          });
+        }
+        
+        // 上移按钮
+        const moveUpBtn = module.querySelector('.move-up-btn');
+        if (moveUpBtn) {
+          moveUpBtn.addEventListener('click', function() {
+            const prevModule = module.previousElementSibling;
+            if (prevModule && !prevModule.classList.contains('empty-modules-message')) {
+              modulesContainer.insertBefore(module, prevModule);
+            }
+          });
+        }
+        
+        // 下移按钮
+        const moveDownBtn = module.querySelector('.move-down-btn');
+        if (moveDownBtn) {
+          moveDownBtn.addEventListener('click', function() {
+            const nextModule = module.nextElementSibling;
+            if (nextModule) {
+              modulesContainer.insertBefore(nextModule, module);
+            }
+          });
+        }
+        
+        // 文件上传预览
+        const fileInputs = module.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+          input.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+              const reader = new FileReader();
+              let previewContainer;
+              
+              // 查找预览容器
+              if (this.classList.contains('prize-upload')) {
+                // 奖品图特殊处理
+                const gridBtn = this.nextElementSibling;
+                previewContainer = gridBtn.querySelector('.preview-container');
+                const uploadIcon = gridBtn.querySelector('.upload-icon');
+                
+                reader.onload = function(e) {
+                  // 清除旧预览
+                  while (previewContainer.firstChild) {
+                    previewContainer.removeChild(previewContainer.firstChild);
+                  }
+                  
+                  // 创建新图片预览
+                  const img = document.createElement('img');
+                  img.src = e.target.result;
+                  img.alt = "Preview";
+                  previewContainer.appendChild(img);
+                  
+                  // 隐藏上传图标
+                  if (uploadIcon) {
+                    uploadIcon.style.display = 'none';
+                  }
+                };
+              } else {
+                // 常规上传按钮
+                const uploadBtn = this.nextElementSibling;
+                
+                // 检查是否有内联预览容器
+                previewContainer = uploadBtn.querySelector('.img-preview-inline');
+                
+                if (previewContainer) {
+                  reader.onload = function(e) {
+                    // 清除旧预览内容
+                    previewContainer.innerHTML = '';
+                    
+                    // 创建新图片预览
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = "Preview";
+                    previewContainer.appendChild(img);
+                  };
+                }
+              }
+              
+              if (previewContainer) {
+                reader.readAsDataURL(this.files[0]);
+              }
+            }
+          });
+        });
+      }
+    }
+    
+    // 检查是否有模块，显示或隐藏空模块提示，更新计数器
+    function checkEmptyModules() {
+      const modulesContainer = document.getElementById('modulesContainer');
+      const emptyMessage = document.getElementById('emptyModulesMessage');
+      
+      if (modulesContainer && emptyMessage) {
+        const modules = modulesContainer.querySelectorAll('.module');
+        const moduleCount = modules.length;
+        const hasModules = moduleCount > 0;
+        
+        // 显示或隐藏空模块提示
+        emptyMessage.style.display = hasModules ? 'none' : 'flex';
+        
+        // 更新模块计数
+        const counter = document.getElementById('moduleCounter');
+        if (counter) {
+          counter.textContent = moduleCount;
+        }
+      }
+    }
+    
+    /**
+     * 主题控制函数
+     */
+    
+    // 应用浅色主题
+    function applyLightTheme() {
+      document.body.classList.remove('dark-theme');
+      document.body.classList.add('light-theme');
+    }
+    
+    // 应用深色主题
+    function applyDarkTheme() {
+      document.body.classList.remove('light-theme');
+      document.body.classList.add('dark-theme');
+    }
+    
+    // 检查系统主题
+    function checkSystemTheme() {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        applyDarkTheme();
+        document.getElementById('darkTheme').classList.add('active');
+        document.getElementById('lightTheme').classList.remove('active');
+      } else {
+        applyLightTheme();
+        document.getElementById('lightTheme').classList.add('active');
+        document.getElementById('darkTheme').classList.remove('active');
+      }
+    }
+    
+    /**
+     * 页面初始化和事件绑定
+     */
     document.addEventListener('DOMContentLoaded', function() {
+      // 初始化模块管理
+      initModuleManagement();
+      
+      // 初始化模块计数
+      checkEmptyModules();
+      
+      // 初始化图片上传事件处理
+      initImageUploaders();
+      
+      // 初始化创建按钮事件
+      initCreateButtonHandler();
+      
       // Tab切换功能
       const tabs = document.querySelectorAll('.tab');
       const tabContents = document.querySelectorAll('.tab-content');
@@ -1622,28 +2326,26 @@
           // 添加当前选项卡的活动状态
           this.classList.add('active');
           
-          // 隐藏所有内容区域（包括设置页）
+          // 隐藏所有内容区域
           document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
           });
           
           // 显示当前选项卡对应的内容区域
           const tabId = this.getAttribute('data-tab');
-        if (!tabId) {
-          console.error('无效的标签ID');
-          return;
-        }
-        const targetContent = document.getElementById(`${tabId}-content`);
-        if (!targetContent) {
-          console.error('找不到内容区域:', tabId);
-          this.classList.remove('active');
-          tabs[0]?.classList.add('active');
-          document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
-          return;
-        }
-          if (targetContent) {
-            targetContent.classList.add('active');
+          if (!tabId) {
+            console.error('无效的标签ID');
+            return;
           }
+          const targetContent = document.getElementById(`${tabId}-content`);
+          if (!targetContent) {
+            console.error('找不到内容区域:', tabId);
+            this.classList.remove('active');
+            tabs[0]?.classList.add('active');
+            document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
+            return;
+          }
+          targetContent.classList.add('active');
         });
       });
       
@@ -1651,37 +2353,15 @@
       const buttonVersionSelect = document.getElementById('buttonVersionSelect');
       const buttonVersionContents = document.querySelectorAll('#buttonVersionContent .version-content');
       
-      buttonVersionSelect.addEventListener('change', function() {
-        // 隐藏所有按钮版本内容
-        buttonVersionContents.forEach(content => content.classList.remove('active'));
-        
-        // 显示选中的按钮版本内容
-        document.getElementById(`${this.value}Content`).classList.add('active');
-      });
-      
-      // 模块类型选择功能
-      const moduleTypeSelect = document.getElementById('moduleTypeSelect');
-      const moduleTypeContents = document.querySelectorAll('#moduleTypeContent .version-content');
-      
-      moduleTypeSelect.addEventListener('change', function() {
-        // 隐藏所有模块类型内容
-        moduleTypeContents.forEach(content => content.classList.remove('active'));
-        
-        // 显示选中的模块类型内容
-        document.getElementById(`${this.value}Content`).classList.add('active');
-      });
-      
-      // 规则类型选择功能
-      const ruleTypeSelect = document.getElementById('ruleTypeSelect');
-      const ruleTypeContents = document.querySelectorAll('#ruleTypeContent .version-content');
-      
-      ruleTypeSelect.addEventListener('change', function() {
-        // 隐藏所有规则类型内容
-        ruleTypeContents.forEach(content => content.classList.remove('active'));
-        
-        // 显示选中的规则类型内容
-        document.getElementById(`${this.value}Content`).classList.add('active');
-      });
+      if (buttonVersionSelect) {
+        buttonVersionSelect.addEventListener('change', function() {
+          // 隐藏所有按钮版本内容
+          buttonVersionContents.forEach(content => content.classList.remove('active'));
+          
+          // 显示选中的按钮版本内容
+          document.getElementById(`${this.value}Content`).classList.add('active');
+        });
+      }
       
       // 折叠面板功能
       const collapseButtons = document.querySelectorAll('.collapse-btn');
@@ -1691,11 +2371,13 @@
           const targetId = this.getAttribute('data-target');
           const contentElement = document.getElementById(targetId);
           
-          // 切换按钮样式
-          this.classList.toggle('collapsed');
-          
-          // 切换内容区域的折叠状态
-          contentElement.classList.toggle('collapsed');
+          if (contentElement) {
+            // 切换按钮样式
+            this.classList.toggle('collapsed');
+            
+            // 切换内容区域的折叠状态
+            contentElement.classList.toggle('collapsed');
+          }
         });
       });
       
@@ -1705,45 +2387,22 @@
       colorInputs.forEach(colorInput => {
         const colorValueInput = colorInput.nextElementSibling;
         
-        colorInput.addEventListener('input', function() {
-          colorValueInput.value = this.value.toUpperCase();
-        });
-        
-        colorValueInput.addEventListener('input', function() {
-          if (/^#[0-9A-F]{6}$/i.test(this.value)) {
-            colorInput.value = this.value;
-          }
-        });
+        if (colorValueInput) {
+          colorInput.addEventListener('input', function() {
+            colorValueInput.value = this.value.toUpperCase();
+          });
+          
+          colorValueInput.addEventListener('input', function() {
+            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+              colorInput.value = this.value;
+            }
+          });
+        }
       });
 
       // 主题切换功能
       const lightThemeBtn = document.getElementById('lightTheme');
       const darkThemeBtn = document.getElementById('darkTheme');
-      
-      // 检查系统主题
-      function checkSystemTheme() {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          applyDarkTheme();
-          darkThemeBtn.classList.add('active');
-          lightThemeBtn.classList.remove('active');
-        } else {
-          applyLightTheme();
-          lightThemeBtn.classList.add('active');
-          darkThemeBtn.classList.remove('active');
-        }
-      }
-      
-      // 应用浅色主题
-      function applyLightTheme() {
-        document.body.classList.remove('dark-theme');
-        document.body.classList.add('light-theme');
-      }
-      
-      // 应用深色主题
-      function applyDarkTheme() {
-        document.body.classList.remove('light-theme');
-        document.body.classList.add('dark-theme');
-      }
       
       // 初始检查系统主题
       checkSystemTheme();
@@ -1754,18 +2413,22 @@
       }
       
       // 点击浅色主题按钮
-      lightThemeBtn.addEventListener('click', function() {
-        applyLightTheme();
-        lightThemeBtn.classList.add('active');
-        darkThemeBtn.classList.remove('active');
-      });
+      if (lightThemeBtn) {
+        lightThemeBtn.addEventListener('click', function() {
+          applyLightTheme();
+          lightThemeBtn.classList.add('active');
+          darkThemeBtn.classList.remove('active');
+        });
+      }
       
       // 点击深色主题按钮
-      darkThemeBtn.addEventListener('click', function() {
-        applyDarkTheme();
-        darkThemeBtn.classList.add('active');
-        lightThemeBtn.classList.remove('active');
-      });
+      if (darkThemeBtn) {
+        darkThemeBtn.addEventListener('click', function() {
+          applyDarkTheme();
+          darkThemeBtn.classList.add('active');
+          lightThemeBtn.classList.remove('active');
+        });
+      }
 
       // 奖品图片上传和预览功能
       const prizeUploads = document.querySelectorAll('.prize-upload');
@@ -1775,29 +2438,36 @@
           if (this.files && this.files[0]) {
             const reader = new FileReader();
             const btn = document.querySelector(`button[onclick="document.getElementById('${this.id}').click()"]`);
-            const previewContainer = btn.querySelector('.preview-container');
-            const uploadIcon = btn.querySelector('.upload-icon');
             
-            reader.onload = function(e) {
-              // 清除旧预览
-              while (previewContainer.firstChild) {
-                previewContainer.removeChild(previewContainer.firstChild);
-              }
+            if (btn) {
+              const previewContainer = btn.querySelector('.preview-container');
+              const uploadIcon = btn.querySelector('.upload-icon');
               
-              // 创建新图片预览
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.alt = "Prize preview";
-              previewContainer.appendChild(img);
+              reader.onload = function(e) {
+                // 清除旧预览
+                if (previewContainer) {
+                  while (previewContainer.firstChild) {
+                    previewContainer.removeChild(previewContainer.firstChild);
+                  }
+                  
+                  // 创建新图片预览
+                  const img = document.createElement('img');
+                  img.src = e.target.result;
+                  img.alt = "Prize preview";
+                  previewContainer.appendChild(img);
+                }
+                
+                // 隐藏上传图标
+                if (uploadIcon) {
+                  uploadIcon.style.display = 'none';
+                }
+                
+                // 更改按钮样式
+                btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+              };
               
-              // 隐藏上传图标
-              uploadIcon.style.display = 'none';
-              
-              // 更改按钮样式
-              btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
-            };
-            
-            reader.readAsDataURL(this.files[0]);
+              reader.readAsDataURL(this.files[0]);
+            }
           }
         });
       });
@@ -1811,25 +2481,154 @@
             const previewContainer = document.getElementById('gameIconPreview');
             
             reader.onload = function(e) {
-              // 清除旧预览内容
-              previewContainer.innerHTML = '';
-              
-              // 创建新图片预览
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.alt = "Game Icon Preview";
-              previewContainer.appendChild(img);
-              
-              // 更改容器样式
-              previewContainer.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+              if (previewContainer) {
+                // 清除旧预览内容
+                previewContainer.innerHTML = '';
+                
+                // 创建新图片预览
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = "Game Icon Preview";
+                previewContainer.appendChild(img);
+                
+                // 更改容器样式
+                previewContainer.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+              }
             };
             
             reader.readAsDataURL(this.files[0]);
           }
         });
       }
-
     });
+    
+    /**
+     * 初始化图片上传处理
+     */
+    function initImageUploaders() {
+      // 通用上传事件监听处理
+      function addUploadListener(inputId, storageKey) {
+        const input = document.getElementById(inputId);
+        if (input) {
+          input.addEventListener('change', async function() {
+            if (this.files && this.files[0]) {
+              try {
+                await handleImageUpload(this.files[0], storageKey);
+                showNotification(`${inputId}上传成功`, 'success');
+              } catch (error) {
+                showNotification(`上传失败: ${error}`, 'error');
+              }
+            }
+          });
+        }
+      }
+      
+      // 添加主要图片上传监听
+      addUploadListener('pageBackground', 'pageBackground');
+      addUploadListener('headerImage', 'headerImage');
+      addUploadListener('titleUpload', 'titleUpload');
+      addUploadListener('gameIconUpload', 'gameIcon');
+      addUploadListener('btnImageUpload', 'btnImage');
+      addUploadListener('footerImageUpload', 'footerLogo');
+      addUploadListener('footerBgUpload', 'footerBg');
+      
+      // 监听动态添加的模块图片上传
+      document.addEventListener('moduleAdded', function(e) {
+        const moduleId = e.detail.moduleId;
+        const moduleEl = document.getElementById(moduleId);
+        
+        if (!moduleEl) return;
+        
+        // 为模块内的所有图片上传添加事件监听
+        moduleEl.querySelectorAll('input[type="file"]').forEach((input, index) => {
+          const inputType = input.className;
+          let storageKey = '';
+          
+          if (inputType.includes('prize-upload')) {
+            storageKey = `${moduleId}-prize-${index}`;
+          } else if (inputType.includes('derived-item-upload') || inputType.includes('nine-grid-bg')) {
+            storageKey = `${moduleId}-titlebg`;
+          } else if (inputType.includes('draw-btn')) {
+            storageKey = `${moduleId}-drawbtn`;
+          } else if (inputType.includes('prize-bg')) {
+            storageKey = `${moduleId}-prizebg`;
+          } else if (inputType.includes('sign-in-title-upload')) {
+            storageKey = `${moduleId}-title`;
+          } else if (inputType.includes('sign-in-bg-upload')) {
+            storageKey = `${moduleId}-bg`;
+          } else if (inputType.includes('day-icon-upload')) {
+            storageKey = `${moduleId}-dayicon`;
+          } else if (inputType.includes('sign-in-btn-upload')) {
+            storageKey = `${moduleId}-signbtn`;
+          } else if (inputType.includes('collect-title-upload')) {
+            storageKey = `${moduleId}-title`;
+          } else if (inputType.includes('collect-bg-upload')) {
+            storageKey = `${moduleId}-bg`;
+          } else if (inputType.includes('card-bg-upload')) {
+            storageKey = `${moduleId}-cardbg`;
+          } else if (inputType.includes('combine-button-upload')) {
+            storageKey = `${moduleId}-combinebtn`;
+          } else if (inputType.includes('activity-rule-item-upload')) {
+            storageKey = `${moduleId}-titlebg`;
+          } else if (inputType.includes('small-title-upload')) {
+            storageKey = `${moduleId}-subtitlebg`;
+          } else if (inputType.includes('activity-rule-text-upload')) {
+            storageKey = `${moduleId}-image`;
+          }
+          
+          if (storageKey) {
+            input.addEventListener('change', async function() {
+              if (this.files && this.files[0]) {
+                try {
+                  await handleImageUpload(this.files[0], storageKey);
+                  showNotification('图片上传成功', 'success');
+                } catch (error) {
+                  showNotification(`上传失败: ${error}`, 'error');
+                }
+              }
+            });
+          }
+        });
+      });
+    }
+    
+    /**
+     * 初始化创建按钮事件处理
+     */
+    function initCreateButtonHandler() {
+      const createButton = document.getElementById('create');
+      if (createButton) {
+        createButton.addEventListener('click', function() {
+          // 显示加载状态
+          this.disabled = true;
+          this.textContent = '处理中...';
+          
+          try {
+            // 收集表单数据
+            const config = collectFormData();
+            console.log('收集的表单数据:', config);
+            
+            // 发送数据到插件
+            postMessageToPlugin('create-prototype', { config });
+            
+            // 创建过程可能需要一点时间，显示提示
+            showNotification('正在创建H5原型...', 'info');
+          } catch (error) {
+            console.error('创建失败:', error);
+            showNotification(`创建失败: ${error.message || '未知错误'}`, 'error');
+            this.disabled = false;
+            this.textContent = '创建原型';
+          }
+        });
+      }
+    }
+    
+    // 添加模块事件分发
+    function dispatchModuleAddedEvent(moduleId) {
+      document.dispatchEvent(new CustomEvent('moduleAdded', { 
+        detail: { moduleId } 
+      }));
+    }
   </script>
 </body>
 </html>

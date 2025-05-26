@@ -11,7 +11,11 @@
     "isolatedModules": true,
     "noEmit": false,
     "outDir": ".",
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@figma"
+    ]
   },
   "include": ["**/*"],
   "exclude": ["node_modules"]
