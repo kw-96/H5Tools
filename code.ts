@@ -2,7 +2,7 @@
 /// <reference types="@figma/plugin-typings" />
 
 // 常量定义
-const MODULE_WIDTH = 850;   // 模块宽度，减小以适应更小的界面
+const MODULE_WIDTH = 950;   // 模块宽度，减小以适应更小的界面
 
 // 创建一个接口以定义H5原型的配置内容
 interface H5Config {
@@ -40,18 +40,9 @@ interface Module {
   id: string;                    // 模块唯一ID
   type: string;                  // 模块类型
   title: string;                 // 模块标题
-  content: LuckyWheelContent | TripleDrawContent | ActivityRulesContent | SignInContent | CollectCardsContent | NineGridContent;  // 模块内容（根据类型不同而不同）
+  content: ActivityRulesContent | SignInContent | CollectCardsContent | NineGridContent;  // 模块内容（根据类型不同而不同）
 }
 
-// 大转盘模块配置
-interface LuckyWheelContent {
-  wheelBgImage: Uint8Array | null;// 转盘背景
-  wheelImage: Uint8Array | null;  // 转盘
-  pointerImage: Uint8Array | null;// 指针
-  buttonImage: Uint8Array | null; // 按钮
-  prizes: PrizeItem[];            // 奖品列表
-  mainTitle: string;              // 标题文本
-}
 
 // 九宫格抽奖模块配置
 interface NineGridContent {
@@ -61,26 +52,6 @@ interface NineGridContent {
   drawButtonImage: Uint8Array | null; // 抽奖按钮
   prizeBgImage: Uint8Array | null;// 奖品背景
   prizes: PrizeItem[];            // 奖品列表（最多9个）
-}
-
-// 翻翻乐模块配置
-interface TripleDrawContent {
-  gameBgImage: Uint8Array | null; // 游戏背景
-  gameTitle: Uint8Array | null;   // 游戏标题
-  prizes: PrizeItem[];            // 奖品列表
-}
-
-// 活动内容模块配置
-interface ActivityRulesContent {
-  mainTitle: string;              // 大标题
-  mainTitleBg: Uint8Array | null; // 大标题背景
-  subTitle: string;               // 小标题
-  subTitleBg: Uint8Array | null;  // 小标题背景
-  text: string;                   // 正文内容
-  image: Uint8Array | null;       // 图片
-  rulesTitle?: string;            // 规则标题
-  rulesContent?: string;          // 规则内容
-  rulesBgImage?: Uint8Array | null; // 规则标题背景
 }
 
 // 签到模块配置
@@ -97,7 +68,7 @@ interface CollectCardsContent {
   titleImage: Uint8Array | null;  // 集卡标题
   bgImage: Uint8Array | null;     // 背景图片
   cardsCount: number;             // 卡片数量
-  cardStyle: string;              // 卡片样式
+  cardStyle: string;              // 卡片样式 style1(方形), style2(圆角), style3(自定义)
   cardBg: Uint8Array | null;      // 卡片背景
   combineButton: Uint8Array | null;// 合成按钮
 }
@@ -108,19 +79,43 @@ interface PrizeItem {
   name: string;                   // 奖品名称
 }
 
+// 活动内容模块配置
+interface ActivityRulesContent {
+  mainTitle: string;              // 大标题
+  mainTitleBg: Uint8Array | null; // 大标题背景
+  subTitle: string;               // 小标题
+  subTitleBg: Uint8Array | null;  // 小标题背景
+  text: string;                   // 正文内容
+  image: Uint8Array | null;       // 图片
+}
+
 // 统一加载常用字体函数定义
-async function loadCommonFonts() {
-  try {
-    // 加载插件中频繁使用的字体
-    await Promise.all([
-      figma.loadFontAsync({ family: "Inter", style: "Regular" }),
-      figma.loadFontAsync({ family: "Inter", style: "Medium" }),
-      figma.loadFontAsync({ family: "Inter", style: "Bold" })
-    ]);
-    console.log('常用字体加载成功');
-  } catch (error) {
-    console.error('加载字体时出错:', error);
-    // 即使出错也继续执行
+async function loadCommonFonts(): Promise<void> {
+  const fonts = [
+    { family: "Inter", style: "Regular" },
+    { family: "Inter", style: "Medium" }, 
+    { family: "Inter", style: "Bold" }
+  ] as const;
+
+  // 逐个加载字体，确保单个字体失败不影响其他字体
+  const loadPromises = fonts.map(async (font) => {
+    try {
+      await figma.loadFontAsync(font);
+      return { success: true, font };
+    } catch (error) {
+      return { success: false, font, error };
+    }
+  });
+
+  // 等待所有字体加载完成（无论成功还是失败）
+  const results = await Promise.all(loadPromises);
+  
+  // 统计加载结果
+  const failureCount = results.filter(result => !result.success).length;
+  
+  // 如果有字体加载失败，记录但不阻塞插件运行
+  if (failureCount > 0) {
+    // 部分字体加载失败，但插件将继续运行
   }
 }
 
@@ -135,12 +130,10 @@ figma.showUI(__html__, {
 const initialData = {
   version: '1.0.0',
   moduleTypes: [
-    { id: 'luckyWheel', name: '大转盘' },
-    { id: 'tripleDraw', name: '翻翻乐' },
+    { id: 'nineGrid', name: '九宫格抽奖' },
     { id: 'signIn', name: '每日签到' },
     { id: 'collectCards', name: '集卡活动' },
-    { id: 'activityRules', name: '活动内容' },
-    { id: 'nineGrid', name: '九宫格抽奖' }
+    { id: 'activityRules', name: '活动内容' }
   ]
 };
 
@@ -151,7 +144,6 @@ figma.ui.postMessage({
 });
 
 // 处理来自UI的消息
-// 由于不清楚 msg 的具体类型，这里创建一个通用的消息接口来替代 any 类型
 interface PluginMessage {
   type: string;
   config?: H5Config;
@@ -162,7 +154,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
   // 当接收到创建原型的消息
   if (msg.type === 'create-prototype') {
     try {
-      console.log('接收到创建原型请求，配置数据:', msg.config);
+      // 接收到创建原型请求
       
       // 检查 config 是否有效
       if (!msg.config) {
@@ -173,7 +165,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
       try {
         await loadCommonFonts();
       } catch (fontError) {
-        console.error('加载字体时出错:', fontError);
+        // 加载字体时出错，但继续执行
         // 继续执行，个别字体问题可能不是致命的
       }
 
@@ -186,7 +178,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
         message: '原型创建成功！'
       });
     } catch (error) {
-      console.error('创建原型时出错:', error);
+      // 创建原型时出错，通过UI消息通知用户
       
       // 通知UI创建失败
       figma.ui.postMessage({ 
@@ -214,7 +206,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
           });
         });
     } catch (error) {
-      console.error('保存配置时出错:', error);
+      // 保存配置时出错，通过UI消息通知用户
       figma.ui.postMessage({
         type: 'save-error',
         message: `保存失败: ${error instanceof Error ? error.message : '未知错误'}`
@@ -240,7 +232,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
           });
         });
     } catch (error) {
-      console.error('加载配置时出错:', error);
+      // 加载配置时出错，通过UI消息通知用户
       figma.ui.postMessage({
         type: 'load-config-error',
         message: `加载配置失败: ${error instanceof Error ? error.message : '未知错误'}`
@@ -259,113 +251,160 @@ async function createH5Prototype(config: H5Config) {
   try {
     // 设置常量
     const H5_WIDTH = 1080;      // H5画板宽度
-    const PADDING = 20;         // 内边距
+    const PADDING = 0;         // 内边距
     
     // 预先加载常用字体，避免后续文本操作失败
     await loadCommonFonts();
     
     // 创建页面和画布
     const currentPage = figma.currentPage;
-  
-  // 创建外层背景画板
-  const outerFrame = figma.createFrame();
-  outerFrame.name = `${config.pageTitle || '未命名活动'}_背景`;
-  outerFrame.resize(H5_WIDTH + 100, 100); // 临时高度，后面调整
-  
-  // 设置外层背景
-  if (config.pageBgImage) {
-    const bgFill = await createImageFill(config.pageBgImage);
-    outerFrame.fills = [bgFill];
-  } else if (config.pageBgColor) {
-    outerFrame.fills = [{
-      type: 'SOLID',
-      color: hexToRgb(config.pageBgColor)
-    }];
-  } else {
-    // 默认背景色
-    outerFrame.fills = [{
-      type: 'SOLID',
-      color: { r: 0.95, g: 0.95, b: 0.95 }
-    }];
-  }
-  
-  // 创建主H5画板
-  const h5Frame = figma.createFrame();
-  h5Frame.name = config.pageTitle || '未命名活动';
-  h5Frame.resize(H5_WIDTH, 100); // 临时高度，后面调整
-  h5Frame.x = 50; // 居中放置在外层画板
-  h5Frame.y = 0;
-  
-  // 设置H5背景为白色
-  h5Frame.fills = [{
-    type: 'SOLID',
-    color: { r: 1, g: 1, b: 1 }
-  }];
-  
-  // 添加H5画板到外层画板
-  outerFrame.appendChild(h5Frame);
-  
-  // 当前垂直位置偏移量
-  let yOffset = 0;
-  
-  // 1. 添加头图模块
-  if (config.headerImage) {
-    const headerFrame = await createHeaderModule(config.headerImage);
-    headerFrame.x = 0;
-    headerFrame.y = yOffset;
-    h5Frame.appendChild(headerFrame);
-    yOffset += headerFrame.height;
-  }
-  
-  // 2. 添加游戏信息模块（如果存在）
-  if (config.gameName || config.gameDesc || config.gameIcon) {
-    const gameInfoFrame = await createGameInfoModule(config);
-    gameInfoFrame.x = (H5_WIDTH - gameInfoFrame.width) / 2; // 水平居中
-    gameInfoFrame.y = yOffset + PADDING;
-    h5Frame.appendChild(gameInfoFrame);
-    yOffset += gameInfoFrame.height + PADDING * 2;
-  }
-  
-  // 3. 添加自定义模块
-  if (config.modules && config.modules.length > 0) {
-    for (const module of config.modules) {
-      const moduleFrame = await createCustomModule(module);
-      moduleFrame.x = (H5_WIDTH - moduleFrame.width) / 2; // 水平居中
-      moduleFrame.y = yOffset + PADDING;
-      h5Frame.appendChild(moduleFrame);
-      yOffset += moduleFrame.height + PADDING * 2;
+    
+    // 创建外层背景画板
+    const outerFrame = figma.createFrame();
+    outerFrame.name = `H5原型`;
+    outerFrame.resize(H5_WIDTH, 100); // 宽度设置为1080，高度暂时设置为100，后面会根据内容调整
+    
+    // 设置外层背景
+    if (config.pageBgImage) {
+      // 如果配置中有背景图片，创建图片填充
+      const bgFill = await createImageFill(config.pageBgImage);
+      outerFrame.fills = [bgFill];
+    } else if (config.pageBgColor) {
+      // 如果配置中有背景颜色，创建纯色填充
+      outerFrame.fills = [{
+        type: 'SOLID',
+        color: hexToRgb(config.pageBgColor)
+      }];
+    } else {
+      // 如果没有指定背景图片或背景颜色，则使用默认的白色背景
+      outerFrame.fills = [{
+        type: 'SOLID',
+        color: { r: 255, g: 255, b: 255 } // 设置为白色（RGB值：255,255,255）
+      }];
     }
+    
+    // 创建主H5画板
+    const h5Frame = figma.createFrame();
+    h5Frame.name = '自适应模块';  // 设置画板名称
+    h5Frame.resize(H5_WIDTH, 100);  // 设置画板宽度为H5_WIDTH，高度暂时设为100（后续会根据内容调整）
+    h5Frame.x = 0;  // 设置画板的水平位置
+    h5Frame.y = 0;  // 设置画板的垂直位置
+    
+    // 添加自动布局属性
+    h5Frame.layoutMode = "VERTICAL";  // 设置为垂直自动布局
+    h5Frame.primaryAxisSizingMode = "AUTO";  // 主轴(垂直方向)尺寸随内容自动调整
+    h5Frame.counterAxisSizingMode = "FIXED";  // 副轴(水平方向)尺寸固定
+    h5Frame.itemSpacing = 0;  // 初始组件间距为0，后面会根据需要为各组件添加间距
+    h5Frame.paddingTop = 0;
+    h5Frame.paddingBottom = 0;
+    h5Frame.paddingLeft = 0;
+    h5Frame.paddingRight = 0;
+    
+    // 设置H5背景为白色
+    h5Frame.fills = [{
+      type: 'SOLID',
+      color: { r: 1, g: 1, b: 1 }
+    }];
+    
+    // 添加H5画板到外层画板
+    outerFrame.appendChild(h5Frame);
+    
+    // 1. 添加头图模块
+    if (config.headerImage) {
+      const headerFrame = await createHeaderModule(config.headerImage);
+      // 设置为自适应宽度
+      headerFrame.layoutAlign = "STRETCH";
+      h5Frame.appendChild(headerFrame);
+    }
+    
+    // 2. 添加游戏信息模块
+    if (config.gameName || config.gameDesc || config.gameIcon) {
+      const gameInfoFrame = await createGameInfoModule(config);
+      // 设置模块水平居中
+      gameInfoFrame.layoutAlign = "CENTER";
+      // 添加上下间距
+      const spacerBefore = figma.createFrame();
+      spacerBefore.name = "间距";
+      spacerBefore.resize(1, PADDING);
+      spacerBefore.fills = [];
+      h5Frame.appendChild(spacerBefore);
+      
+      h5Frame.appendChild(gameInfoFrame);
+      
+      const spacerAfter = figma.createFrame();
+      spacerAfter.name = "间距";
+      spacerAfter.resize(1, PADDING);
+      spacerAfter.fills = [];
+      h5Frame.appendChild(spacerAfter);
+    }
+    
+    // 3. 添加自定义模块
+    if (config.modules && config.modules.length > 0) {
+      for (const module of config.modules) {
+        const moduleFrame = await createCustomModule(module);
+        // 设置模块水平居中
+        moduleFrame.layoutAlign = "CENTER";
+        
+        // 添加间距
+        const spacerBefore = figma.createFrame();
+        spacerBefore.name = "间距";
+        spacerBefore.resize(1, PADDING);
+        spacerBefore.fills = [];
+        h5Frame.appendChild(spacerBefore);
+        
+        h5Frame.appendChild(moduleFrame);
+        
+        const spacerAfter = figma.createFrame();
+        spacerAfter.name = "间距";
+        spacerAfter.resize(1, PADDING);
+        spacerAfter.fills = [];
+        h5Frame.appendChild(spacerAfter);
+      }
+    }
+    
+    // 4. 添加活动规则模块
+    if (config.rulesContent) {
+      const rulesFrame = await createRulesModule(config);
+      // 设置模块水平居中
+      rulesFrame.layoutAlign = "CENTER";
+      
+      // 添加间距
+      const spacerBefore = figma.createFrame();
+      spacerBefore.name = "间距";
+      spacerBefore.resize(1, PADDING);
+      spacerBefore.fills = [];
+      h5Frame.appendChild(spacerBefore);
+      
+      h5Frame.appendChild(rulesFrame);
+      
+      const spacerAfter = figma.createFrame();
+      spacerAfter.name = "间距";
+      spacerAfter.resize(1, PADDING);
+      spacerAfter.fills = [];
+      h5Frame.appendChild(spacerAfter);
+    }
+    
+    // 5. 添加尾版模块
+    const footerFrame = await createFooterModule(config);
+    // 设置为自适应宽度
+    footerFrame.layoutAlign = "STRETCH";
+    h5Frame.appendChild(footerFrame);
+    
+    // 调整外层背景画板高度适应内容
+    outerFrame.resize(H5_WIDTH, h5Frame.height);
+    
+    // 将外层背景画板添加到当前页面并居中显示
+    currentPage.appendChild(outerFrame);
+    
+    // 居中视图到创建的画板
+    figma.viewport.scrollAndZoomIntoView([outerFrame]);
+    
+    return outerFrame;
+  } catch (error) {
+    // 创建H5原型时出错，通过notify和抛出异常处理
+    figma.notify(`创建失败: ${error instanceof Error ? error.message : '未知错误'}`, {timeout: 5000});
+    throw error;
   }
-  
-  // 4. 添加活动规则模块
-  if (config.rulesContent) {
-    const rulesFrame = await createRulesModule(config);
-    rulesFrame.x = (H5_WIDTH - rulesFrame.width) / 2; // 水平居中
-    rulesFrame.y = yOffset + PADDING;
-    h5Frame.appendChild(rulesFrame);
-    yOffset += rulesFrame.height + PADDING * 2;
-  }
-  
-  // 5. 添加尾版模块
-  const footerFrame = await createFooterModule(config);
-  footerFrame.x = 0;
-  footerFrame.y = yOffset;
-  h5Frame.appendChild(footerFrame);
-  yOffset += footerFrame.height;
-  
-  // 调整H5画板高度适应内容
-  h5Frame.resize(H5_WIDTH, yOffset);
-  
-  // 调整外层背景画板高度适应内容
-  outerFrame.resize(H5_WIDTH + 100, yOffset);
-  
-  // 将外层背景画板添加到当前页面并居中显示
-  currentPage.appendChild(outerFrame);
-  
-  // 居中视图到创建的画板
-  figma.viewport.scrollAndZoomIntoView([outerFrame]);
-  
-  return outerFrame;
 }
 
 // 这里开始实现创建图片的函数
@@ -387,7 +426,7 @@ async function createImageFill(bytes: Uint8Array): Promise<SolidPaint | ImagePai
       } as SolidPaint;
     }
   } catch (error) {
-    console.error('创建图片填充失败:', error);
+    // 创建图片填充失败，返回默认灰色填充
     
     // 图片创建失败，返回灰色填充
     return {
@@ -397,7 +436,7 @@ async function createImageFill(bytes: Uint8Array): Promise<SolidPaint | ImagePai
   }
 }
 
-// 创建活动规则模块
+// 创建活动规则模块 (已简化为与UI HTML一致的结构)
 async function createRulesModule(config: H5Config): Promise<FrameNode> {
   const frame = figma.createFrame();
   frame.name = "活动规则";
@@ -421,15 +460,10 @@ async function createRulesModule(config: H5Config): Promise<FrameNode> {
     titleContainer.y = yPos;
     
     // 设置标题背景
-    if (config.rulesBgImage) {
-      const bgFill = await createImageFill(config.rulesBgImage);
-      titleContainer.fills = [bgFill];
-    } else {
-      titleContainer.fills = [{
-        type: 'SOLID',
-        color: { r: 0.95, g: 0.95, b: 0.95 }
-      }];
-    }
+    titleContainer.fills = [{
+      type: 'SOLID',
+      color: { r: 0.95, g: 0.95, b: 0.95 }
+    }];
     
     // 添加标题文本
     const titleText = figma.createText();
@@ -516,7 +550,8 @@ async function createHeaderModule(headerImage: Uint8Array): Promise<FrameNode> {
     // 使用图片创建背景
     const image = await createImage(headerImage);
     if (image) {
-      frame.resize(1080, image.height);
+      // Figma Image 对象没有 height 属性，使用默认尺寸
+      frame.resize(1080, 300); // 使用默认高度
       frame.fills = [{
         type: 'IMAGE',
         imageHash: image.hash,
@@ -677,7 +712,7 @@ async function createCustomModule(module: Module): Promise<FrameNode> {
   try {
     await loadCommonFonts();
   } catch (fontError) {
-    console.error('在创建模块前加载字体时出错:', fontError);
+    // 在创建模块前加载字体时出错，继续执行
     // 继续执行，我们将在创建具体文本元素时再次尝试加载字体
   }
   
@@ -686,12 +721,6 @@ async function createCustomModule(module: Module): Promise<FrameNode> {
   
   try {
     switch (module.type) {
-      case 'luckyWheel':
-        moduleContent = await createLuckyWheelModule(module.content as LuckyWheelContent);
-        break;
-      case 'tripleDraw':
-        moduleContent = await createTripleDrawModule(module.content as TripleDrawContent);
-        break;
       case 'activityRules':
         moduleContent = await createActivityContentModule(module.content as ActivityRulesContent);
         break;
@@ -710,7 +739,7 @@ async function createCustomModule(module: Module): Promise<FrameNode> {
         moduleContent.resize(MODULE_WIDTH, 100);
     }
   } catch (error) {
-    console.error(`创建模块 ${module.type} 时出错:`, error);
+    // 创建模块时出错，返回错误提示模块
     
     // 返回一个错误提示模块
     moduleContent = figma.createFrame();
@@ -720,7 +749,7 @@ async function createCustomModule(module: Module): Promise<FrameNode> {
     // 加载字体并显示错误信息
     const errorText = figma.createText();
     await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-    errorText.characters = `模块创建失败: ${error.message || '未知错误'}`;
+    errorText.characters = `模块创建失败: ${error instanceof Error ? error.message : '未知错误'}`;
     errorText.fontSize = 16;
     errorText.x = 20;
     errorText.y = 40;
@@ -736,294 +765,6 @@ async function createCustomModule(module: Module): Promise<FrameNode> {
   return frame;
 }
 
-// 创建大转盘模块
-async function createLuckyWheelModule(content: LuckyWheelContent): Promise<FrameNode> {
-  const frame = figma.createFrame();
-  frame.name = "大转盘";
-  frame.resize(MODULE_WIDTH, 650); // 增加高度以适应更多内容
-  
-  // 添加标题文本（如果有）
-  if (content.mainTitle) {
-    const titleText = figma.createText();
-    titleText.characters = content.mainTitle;
-    titleText.fontSize = 28;
-    titleText.fontName = { family: "Inter", style: "Bold" };
-    
-    // 加载字体
-    await figma.loadFontAsync(titleText.fontName);
-    
-    // 调整文本位置居中
-    titleText.resize(MODULE_WIDTH, titleText.height);
-    titleText.textAlignHorizontal = "CENTER";
-    titleText.x = 0;
-    titleText.y = 20;
-    
-    frame.appendChild(titleText);
-  }
-  
-  // 设置背景
-  if (content.wheelBgImage) {
-    const bgFill = await createImageFill(content.wheelBgImage);
-    frame.fills = [bgFill];
-  } else {
-    frame.fills = [{
-      type: 'SOLID',
-      color: { r: 1, g: 0.95, b: 0.8 }
-    }];
-  }
-  
-  // 转盘中心位置
-  const centerX = MODULE_WIDTH / 2;
-  const centerY = 320; // 向下移动一些以适应标题
-  
-  // 创建转盘
-  if (content.wheelImage) {
-    const wheelFrame = figma.createFrame();
-    wheelFrame.name = "转盘";
-    wheelFrame.resize(420, 420);
-    
-    // 设置转盘图片
-    const image = await createImage(content.wheelImage);
-    if (image) {
-      wheelFrame.fills = [{
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      }];
-    }
-    
-    wheelFrame.x = centerX - 210;
-    wheelFrame.y = centerY - 210;
-    frame.appendChild(wheelFrame);
-  }
-  
-  // 创建指针
-  if (content.pointerImage) {
-    const pointerFrame = figma.createFrame();
-    pointerFrame.name = "指针";
-    pointerFrame.resize(90, 90);
-    
-    // 设置指针图片
-    const image = await createImage(content.pointerImage);
-    if (image) {
-      pointerFrame.fills = [{
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      }];
-    }
-    
-    pointerFrame.x = centerX - 45;
-    pointerFrame.y = centerY - 45;
-    frame.appendChild(pointerFrame);
-  }
-  
-  // 创建按钮
-  if (content.buttonImage) {
-    const buttonFrame = figma.createFrame();
-    buttonFrame.name = "抽奖按钮";
-    buttonFrame.resize(220, 70);
-    
-    // 设置按钮图片
-    const image = await createImage(content.buttonImage);
-    if (image) {
-      buttonFrame.fills = [{
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      }];
-    } else {
-      buttonFrame.fills = [{
-        type: 'SOLID',
-        color: { r: 1, g: 0.4, b: 0.2 }
-      }];
-      buttonFrame.cornerRadius = 35;
-      
-      // 添加按钮文本
-      const buttonText = figma.createText();
-      buttonText.characters = "开始抽奖";
-      buttonText.fontSize = 20;
-      buttonText.fontName = { family: "Inter", style: "Bold" };
-      buttonText.fills = [{
-        type: 'SOLID',
-        color: { r: 1, g: 1, b: 1 }
-      }];
-      
-      // 加载字体
-      await figma.loadFontAsync(buttonText.fontName);
-      
-      // 调整文本位置居中
-      buttonText.resize(220, buttonText.height);
-      buttonText.textAlignHorizontal = "CENTER";
-      buttonText.x = 0;
-      buttonText.y = (70 - buttonText.height) / 2;
-      
-      buttonFrame.appendChild(buttonText);
-    }
-    
-    buttonFrame.x = centerX - 110;
-    buttonFrame.y = centerY + 230;
-    frame.appendChild(buttonFrame);
-  }
-  
-  return frame;
-}
-
-// 创建翻翻乐模块
-async function createTripleDrawModule(content: TripleDrawContent): Promise<FrameNode> {
-  const frame = figma.createFrame();
-  frame.name = "翻翻乐";
-  frame.resize(MODULE_WIDTH, 720);
-  
-  // 设置背景
-  if (content.gameBgImage) {
-    const bgFill = await createImageFill(content.gameBgImage);
-    frame.fills = [bgFill];
-  } else {
-    frame.fills = [{
-      type: 'SOLID',
-      color: { r: 0.9, g: 0.95, b: 1 }
-    }];
-  }
-  
-  // 添加标题
-  if (content.gameTitle) {
-    const titleFrame = figma.createFrame();
-    titleFrame.name = "游戏标题";
-    titleFrame.resize(600, 100);
-    
-    // 设置标题图片
-    const image = await createImage(content.gameTitle);
-    if (image) {
-      titleFrame.fills = [{
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      }];
-    }
-    
-    titleFrame.x = (MODULE_WIDTH - 600) / 2;
-    titleFrame.y = 40;
-    frame.appendChild(titleFrame);
-  }
-  
-  // 添加奖品格子
-  if (content.prizes && content.prizes.length > 0) {
-    // 创建3x3网格
-    const gridContainer = figma.createFrame();
-    gridContainer.name = "奖品网格";
-    gridContainer.layoutMode = "HORIZONTAL"; // Figma只支持HORIZONTAL或VERTICAL
-    gridContainer.primaryAxisSizingMode = "AUTO";
-    gridContainer.counterAxisSizingMode = "AUTO";
-    gridContainer.layoutGrids = [{
-      pattern: "GRID",
-      sectionSize: 200,
-      visible: true,
-      color: { r: 0.9, g: 0.9, b: 0.9, a: 0.5 }
-    }];
-    
-    // 获取奖品数量，最多支持9个
-    const prizeCount = Math.min(content.prizes.length, 9);
-    // 设置网格属性
-    gridContainer.itemSpacing = 20;
-    gridContainer.counterAxisAlignItems = "CENTER"; // 使用有效值：CENTER, MIN, MAX, 或 BASELINE
-    gridContainer.primaryAxisAlignItems = "SPACE_BETWEEN"; // 仅 primaryAxisAlignItems 可以使用 SPACE_BETWEEN
-    
-    // 根据奖品数量调整大小
-    const gridWidth = 640;
-    const gridHeight = 480;
-    gridContainer.resize(gridWidth, gridHeight);
-    gridContainer.x = (MODULE_WIDTH - gridWidth) / 2;
-    gridContainer.y = 160;
-    
-    // 添加奖品格子
-    for (let i = 0; i < 9; i++) {
-      const prizeBox = figma.createFrame();
-      prizeBox.name = i < prizeCount && content.prizes[i].name ? 
-        content.prizes[i].name : `奖品${i+1}`;
-      
-      const boxSize = 200;
-      prizeBox.resize(boxSize, boxSize);
-      prizeBox.cornerRadius = 10;
-      
-      // 设置格子背景
-      prizeBox.fills = [{
-        type: 'SOLID',
-        color: { r: 1, g: 1, b: 1 }
-      }];
-      
-      // 边框
-      prizeBox.strokes = [{
-        type: 'SOLID',
-        color: { r: 0.9, g: 0.9, b: 0.9 }
-      }];
-      prizeBox.strokeWeight = 1;
-      
-      // 如果有奖品图片，则设置
-      if (i < prizeCount && content.prizes[i].image) {
-        const prizeImage = figma.createFrame();
-        prizeImage.name = "奖品图片";
-        prizeImage.resize(140, 140);
-        
-        // 确保使用有效的 Uint8Array 参数
-        const image = await createImage(content.prizes[i].image || new Uint8Array(0));
-        if (image) {
-          prizeImage.fills = [{
-            type: 'IMAGE',
-            imageHash: image.hash,
-            scaleMode: 'FILL'
-          }];
-        }
-        
-        prizeImage.x = 30;
-        prizeImage.y = 20;
-        prizeBox.appendChild(prizeImage);
-        
-        // 添加奖品名称
-        if (content.prizes[i].name) {
-          const nameText = figma.createText();
-          nameText.characters = content.prizes[i].name;
-          nameText.fontSize = 16;
-          nameText.fontName = { family: "Inter", style: "Regular" };
-          
-          // 加载字体
-          await figma.loadFontAsync(nameText.fontName);
-          
-          // 调整文本位置居中
-          nameText.resize(boxSize, nameText.height);
-          nameText.textAlignHorizontal = "CENTER";
-          nameText.x = 0;
-          nameText.y = 170;
-          
-          prizeBox.appendChild(nameText);
-        }
-      } else {
-        // 添加默认的"+"号
-        const plusText = figma.createText();
-        plusText.characters = "+";
-        plusText.fontSize = 60;
-        plusText.fontName = { family: "Inter", style: "Regular" };
-        
-        // 加载字体
-        await figma.loadFontAsync(plusText.fontName);
-        
-        // 调整文本位置居中
-        plusText.resize(boxSize, plusText.height);
-        plusText.textAlignHorizontal = "CENTER";
-        plusText.x = 0;
-        plusText.y = 70;
-        
-        prizeBox.appendChild(plusText);
-      }
-      
-      gridContainer.appendChild(prizeBox);
-    }
-    
-    frame.appendChild(gridContainer);
-  }
-  
-  return frame;
-}
 
 // 创建活动内容模块
 async function createActivityContentModule(content: ActivityRulesContent): Promise<FrameNode> {
@@ -1118,7 +859,7 @@ async function createActivityContentModule(content: ActivityRulesContent): Promi
   }
   
   // 添加正文
-  if (content.text || content.rulesContent) {
+  if (content.text) {
     const contentContainer = figma.createFrame();
     contentContainer.name = "正文容器";
     contentContainer.resize(MODULE_WIDTH - 40, 0); // 高度后面调整
@@ -1130,7 +871,7 @@ async function createActivityContentModule(content: ActivityRulesContent): Promi
     
     // 添加正文文本
     const contentText = figma.createText();
-    contentText.characters = content.text || content.rulesContent || "";
+    contentText.characters = content.text;
     contentText.fontSize = 16;
     contentText.fontName = { family: "Inter", style: "Regular" };
     contentText.lineHeight = { value: 24, unit: 'PIXELS' };
@@ -1148,10 +889,33 @@ async function createActivityContentModule(content: ActivityRulesContent): Promi
     frame.appendChild(contentContainer);
     
     yPos += contentContainer.height + 30;
-  } else {
-    // 添加默认文本
+  }
+  
+  // 添加图片（如果有）
+  if (content.image) {
+    const imageFrame = figma.createFrame();
+    imageFrame.name = "内容图片";
+    imageFrame.resize(MODULE_WIDTH - 40, 200); // 默认高度
+    imageFrame.x = 20;
+    imageFrame.y = yPos;
+    
+    const image = await createImage(content.image);
+    if (image) {
+      imageFrame.fills = [{
+        type: 'IMAGE',
+        imageHash: image.hash,
+        scaleMode: 'FIT'
+      }];
+      
+      frame.appendChild(imageFrame);
+      yPos += 220; // 图片高度 + 间距
+    }
+  }
+  
+  // 如果没有任何内容，显示默认文本
+  if (!content.mainTitle && !content.subTitle && !content.text && !content.image) {
     const defaultText = figma.createText();
-    defaultText.characters = "暂无活动规则";
+    defaultText.characters = "暂无活动内容";
     defaultText.fontSize = 16;
     defaultText.fontName = { family: "Inter", style: "Regular" };
     
@@ -1253,7 +1017,7 @@ async function createFooterModule(config: H5Config): Promise<FrameNode> {
       frame.appendChild(copyrightText);
     }
   } catch (error) {
-    console.error('创建尾版模块时出错:', error);
+    // 创建尾版模块时出错，返回基本框架
     // 如果出错，至少返回一个基本的框架
   }
   
@@ -1278,33 +1042,13 @@ function hexToRgb(hex: string): RGB {
   return { r, g, b };
 }
 
-// 此函数已在前面定义，删除此处重复定义
-
-async function createImageFill(bytes: Uint8Array): Promise<SolidPaint | ImagePaint> {
+// 实现创建图片的函数
+async function createImage(bytes: Uint8Array): Promise<Image | null> {
   try {
-    const image = await createImage(bytes);
-    
-    if (image) {
-      return {
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      } as ImagePaint;
-    } else {
-      // 图片创建失败，返回灰色填充
-      return {
-        type: 'SOLID',
-        color: { r: 0.9, g: 0.9, b: 0.9 }
-      } as SolidPaint;
-    }
+    return figma.createImage(bytes);
   } catch (error) {
-    console.error('创建图片填充失败:', error);
-    
-    // 图片创建失败，返回灰色填充
-    return {
-      type: 'SOLID',
-      color: { r: 0.9, g: 0.9, b: 0.9 }
-    } as SolidPaint;
+    // 创建图片时出错，返回null
+    return null;
   }
 }
 
@@ -1606,7 +1350,6 @@ async function createNineGridModule(content: NineGridContent): Promise<FrameNode
   
   // 计算单元格大小和间距
   const cellSize = (MODULE_WIDTH - 40 - 40) / 3; // 考虑内边距
-  const gridSize = cellSize * 3 + 40; // 3x3网格总大小
   
   // 创建九宫格
   for (let i = 0; i < 3; i++) {
@@ -1734,7 +1477,7 @@ async function createNineGridModule(content: NineGridContent): Promise<FrameNode
 async function createCollectCardsModule(content: CollectCardsContent): Promise<FrameNode> {
   const frame = figma.createFrame();
   frame.name = "集卡活动";
-  frame.resize(MODULE_WIDTH, 580); // 默认高度
+  frame.resize(MODULE_WIDTH, 620); // 默认高度
   
   // 设置背景
   if (content.bgImage) {
@@ -1743,7 +1486,7 @@ async function createCollectCardsModule(content: CollectCardsContent): Promise<F
   } else {
     frame.fills = [{
       type: 'SOLID',
-      color: { r: 1, g: 0.95, b: 0.9 }
+      color: { r: 0.95, g: 0.97, b: 1 }
     }];
   }
   
@@ -1764,7 +1507,7 @@ async function createCollectCardsModule(content: CollectCardsContent): Promise<F
     } else {
       titleFrame.fills = [{
         type: 'SOLID',
-        color: { r: 0.8, g: 0.6, b: 0.2 }
+        color: { r: 0.3, g: 0.6, b: 0.9 }
       }];
       
       // 添加默认标题文本
@@ -1830,11 +1573,12 @@ async function createCollectCardsModule(content: CollectCardsContent): Promise<F
     cardItem.resize(120, 260);
     
     // 设置卡片样式
-    if (content.cardStyle === 'rounded') {
-      cardItem.cornerRadius = 10;
-    } else if (content.cardStyle === 'circle') {
-      cardItem.cornerRadius = 60;
+    if (content.cardStyle === 'style2') {
+      cardItem.cornerRadius = 10; // 圆角
+    } else if (content.cardStyle === 'style3') {
+      cardItem.cornerRadius = 60; // 自定义（这里用更大的圆角代表）
     }
+    // style1是方形，默认不做任何处理
     
     // 设置卡片背景
     if (content.cardBg) {

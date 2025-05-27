@@ -249,7 +249,8 @@
     
     .upload-btn {
       width: 100%;
-      padding: 12px;
+      height: 60px;
+      padding: 0;
       background-color: #f5f5f7;
       border: 1px dashed rgba(0, 0, 0, 0.1);
       border-radius: 8px;
@@ -259,11 +260,45 @@
       text-align: center;
       transition: all 0.2s;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
     
     .upload-btn:hover {
       background-color: #efefef;
       border-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .upload-btn .img-preview-inline {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fafafa;
+    }
+    
+    body.dark-theme .upload-btn .img-preview-inline {
+      background-color: #1c1c1e;
+    }
+    
+    .upload-btn .img-preview-inline img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .upload-btn .img-preview-inline .upload-icon-inline {
+      font-size: 20px;
+      color: #86868b;
     }
     
     /* 折叠内容区域 */
@@ -499,9 +534,10 @@
     .img-preview-inline img, 
     .preview-container img, 
     .img-preview-container img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      border-radius: 8px;
     }
     
     .img-preview-btn {
@@ -775,13 +811,26 @@
     button#create {
       background-color: #0071e3;
       color: white;
-      min-width: 150px;
+      min-width: 120px;
     }
     
     button#create:hover {
       background-color: #0077ed;
       transform: translateY(-1px);
       box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+    }
+    
+    button#reset {
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+      min-width: 120px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    button#reset:hover {
+      background-color: #e8e8ed;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
     button#cancel {
@@ -860,6 +909,10 @@
       border-color: rgba(255, 255, 255, 0.2);
     }
     
+    body.dark-theme .upload-btn .img-preview-inline .upload-icon-inline {
+      color: #a1a1a6;
+    }
+    
     body.dark-theme .control-btn {
       border-color: #3a3a3c;
       color: #a1a1a6;
@@ -879,6 +932,17 @@
       background-color: rgba(255, 69, 58, 0.1);
       border-color: #ff453a;
       color: #ff453a;
+    }
+    
+    body.dark-theme button#reset {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+    
+    body.dark-theme button#reset:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.2);
     }
     
     body.dark-theme .section-dropdown {
@@ -949,16 +1013,20 @@
         <div class="form-group row-layout">
           <label class="non-interactive-label">页面底色</label>
           <div class="color-input-group">
-            <input type="color" id="pageColor" value="#D9D9D9">
-            <input type="text" class="color-value" value="#D9D9D9" maxlength="7">
+            <input type="color" id="pageColor" value="#FFFFFF">
+            <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
           </div>
         </div>
         
         <div class="form-group row-layout">
           <label class="non-interactive-label">页面背景</label>
           <div class="file-upload-btn">
-            <input type="file" id="pageBackground" accept="image/*" style="display:none">
-            <button class="upload-btn" onclick="document.getElementById('pageBackground').click()">点击上传</button>
+            <input type="file" id="pageBackground" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+            <button class="upload-btn" onclick="document.getElementById('pageBackground').click()">
+              <div class="img-preview-inline">
+                <span class="upload-icon-inline">+</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -970,16 +1038,24 @@
           <label class="non-interactive-label">头图</label>
           <div class="file-upload-btn">
             <input type="file" id="headerImage" accept="image/*" style="display:none">
-            <button class="upload-btn" onclick="document.getElementById('headerImage').click()">点击上传</button>
+            <button class="upload-btn" onclick="document.getElementById('headerImage').click()">
+              <div class="img-preview-inline">
+                <span class="upload-icon-inline">+</span>
+              </div>
+            </button>
           </div>
         </div>
-        
+    
         <!-- 标题 -->
         <div class="form-group row-layout">
           <label class="non-interactive-label">标题</label>
           <div class="file-upload-btn">
-            <input type="file" id="titleUpload" accept="image/*" style="display:none">
-            <button class="upload-btn" onclick="document.getElementById('titleUpload').click()">点击上传</button>
+            <input type="file" id="titleUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+            <button class="upload-btn" onclick="document.getElementById('titleUpload').click()">
+              <div class="img-preview-inline">
+                <span class="upload-icon-inline">+</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -1046,8 +1122,12 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="btnImageUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">点击上传</button>
+                <input type="file" id="btnImageUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -1176,7 +1256,11 @@
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
                 <input type="file" class="derived-item-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1185,7 +1269,11 @@
               <label class="non-interactive-label">九宫格背景</label>
               <div class="file-upload-btn">
                 <input type="file" class="nine-grid-bg" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -1194,7 +1282,11 @@
               <label class="non-interactive-label">抽奖按钮</label>
               <div class="file-upload-btn">
                 <input type="file" class="draw-btn" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -1203,7 +1295,11 @@
               <label class="non-interactive-label">奖品背景</label>
               <div class="file-upload-btn">
                 <input type="file" class="prize-bg" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1340,7 +1436,11 @@
               <label class="non-interactive-label">标题图片</label>
               <div class="file-upload-btn">
                 <input type="file" class="sign-in-title-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1349,7 +1449,11 @@
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
                 <input type="file" class="sign-in-bg-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1364,7 +1468,11 @@
               <label class="non-interactive-label">日期图标</label>
               <div class="file-upload-btn">
                 <input type="file" class="day-icon-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1373,7 +1481,11 @@
               <label class="non-interactive-label">签到按钮</label>
               <div class="file-upload-btn">
                 <input type="file" class="sign-in-btn-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -1413,7 +1525,11 @@
               <label class="non-interactive-label">集卡标题</label>
               <div class="file-upload-btn">
                 <input type="file" class="collect-title-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1422,7 +1538,11 @@
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
                 <input type="file" class="collect-bg-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1456,7 +1576,11 @@
               <label class="non-interactive-label">卡片背景</label>
               <div class="file-upload-btn">
                 <input type="file" class="card-bg-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1465,7 +1589,11 @@
               <label class="non-interactive-label">合成按钮</label>
               <div class="file-upload-btn">
                 <input type="file" class="combine-button-upload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -1549,7 +1677,11 @@
               <label class="non-interactive-label">图片</label>
               <div class="file-upload-btn">
                 <input type="file" class="activity-rule-text-upload" accept="image/*" style="display:none">
-                <button class="upload-btn text-upload-btn" onclick="this.previousElementSibling.click()">点击上传</button>
+                <button class="upload-btn text-upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
@@ -1586,7 +1718,11 @@
             <label class="non-interactive-label">标题背景</label>
             <div class="file-upload-btn">
               <input type="file" id="footerImageUpload" accept="image/*" style="display:none">
-              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">点击上传</button>
+              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">
+                <div class="img-preview-inline">
+                  <span class="upload-icon-inline">+</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -1633,7 +1769,11 @@
             <label class="non-interactive-label">尾版背景</label>
             <div class="file-upload-btn">
               <input type="file" id="footerBgUpload" accept="image/*" style="display:none">
-              <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">点击上传</button>
+              <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">
+                <div class="img-preview-inline">
+                  <span class="upload-icon-inline">+</span>
+                </div>
+              </button>
             </div>
           </div>
           
@@ -1644,6 +1784,7 @@
       <div class="create-btn-container">
         <div class="button-group">
           <button class="create-btn" id="create">创建原型</button>
+          <button class="reset-btn" id="reset">重置</button>
         </div>
       </div>
     </div>
@@ -1703,931 +1844,986 @@
 
   <!-- JavaScript 部分 -->
   <script>
-    /**
-     * 与Figma插件通信
-     */
-    // 全局变量存储图片数据
-    const imageData = {
-      pageBackground: null,
-      headerImage: null,
-      titleUpload: null,
-      gameIcon: null,
-      btnImage: null,
-      footerLogo: null,
-      footerBg: null,
-      rulesBg: null
-    };
+    // ==================== 核心数据管理 ====================
     
-    // 模块图片数据存储
-    const moduleImageData = {};
-    
-    // 发送消息到Figma插件
-    function postMessageToPlugin(type, data) {
-      parent.postMessage({ pluginMessage: { type, ...data } }, '*');
+    // 图片数据存储管理
+    class ImageDataManager {
+      constructor() {
+        this.data = {
+          pageBackground: null,
+          headerImage: null,
+          titleUpload: null,
+          gameIcon: null,
+          btnImage: null,
+          footerLogo: null,
+          footerBg: null,
+          rulesBg: null
+        };
+        this.moduleData = {};
+      }
+      
+      set(key, value) {
+        this.data[key] = value;
+      }
+      
+      get(key) {
+        return this.data[key];
+      }
+      
+      setModule(key, value) {
+        this.moduleData[key] = value;
+      }
+      
+      getModule(key) {
+        return this.moduleData[key];
+      }
+      
+      clear() {
+        this.data = {};
+        this.moduleData = {};
+      }
     }
     
-    // 初始化与插件通信
-    window.onload = function() {
-      // 监听来自插件的消息
-      window.onmessage = function(event) {
+    // 创建全局图片管理器实例
+    const imageManager = new ImageDataManager();
+    
+    // ==================== 插件通信管理 ====================
+    
+    class PluginCommunicator {
+      constructor() {
+        this.messageHandlers = new Map();
+        this.init();
+      }
+      
+      // 初始化通信
+      init() {
+        window.addEventListener('message', this.handleMessage.bind(this));
+        // 页面加载完成后通知插件
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            this.postMessage('ui-loaded', {});
+          });
+        } else {
+          this.postMessage('ui-loaded', {});
+        }
+      }
+      
+      // 发送消息到插件
+      postMessage(type, data = {}) {
+        parent.postMessage({ pluginMessage: { type, ...data } }, '*');
+      }
+      
+      // 处理插件消息
+      handleMessage(event) {
         const message = event.data.pluginMessage;
         if (!message) return;
         
-        console.log('收到插件消息:', message);
-        
-        switch (message.type) {
-          case 'init':
-            // 处理初始数据
-            handleInitData(message.data);
-            break;
-          case 'creation-success':
-            showNotification('原型创建成功！', 'success');
-            break;
-          case 'creation-error':
-            showNotification('创建失败: ' + message.message, 'error');
-            break;
-          case 'save-success':
-            showNotification('配置已保存', 'success');
-            break;
-          case 'save-error':
-            showNotification('保存失败: ' + message.message, 'error');
-            break;
-          case 'load-config-success':
-            if (message.config) {
-              loadSavedConfig(message.config);
-              showNotification('配置加载成功', 'success');
-            }
-            break;
-          case 'load-config-error':
-            showNotification('加载配置失败: ' + message.message, 'warning');
-            break;
+        const handler = this.messageHandlers.get(message.type);
+        if (handler) {
+          handler(message);
         }
-      };
+      }
       
-      // 告知插件UI已加载完成
-      postMessageToPlugin('ui-loaded', {});
-    };
-    
-    // 处理初始数据
-    function handleInitData(data) {
-      console.log('初始化数据:', data);
-      // 这里可以根据数据设置一些UI元素的初始状态
+      // 注册消息处理器
+      on(type, handler) {
+        this.messageHandlers.set(type, handler);
+      }
     }
     
-    // 显示通知
-    function showNotification(message, type = 'info') {
-      // 创建一个新的div元素作为通知
-      const notification = document.createElement('div');
-      // 设置通知元素的类名，包括通用的'notification'类和特定类型的类（如'success'、'error'等）
-      notification.className = `notification ${type}`;
-      // 设置通知元素的文本内容为传入的消息
-      notification.textContent = message;
+    // 创建通信器实例
+    const pluginComm = new PluginCommunicator();
+    
+    // ==================== UI 通知系统 ====================
+    
+    class NotificationSystem {
+      constructor() {
+        this.notifications = new Set();
+      }
       
-      // 添加到body
-      document.body.appendChild(notification);
+      show(message, type = 'info', duration = 5000) {
+        const notification = this.createElement(message, type);
+        this.notifications.add(notification);
+        
+        document.body.appendChild(notification);
+        
+        // 使用 requestAnimationFrame 确保平滑动画
+        requestAnimationFrame(() => {
+          notification.style.opacity = '1';
+          notification.style.transform = 'translateY(0)';
+        });
+        
+        // 自动移除
+        setTimeout(() => this.hide(notification), duration);
+        
+        return notification;
+      }
       
-      // 淡入效果
-      setTimeout(() => {
-        // 设置通知元素的不透明度为1，使其完全可见
-        notification.style.opacity = '1';
-        // 重置通知元素的垂直位置，使其回到原始位置（无位移）
-        notification.style.transform = 'translateY(0)';
-      }, 10); // 延迟10毫秒执行，以确保DOM更新并应用初始样式
-      
-      // 几秒后自动淡出
-      setTimeout(() => {
-        // 设置通知元素的透明度为0，开始淡出效果
+      createElement(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
         notification.style.opacity = '0';
-        // 向上移动通知元素，创造一个滑出效果
+        notification.style.transform = 'translateY(-20px)';
+        return notification;
+      }
+      
+      hide(notification) {
+        notification.style.opacity = '0';
         notification.style.transform = 'translateY(-20px)';
         
-        // 移除元素
         setTimeout(() => {
-          // 从DOM中完全移除通知元素
-          document.body.removeChild(notification);
-        }, 300); // 300毫秒后执行，与CSS过渡效果的持续时间匹配
-      }, 5000); // 5000毫秒（3秒）后开始淡出过程
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+          this.notifications.delete(notification);
+        }, 300);
+      }
+      
+      clear() {
+        this.notifications.forEach(notification => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        });
+        this.notifications.clear();
+      }
     }
     
-    // 收集表单数据
-    function collectFormData() {
-      const config = {
-        // 基础设置
-        pageTitle: document.title || "未命名H5活动页",
-        pageBgColor: document.querySelector('#pageColor').value || "#D9D9D9",
-        pageBgImage: imageData.pageBackground,
-        
-        // 头图设置
-        headerImage: imageData.headerImage,
-        
-        // 游戏设置
-        gameIcon: imageData.gameIcon,
-        gameName: document.querySelector('#gameNameInput')?.value || "",
-        gameDesc: document.querySelector('#gameCopyInput')?.value || "",
-        buttonVersion: document.querySelector('#buttonVersionSelect')?.value || "imageButton",
-        buttonText: document.querySelector('#buttonTextInput')?.value || "立即下载",
-        buttonBgColor: document.querySelector('#btnTextColor')?.value || "#FFFFFF",
-        buttonImage: imageData.btnImage,
-        
-        // 自定义模块
-        modules: collectModulesData(),
-        
-        // 活动规则
-        rulesTitle: document.querySelector('#titleText')?.value || "",
-        rulesBgImage: imageData.rulesBg,
-        rulesContent: document.querySelector('#activityRules')?.value || "",
-        
-        // 尾版
-        footerLogo: imageData.footerLogo,
-        footerBg: imageData.footerBg
-      };
-      
-      return config;
-    }
+    // 创建通知系统实例
+    const notificationSystem = new NotificationSystem();
     
-    // 收集模块数据
-    function collectModulesData() {
-      const modules = [];
-      const moduleElements = document.querySelectorAll('#modulesContainer .module');
+    // ==================== 数据收集器 ====================
+    
+    class DataCollector {
+      // 收集表单数据
+      collectFormData() {
+        return {
+          pageTitle: document.title || "未命名H5活动页",
+          pageBgColor: this.getElementValue('#pageColor', "#D9D9D9"),
+          pageBgImage: imageManager.get('pageBackground'),
+          headerImage: imageManager.get('headerImage'),
+          gameIcon: imageManager.get('gameIcon'),
+          gameName: this.getElementValue('#gameNameInput'),
+          gameDesc: this.getElementValue('#gameCopyInput'),
+          buttonVersion: this.getElementValue('#buttonVersionSelect', "imageButton"),
+          buttonText: this.getElementValue('#buttonTextInput', "立即下载"),
+          buttonBgColor: this.getElementValue('#btnTextColor', "#FFFFFF"),
+          buttonImage: imageManager.get('btnImage'),
+          modules: this.collectModulesData(),
+          rulesTitle: this.getElementValue('#titleText'),
+          rulesBgImage: imageManager.get('rulesBg'),
+          rulesContent: this.getElementValue('#activityRules'),
+          footerLogo: imageManager.get('footerLogo'),
+          footerBg: imageManager.get('footerBg')
+        };
+      }
       
-      moduleElements.forEach((moduleEl, index) => {
-        const moduleType = moduleEl.className.includes('lottery') ? 'nineGrid' :
-                          moduleEl.className.includes('signIn') ? 'signIn' :
-                          moduleEl.className.includes('collect') ? 'collectCards' :
-                          moduleEl.className.includes('activity') ? 'activityRules' : '';
+      // 获取元素值的通用方法
+      getElementValue(selector, defaultValue = "") {
+        const element = document.querySelector(selector);
+        return element?.value || defaultValue;
+      }
+      
+      // 收集模块数据
+      collectModulesData() {
+        const modules = [];
+        const moduleElements = document.querySelectorAll('#modulesContainer .module');
         
-        if (!moduleType) return;
+        moduleElements.forEach((moduleEl, index) => {
+          const moduleData = this.extractModuleData(moduleEl, index);
+          if (moduleData) {
+            modules.push(moduleData);
+          }
+        });
+        
+        return modules;
+      }
+      
+      // 提取单个模块数据
+      extractModuleData(moduleEl, index) {
+        const moduleType = this.getModuleType(moduleEl);
+        if (!moduleType) return null;
         
         const moduleId = moduleEl.id || `module-${index}`;
-        const moduleTitle = moduleEl.querySelector('.module-title')?.textContent || "模块" + (index + 1);
+        const moduleTitle = moduleEl.querySelector('.module-title')?.textContent || `模块${index + 1}`;
         
-        // 根据模块类型收集不同的内容
-        let moduleContent = {};
+        const collectors = {
+          nineGrid: () => this.collectNineGridData(moduleEl, moduleId),
+          signIn: () => this.collectSignInData(moduleEl, moduleId),
+          collectCards: () => this.collectCollectCardsData(moduleEl, moduleId),
+          activityRules: () => this.collectActivityRulesData(moduleEl, moduleId)
+        };
         
-        switch(moduleType) {
-          case 'nineGrid':
-            moduleContent = collectNineGridData(moduleEl, moduleId);
-            break;
-          case 'signIn':
-            moduleContent = collectSignInData(moduleEl, moduleId);
-            break;
-          case 'collectCards':
-            moduleContent = collectCollectCardsData(moduleEl, moduleId);
-            break;
-          case 'activityRules':
-            moduleContent = collectActivityRulesData(moduleEl, moduleId);
-            break;
-        }
+        const collector = collectors[moduleType];
+        const moduleContent = collector ? collector() : {};
         
-        modules.push({
+        return {
           id: moduleId,
           type: moduleType,
           title: moduleTitle,
           content: moduleContent
+        };
+      }
+      
+      // 获取模块类型
+      getModuleType(moduleEl) {
+        const typeMap = {
+          lottery: 'nineGrid',
+          signIn: 'signIn',
+          collect: 'collectCards',
+          activity: 'activityRules'
+        };
+        
+        for (const [className, type] of Object.entries(typeMap)) {
+          if (moduleEl.className.includes(className)) {
+            return type;
+          }
+        }
+        return '';
+      }
+      
+      // 收集九宫格模块数据
+      collectNineGridData(moduleEl, moduleId) {
+        return {
+          mainTitle: moduleEl.querySelector('.big-title-input')?.value || "抽奖活动",
+          titleBgImage: imageManager.getModule(`${moduleId}-titlebg`),
+          gridBgImage: imageManager.getModule(`${moduleId}-gridbg`),
+          drawButtonImage: imageManager.getModule(`${moduleId}-drawbtn`),
+          prizeBgImage: imageManager.getModule(`${moduleId}-prizebg`),
+          prizes: this.collectPrizes(moduleEl, moduleId)
+        };
+      }
+      
+      // 收集签到模块数据
+      collectSignInData(moduleEl, moduleId) {
+        return {
+          titleImage: imageManager.getModule(`${moduleId}-title`),
+          bgImage: imageManager.getModule(`${moduleId}-bg`),
+          daysCount: parseInt(moduleEl.querySelector('.days-count')?.value || "7"),
+          dayIcon: imageManager.getModule(`${moduleId}-dayicon`),
+          signButton: imageManager.getModule(`${moduleId}-signbtn`)
+        };
+      }
+      
+      // 收集集卡模块数据
+      collectCollectCardsData(moduleEl, moduleId) {
+        return {
+          titleImage: imageManager.getModule(`${moduleId}-title`),
+          bgImage: imageManager.getModule(`${moduleId}-bg`),
+          cardsCount: parseInt(moduleEl.querySelector('.cards-count')?.value || "5"),
+          cardStyle: moduleEl.querySelector('input[name="cardStyle"]:checked')?.value || "style1",
+          cardBg: imageManager.getModule(`${moduleId}-cardbg`),
+          combineButton: imageManager.getModule(`${moduleId}-combinebtn`)
+        };
+      }
+      
+      // 收集活动内容模块数据
+      collectActivityRulesData(moduleEl, moduleId) {
+        return {
+          mainTitle: moduleEl.querySelector('.activity-rule-title-input')?.value || "",
+          mainTitleBg: imageManager.getModule(`${moduleId}-titlebg`),
+          subTitle: moduleEl.querySelector('.small-title-input')?.value || "",
+          subTitleBg: imageManager.getModule(`${moduleId}-subtitlebg`),
+          text: moduleEl.querySelector('.activity-rule-text-input')?.value || "",
+          image: imageManager.getModule(`${moduleId}-image`)
+        };
+      }
+      
+      // 收集奖品数据
+      collectPrizes(moduleEl, moduleId) {
+        const prizes = [];
+        const prizeElements = moduleEl.querySelectorAll('.prize-grid .grid-item');
+        
+        prizeElements.forEach((prizeEl, index) => {
+          prizes.push({
+            image: imageManager.getModule(`${moduleId}-prize-${index}`),
+            name: prizeEl.querySelector('.prize-label')?.textContent || `奖品${index + 1}`
+          });
         });
-      });
-      
-      return modules;
+        
+        return prizes;
+      }
     }
     
-    // 收集九宫格模块数据
-    function collectNineGridData(moduleEl, moduleId) {
-      return {
-        mainTitle: moduleEl.querySelector('.big-title-input')?.value || "抽奖活动",
-        titleBgImage: moduleImageData[`${moduleId}-titlebg`] || null,
-        gridBgImage: moduleImageData[`${moduleId}-gridbg`] || null,
-        drawButtonImage: moduleImageData[`${moduleId}-drawbtn`] || null,
-        prizeBgImage: moduleImageData[`${moduleId}-prizebg`] || null,
-        prizes: collectPrizes(moduleEl, moduleId)
-      };
-    }
+    // 创建数据收集器实例
+    const dataCollector = new DataCollector();
     
-    // 收集签到模块数据
-    function collectSignInData(moduleEl, moduleId) {
-      return {
-        titleImage: moduleImageData[`${moduleId}-title`] || null,
-        bgImage: moduleImageData[`${moduleId}-bg`] || null,
-        daysCount: parseInt(moduleEl.querySelector('.days-count')?.value || "7"),
-        dayIcon: moduleImageData[`${moduleId}-dayicon`] || null,
-        signButton: moduleImageData[`${moduleId}-signbtn`] || null
-      };
-    }
+    // ==================== 文件处理器 ====================
     
-    // 收集集卡模块数据
-    function collectCollectCardsData(moduleEl, moduleId) {
-      return {
-        titleImage: moduleImageData[`${moduleId}-title`] || null,
-        bgImage: moduleImageData[`${moduleId}-bg`] || null,
-        cardsCount: parseInt(moduleEl.querySelector('.cards-count')?.value || "5"),
-        cardStyle: moduleEl.querySelector('input[name="cardStyle"]:checked')?.value || "style1",
-        cardBg: moduleImageData[`${moduleId}-cardbg`] || null,
-        combineButton: moduleImageData[`${moduleId}-combinebtn`] || null
-      };
-    }
-    
-    // 收集活动内容模块数据
-    function collectActivityRulesData(moduleEl, moduleId) {
-      return {
-        mainTitle: moduleEl.querySelector('.activity-rule-title-input')?.value || "",
-        mainTitleBg: moduleImageData[`${moduleId}-titlebg`] || null,
-        subTitle: moduleEl.querySelector('.small-title-input')?.value || "",
-        subTitleBg: moduleImageData[`${moduleId}-subtitlebg`] || null,
-        text: moduleEl.querySelector('.activity-rule-text-input')?.value || "",
-        image: moduleImageData[`${moduleId}-image`] || null
-      };
-    }
-    
-    // 收集奖品数据
-    function collectPrizes(moduleEl, moduleId) {
-      const prizes = [];
-      const prizeElements = moduleEl.querySelectorAll('.prize-grid .grid-item');
-      
-      prizeElements.forEach((prizeEl, index) => {
-        prizes.push({
-          image: moduleImageData[`${moduleId}-prize-${index}`] || null,
-          name: prizeEl.querySelector('.prize-label')?.textContent || `奖品${index + 1}`
-        });
-      });
-      
-      return prizes;
-    }
-    
-    // 处理图片文件上传
-    function handleImageUpload(file, storageKey) {
-      return new Promise((resolve, reject) => {
-        if (!file || !file.type.startsWith('image/')) {
-          return reject('请上传有效的图片文件');
+    class FileProcessor {
+      // 处理图片文件上传
+      async processImageFile(file, storageKey, isModule = false) {
+        if (!this.isValidImageFile(file)) {
+          throw new Error('请上传有效的图片文件');
         }
         
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const arrayBuffer = e.target.result;
-          const uint8Array = new Uint8Array(arrayBuffer);
+        try {
+          const uint8Array = await this.fileToUint8Array(file);
           
-          if (storageKey.startsWith('module-')) {
-            moduleImageData[storageKey] = uint8Array;
+          // 存储到相应的管理器
+          if (isModule) {
+            imageManager.setModule(storageKey, uint8Array);
           } else {
-            imageData[storageKey] = uint8Array;
+            imageManager.set(storageKey, uint8Array);
           }
           
-          resolve(uint8Array);
-        };
-        
-        reader.onerror = function() {
-          reject('读取图片文件失败');
-        };
-        
-        reader.readAsArrayBuffer(file);
-      });
-    }
-    
-    // 加载保存的配置
-    function loadSavedConfig(config) {
-      console.log('加载配置:', config);
-      // 这里可以根据配置设置UI元素的状态
-      // 实际实现需要根据完整的表单结构进行
-    }
-    
-    /**
-     * 工具函数
-     */
-
-    // 图片预览函数 - 接受输入元素和预览ID
-    function previewImage(input, previewElement) {
-      // 处理字符串类型的预览元素(ID)
-      if (typeof previewElement === 'string') {
-        const preview = document.getElementById(previewElement);
-        if (preview) {
-          handlePreview(input, preview);
+          return uint8Array;
+        } catch (error) {
+          throw new Error(`图片处理失败: ${error.message}`);
         }
-      } 
-      // 处理DOM元素类型的预览元素
-      else if (previewElement instanceof Element) {
-        handlePreview(input, previewElement);
       }
       
-      // 内部处理函数
-      function handlePreview(input, preview) {
-        // 重置预览区域
-        preview.innerHTML = '<span class="upload-icon-inline">+</span>';
-        
-        if (input.files && input.files[0]) {
+      // 验证是否为有效图片文件
+      isValidImageFile(file) {
+        return file && file.type.startsWith('image/');
+      }
+      
+      // 将文件转换为 Uint8Array
+      fileToUint8Array(file) {
+        return new Promise((resolve, reject) => {
           const reader = new FileReader();
-          
-          reader.onload = function(e) {
-            preview.innerHTML = '';
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = "Preview";
-            preview.appendChild(img);
+          reader.onload = (e) => {
+            const arrayBuffer = e.target.result;
+            const uint8Array = new Uint8Array(arrayBuffer);
+            resolve(uint8Array);
           };
-          
-          reader.readAsDataURL(input.files[0]);
+          reader.onerror = () => reject(new Error('文件读取失败'));
+          reader.readAsArrayBuffer(file);
+        });
+      }
+    }
+    
+    // 创建文件处理器实例
+    const fileProcessor = new FileProcessor();
+    
+    // ==================== UI 控制器 ====================
+    
+    class UIController {
+      constructor() {
+        this.initialized = false;
+        this.eventListeners = new Map();
+      }
+      
+      init() {
+        if (this.initialized) return;
+        
+        this.initializeComponents();
+        this.bindEvents();
+        this.initialized = true;
+      }
+      
+      // 初始化组件
+      initializeComponents() {
+        this.initializeTabs();
+        this.initializeModuleManagement();
+        this.initializeImageUploaders();
+        this.initializeThemeSystem();
+        this.initializeColorPickers();
+        this.initializeCollapsiblePanels();
+      }
+      
+      // 绑定事件
+      bindEvents() {
+        this.bindTabEvents();
+        this.bindButtonEvents();
+        this.bindVersionSelectorEvents();
+      }
+      
+      // 初始化标签页
+      initializeTabs() {
+        const activeTab = document.querySelector('.tab.active');
+        if (!activeTab) {
+          const firstTab = document.querySelector('.tab');
+          if (firstTab) {
+            firstTab.classList.add('active');
+            this.showTabContent(firstTab.dataset.tab);
+          }
+        } else {
+          this.showTabContent(activeTab.dataset.tab);
         }
       }
-    }
-
-    // 删除模块
-    function removeModule(moduleId) {
-      const module = document.getElementById(moduleId);
-      if (module) {
-        // 添加删除动画
-        module.style.opacity = '0';
-        module.style.transform = 'translateY(-10px)';
-        module.style.transition = 'all 0.2s ease';
-        
-        // 动画完成后移除元素
-        setTimeout(() => module.remove(), 200);
-      }
-    }
-
-    /**
-     * 模块管理
-     */
-    
-    // 模块计数器
-    let moduleCounter = 0;
-    let fixedModuleCounter = 0;
-    
-    // 模块管理初始化
-    function initModuleManagement() {
-      const addModuleBtn = document.getElementById('addModuleBtn');
-      const moduleTypeSelect = document.getElementById('moduleTypeSelect');
-      const modulesContainer = document.getElementById('modulesContainer');
-      const emptyMessage = document.getElementById('emptyModulesMessage');
       
-      // 监听添加模块按钮点击
-      if (addModuleBtn) {
-        addModuleBtn.addEventListener('click', function() {
-          const selectedModuleType = moduleTypeSelect.value;
-          addModule(selectedModuleType);
+      // 显示标签页内容
+      showTabContent(tabId) {
+        // 隐藏所有内容
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        
+        // 显示目标内容
+        const targetContent = document.getElementById(`${tabId}-content`);
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+      }
+      
+      // 绑定标签页事件
+      bindTabEvents() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            this.showTabContent(tab.dataset.tab);
+          });
         });
       }
       
-      // 检查是否存在已添加的模块
-      checkEmptyModules();
+      // 初始化模块管理
+      initializeModuleManagement() {
+        const moduleManager = new ModuleManager();
+        moduleManager.init();
+      }
       
-      // 添加模块的方法
-      function addModule(moduleType) {
-        // 获取对应模板
-        const templateId = moduleType + 'Template';
-        const template = document.getElementById(templateId);
+      // 初始化图片上传
+      initializeImageUploaders() {
+        const imageUploader = new ImageUploader();
+        imageUploader.init();
+      }
+      
+      // 初始化主题系统
+      initializeThemeSystem() {
+        const themeManager = new ThemeManager();
+        themeManager.init();
+      }
+      
+      // 初始化颜色选择器
+      initializeColorPickers() {
+        const colorInputs = document.querySelectorAll('input[type="color"]');
+        colorInputs.forEach(colorInput => {
+          const textInput = colorInput.nextElementSibling;
+          if (textInput && textInput.classList.contains('color-value')) {
+            this.syncColorInputs(colorInput, textInput);
+          }
+        });
+      }
+      
+      // 同步颜色输入
+      syncColorInputs(colorInput, textInput) {
+        colorInput.addEventListener('input', () => {
+          textInput.value = colorInput.value.toUpperCase();
+        });
         
-        if (!template) {
-          console.error('找不到模板:', templateId);
+        textInput.addEventListener('input', () => {
+          if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+            colorInput.value = textInput.value;
+          }
+        });
+      }
+      
+      // 初始化折叠面板
+      initializeCollapsiblePanels() {
+        const collapseButtons = document.querySelectorAll('.collapse-btn');
+        collapseButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target');
+            const contentElement = document.getElementById(targetId);
+            
+            if (contentElement) {
+              button.classList.toggle('collapsed');
+              contentElement.classList.toggle('collapsed');
+            }
+          });
+        });
+      }
+      
+      // 绑定按钮事件
+      bindButtonEvents() {
+        const createBtn = document.getElementById('create');
+        const resetBtn = document.getElementById('reset');
+        
+        if (createBtn) {
+          createBtn.addEventListener('click', () => this.handleCreatePrototype());
+        }
+        
+        if (resetBtn) {
+          resetBtn.addEventListener('click', () => this.handleReset());
+        }
+      }
+      
+      // 绑定版本选择器事件
+      bindVersionSelectorEvents() {
+        const selector = document.getElementById('buttonVersionSelect');
+        if (selector) {
+          selector.addEventListener('change', (e) => {
+            const contents = document.querySelectorAll('#buttonVersionContent .version-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            const targetContent = document.getElementById(`${e.target.value}Content`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          });
+        }
+      }
+      
+      // 处理创建原型
+      handleCreatePrototype() {
+        const createBtn = document.getElementById('create');
+        if (!createBtn) return;
+        
+        createBtn.disabled = true;
+        createBtn.textContent = '处理中...';
+        
+        try {
+          const config = dataCollector.collectFormData();
+          pluginComm.postMessage('create-prototype', { config });
+        } catch (error) {
+          notificationSystem.show(`创建失败: ${error.message}`, 'error');
+          this.resetCreateButton();
+        }
+      }
+      
+      // 处理重置
+      handleReset() {
+        if (!confirm('确定要重置所有设置吗？此操作无法撤销。')) {
           return;
         }
         
-        // 创建新模块
-        const newModule = template.cloneNode(true);
-        newModule.id = `module-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        newModule.classList.remove('module-template');
-        newModule.classList.add('module');
+        const formResetter = new FormResetter();
+        formResetter.resetAll();
         
-        // 绑定控制按钮事件
-        bindModuleControls(newModule);
-        
-        // 添加到容器
-        modulesContainer.appendChild(newModule);
-    
-        // 隐藏空模块提示
-        checkEmptyModules();
-    
-        // 滚动到新添加的模块
-        setTimeout(() => {
-          newModule.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-    
-        // 触发模块添加事件，用于初始化上传事件监听
-        dispatchModuleAddedEvent(newModule.id);
+        notificationSystem.show('所有设置已重置', 'success');
       }
       
-      // 绑定模块控制按钮事件
-      function bindModuleControls(module) {
-        // 删除按钮
-        const deleteBtn = module.querySelector('.delete-btn');
-        if (deleteBtn) {
-          deleteBtn.addEventListener('click', function() {
-            // 添加删除动画
-            module.style.opacity = '0';
-            module.style.transform = 'translateY(-10px)';
-            module.style.transition = 'all 0.3s ease';
-            
-            // 删除后检查是否需要显示空模块提示
-            setTimeout(() => {
-              module.remove();
-              checkEmptyModules();
-            }, 300);
-          });
+      // 重置创建按钮
+      resetCreateButton() {
+        const createBtn = document.getElementById('create');
+        if (createBtn) {
+          createBtn.textContent = '创建原型';
+          createBtn.disabled = false;
         }
-        
-        // 折叠按钮
-        const collapseBtn = module.querySelector('.collapse-btn');
-        if (collapseBtn) {
-          collapseBtn.addEventListener('click', function() {
-            module.classList.toggle('module-collapsed');
-          });
-        }
-        
-        // 上移按钮
-        const moveUpBtn = module.querySelector('.move-up-btn');
-        if (moveUpBtn) {
-          moveUpBtn.addEventListener('click', function() {
-            const prevModule = module.previousElementSibling;
-            if (prevModule && !prevModule.classList.contains('empty-modules-message')) {
-              modulesContainer.insertBefore(module, prevModule);
-            }
-          });
-        }
-        
-        // 下移按钮
-        const moveDownBtn = module.querySelector('.move-down-btn');
-        if (moveDownBtn) {
-          moveDownBtn.addEventListener('click', function() {
-            const nextModule = module.nextElementSibling;
-            if (nextModule) {
-              modulesContainer.insertBefore(nextModule, module);
-            }
-          });
-        }
-        
-        // 文件上传预览
-        const fileInputs = module.querySelectorAll('input[type="file"]');
-        fileInputs.forEach(input => {
-          input.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-              const reader = new FileReader();
-              let previewContainer;
-              
-              // 查找预览容器
-              if (this.classList.contains('prize-upload')) {
-                // 奖品图特殊处理
-                const gridBtn = this.nextElementSibling;
-                previewContainer = gridBtn.querySelector('.preview-container');
-                const uploadIcon = gridBtn.querySelector('.upload-icon');
-                
-                reader.onload = function(e) {
-                  // 清除旧预览
-                  while (previewContainer.firstChild) {
-                    previewContainer.removeChild(previewContainer.firstChild);
-                  }
-                  
-                  // 创建新图片预览
-                  const img = document.createElement('img');
-                  img.src = e.target.result;
-                  img.alt = "Preview";
-                  previewContainer.appendChild(img);
-                  
-                  // 隐藏上传图标
-                  if (uploadIcon) {
-                    uploadIcon.style.display = 'none';
-                  }
-                };
-              } else {
-                // 常规上传按钮
-                const uploadBtn = this.nextElementSibling;
-                
-                // 检查是否有内联预览容器
-                previewContainer = uploadBtn.querySelector('.img-preview-inline');
-                
-                if (previewContainer) {
-                  reader.onload = function(e) {
-                    // 清除旧预览内容
-                    previewContainer.innerHTML = '';
-                    
-                    // 创建新图片预览
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.alt = "Preview";
-                    previewContainer.appendChild(img);
-                  };
-                }
-              }
-              
-              if (previewContainer) {
-                reader.readAsDataURL(this.files[0]);
-              }
-            }
-          });
-        });
       }
     }
     
-    // 检查是否有模块，显示或隐藏空模块提示，更新计数器
-    function checkEmptyModules() {
-      const modulesContainer = document.getElementById('modulesContainer');
-      const emptyMessage = document.getElementById('emptyModulesMessage');
+    // ==================== 模块管理器 ====================
+    
+    class ModuleManager {
+      constructor() {
+        this.moduleCounter = 0;
+      }
       
-      if (modulesContainer && emptyMessage) {
-        const modules = modulesContainer.querySelectorAll('.module');
-        const moduleCount = modules.length;
-        const hasModules = moduleCount > 0;
+      init() {
+        this.bindAddModuleEvent();
+        this.updateModuleCount();
+      }
+      
+      bindAddModuleEvent() {
+        const addBtn = document.getElementById('addModuleBtn');
+        const typeSelect = document.getElementById('moduleTypeSelect');
         
-        // 显示或隐藏空模块提示
-        emptyMessage.style.display = hasModules ? 'none' : 'flex';
+        if (addBtn) {
+          addBtn.addEventListener('click', () => {
+            const moduleType = typeSelect?.value;
+            if (moduleType) {
+              this.addModule(moduleType);
+            }
+          });
+        }
+      }
+      
+      addModule(moduleType) {
+        const template = document.getElementById(`${moduleType}Template`);
+        if (!template) return;
         
-        // 更新模块计数
+        const moduleEl = template.cloneNode(true);
+        const moduleId = `module-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        moduleEl.id = moduleId;
+        moduleEl.classList.remove('module-template');
+        moduleEl.classList.add('module');
+        
+        this.bindModuleEvents(moduleEl);
+        
+        const container = document.getElementById('modulesContainer');
+        container.appendChild(moduleEl);
+        
+        this.updateModuleCount();
+        
+        // 滚动到新模块
+        requestAnimationFrame(() => {
+          moduleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        
+        // 触发模块添加事件
+        document.dispatchEvent(new CustomEvent('moduleAdded', { 
+          detail: { moduleId } 
+        }));
+      }
+      
+      bindModuleEvents(moduleEl) {
+        const deleteBtn = moduleEl.querySelector('.delete-btn');
+        const collapseBtn = moduleEl.querySelector('.collapse-btn');
+        const moveUpBtn = moduleEl.querySelector('.move-up-btn');
+        const moveDownBtn = moduleEl.querySelector('.move-down-btn');
+        
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', () => this.deleteModule(moduleEl));
+        }
+        
+        if (collapseBtn) {
+          collapseBtn.addEventListener('click', () => {
+            moduleEl.classList.toggle('module-collapsed');
+          });
+        }
+        
+        if (moveUpBtn) {
+          moveUpBtn.addEventListener('click', () => this.moveModuleUp(moduleEl));
+        }
+        
+        if (moveDownBtn) {
+          moveDownBtn.addEventListener('click', () => this.moveModuleDown(moduleEl));
+        }
+      }
+      
+      deleteModule(moduleEl) {
+        moduleEl.style.opacity = '0';
+        moduleEl.style.transform = 'translateY(-10px)';
+        moduleEl.style.transition = 'all 0.3s ease';
+        
+        setTimeout(() => {
+          moduleEl.remove();
+          this.updateModuleCount();
+        }, 300);
+      }
+      
+      moveModuleUp(moduleEl) {
+        const prevModule = moduleEl.previousElementSibling;
+        if (prevModule && !prevModule.classList.contains('empty-modules-message')) {
+          moduleEl.parentNode.insertBefore(moduleEl, prevModule);
+        }
+      }
+      
+      moveModuleDown(moduleEl) {
+        const nextModule = moduleEl.nextElementSibling;
+        if (nextModule) {
+          moduleEl.parentNode.insertBefore(nextModule, moduleEl);
+        }
+      }
+      
+      updateModuleCount() {
+        const container = document.getElementById('modulesContainer');
+        const emptyMessage = document.getElementById('emptyModulesMessage');
         const counter = document.getElementById('moduleCounter');
+        
+        if (!container) return;
+        
+        const moduleCount = container.querySelectorAll('.module').length;
+        
+        if (emptyMessage) {
+          emptyMessage.style.display = moduleCount > 0 ? 'none' : 'flex';
+        }
+        
         if (counter) {
           counter.textContent = moduleCount;
         }
       }
     }
     
-    /**
-     * 主题控制函数
-     */
+    // ==================== 图片上传管理器 ====================
     
-    // 应用浅色主题
-    function applyLightTheme() {
-      document.body.classList.remove('dark-theme');
-      document.body.classList.add('light-theme');
-    }
-    
-    // 应用深色主题
-    function applyDarkTheme() {
-      document.body.classList.remove('light-theme');
-      document.body.classList.add('dark-theme');
-    }
-    
-    // 检查系统主题
-    function checkSystemTheme() {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        applyDarkTheme();
-        document.getElementById('darkTheme').classList.add('active');
-        document.getElementById('lightTheme').classList.remove('active');
-      } else {
-        applyLightTheme();
-        document.getElementById('lightTheme').classList.add('active');
-        document.getElementById('darkTheme').classList.remove('active');
-      }
-    }
-    
-    /**
-     * 页面初始化和事件绑定
-     */
-    document.addEventListener('DOMContentLoaded', function() {
-      // 初始化模块管理
-      initModuleManagement();
-      
-      // 初始化模块计数
-      checkEmptyModules();
-      
-      // 初始化图片上传事件处理
-      initImageUploaders();
-      
-      // 初始化创建按钮事件
-      initCreateButtonHandler();
-      
-      // Tab切换功能
-      const tabs = document.querySelectorAll('.tab');
-      const tabContents = document.querySelectorAll('.tab-content');
-
-      // 初始化标签状态 - 确保只有一个标签是活动的
-      function initializeTabs() {
-        // 获取当前活动标签
-        const activeTab = document.querySelector('.tab.active');
-        if (activeTab) {
-          const activeTabId = activeTab.getAttribute('data-tab');
-          
-          // 隐藏所有内容区域
-          tabContents.forEach(content => {
-            content.classList.remove('active');
-          });
-          
-          // 只显示当前活动标签对应的内容
-          const activeContent = document.getElementById(`${activeTabId}-content`);
-          if (activeContent) {
-            activeContent.classList.add('active');
-          } else {
-            console.warn('未找到对应的内容区域:', activeTabId);
-            tabs[0]?.classList.add('active');
-            document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
-          }
-        }
+    class ImageUploader {
+      init() {
+        this.bindStaticUploaders();
+        this.bindDynamicUploaders();
       }
       
-      // 页面加载时初始化标签状态
-      initializeTabs();
-      
-      // 默认激活第一个标签（如果当前没有激活项）
-      if (!document.querySelector('.tab.active')) {
-        tabs[0]?.classList.add('active');
-        const firstContent = document.getElementById(`${tabs[0]?.dataset.tab}-content`);
-        firstContent?.classList.add('active');
-      }
-      
-      // 为所有标签添加点击事件
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          // 移除所有选项卡的活动状态
-          tabs.forEach(t => t.classList.remove('active'));
-          
-          // 添加当前选项卡的活动状态
-          this.classList.add('active');
-          
-          // 隐藏所有内容区域
-          document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-          });
-          
-          // 显示当前选项卡对应的内容区域
-          const tabId = this.getAttribute('data-tab');
-          if (!tabId) {
-            console.error('无效的标签ID');
-            return;
-          }
-          const targetContent = document.getElementById(`${tabId}-content`);
-          if (!targetContent) {
-            console.error('找不到内容区域:', tabId);
-            this.classList.remove('active');
-            tabs[0]?.classList.add('active');
-            document.getElementById(`${tabs[0]?.dataset.tab}-content`)?.classList.add('active');
-            return;
-          }
-          targetContent.classList.add('active');
-        });
-      });
-      
-      // 按钮版本选择功能
-      const buttonVersionSelect = document.getElementById('buttonVersionSelect');
-      const buttonVersionContents = document.querySelectorAll('#buttonVersionContent .version-content');
-      
-      if (buttonVersionSelect) {
-        buttonVersionSelect.addEventListener('change', function() {
-          // 隐藏所有按钮版本内容
-          buttonVersionContents.forEach(content => content.classList.remove('active'));
-          
-          // 显示选中的按钮版本内容
-          document.getElementById(`${this.value}Content`).classList.add('active');
-        });
-      }
-      
-      // 折叠面板功能
-      const collapseButtons = document.querySelectorAll('.collapse-btn');
-      
-      collapseButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const targetId = this.getAttribute('data-target');
-          const contentElement = document.getElementById(targetId);
-          
-          if (contentElement) {
-            // 切换按钮样式
-            this.classList.toggle('collapsed');
-            
-            // 切换内容区域的折叠状态
-            contentElement.classList.toggle('collapsed');
-          }
-        });
-      });
-      
-      // 颜色选择器同步功能
-      const colorInputs = document.querySelectorAll('input[type="color"]');
-      
-      colorInputs.forEach(colorInput => {
-        const colorValueInput = colorInput.nextElementSibling;
+      bindStaticUploaders() {
+        const uploaders = [
+          { id: 'pageBackground', key: 'pageBackground' },
+          { id: 'headerImage', key: 'headerImage' },
+          { id: 'titleUpload', key: 'titleUpload' },
+          { id: 'gameIconUpload', key: 'gameIcon' },
+          { id: 'btnImageUpload', key: 'btnImage' },
+          { id: 'footerImageUpload', key: 'rulesBg' },
+          { id: 'footerLogoUpload', key: 'footerLogo' },
+          { id: 'footerBgUpload', key: 'footerBg' }
+        ];
         
-        if (colorValueInput) {
-          colorInput.addEventListener('input', function() {
-            colorValueInput.value = this.value.toUpperCase();
-          });
-          
-          colorValueInput.addEventListener('input', function() {
-            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
-              colorInput.value = this.value;
-            }
-          });
-        }
-      });
-
-      // 主题切换功能
-      const lightThemeBtn = document.getElementById('lightTheme');
-      const darkThemeBtn = document.getElementById('darkTheme');
-      
-      // 初始检查系统主题
-      checkSystemTheme();
-      
-      // 监听系统主题变化
-      if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', checkSystemTheme);
-      }
-      
-      // 点击浅色主题按钮
-      if (lightThemeBtn) {
-        lightThemeBtn.addEventListener('click', function() {
-          applyLightTheme();
-          lightThemeBtn.classList.add('active');
-          darkThemeBtn.classList.remove('active');
-        });
-      }
-      
-      // 点击深色主题按钮
-      if (darkThemeBtn) {
-        darkThemeBtn.addEventListener('click', function() {
-          applyDarkTheme();
-          darkThemeBtn.classList.add('active');
-          lightThemeBtn.classList.remove('active');
-        });
-      }
-
-      // 奖品图片上传和预览功能
-      const prizeUploads = document.querySelectorAll('.prize-upload');
-      
-      prizeUploads.forEach(upload => {
-        upload.addEventListener('change', function(event) {
-          if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            const btn = document.querySelector(`button[onclick="document.getElementById('${this.id}').click()"]`);
-            
-            if (btn) {
-              const previewContainer = btn.querySelector('.preview-container');
-              const uploadIcon = btn.querySelector('.upload-icon');
-              
-              reader.onload = function(e) {
-                // 清除旧预览
-                if (previewContainer) {
-                  while (previewContainer.firstChild) {
-                    previewContainer.removeChild(previewContainer.firstChild);
-                  }
-                  
-                  // 创建新图片预览
-                  const img = document.createElement('img');
-                  img.src = e.target.result;
-                  img.alt = "Prize preview";
-                  previewContainer.appendChild(img);
-                }
-                
-                // 隐藏上传图标
-                if (uploadIcon) {
-                  uploadIcon.style.display = 'none';
-                }
-                
-                // 更改按钮样式
-                btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
-              };
-              
-              reader.readAsDataURL(this.files[0]);
-            }
-          }
-        });
-      });
-
-      // 游戏图标上传和预览功能
-      const gameIconUpload = document.getElementById('gameIconUpload');
-      if (gameIconUpload) {
-        gameIconUpload.addEventListener('change', function(event) {
-          if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            const previewContainer = document.getElementById('gameIconPreview');
-            
-            reader.onload = function(e) {
-              if (previewContainer) {
-                // 清除旧预览内容
-                previewContainer.innerHTML = '';
-                
-                // 创建新图片预览
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = "Game Icon Preview";
-                previewContainer.appendChild(img);
-                
-                // 更改容器样式
-                previewContainer.style.border = '1px solid rgba(0, 113, 227, 0.5)';
-              }
-            };
-            
-            reader.readAsDataURL(this.files[0]);
-          }
-        });
-      }
-    });
-    
-    /**
-     * 初始化图片上传处理
-     */
-    function initImageUploaders() {
-      // 通用上传事件监听处理
-      function addUploadListener(inputId, storageKey) {
-        const input = document.getElementById(inputId);
-        if (input) {
-          input.addEventListener('change', async function() {
-            if (this.files && this.files[0]) {
-              try {
-                await handleImageUpload(this.files[0], storageKey);
-                showNotification(`${inputId}上传成功`, 'success');
-              } catch (error) {
-                showNotification(`上传失败: ${error}`, 'error');
-              }
-            }
-          });
-        }
-      }
-      
-      // 添加主要图片上传监听
-      addUploadListener('pageBackground', 'pageBackground');
-      addUploadListener('headerImage', 'headerImage');
-      addUploadListener('titleUpload', 'titleUpload');
-      addUploadListener('gameIconUpload', 'gameIcon');
-      addUploadListener('btnImageUpload', 'btnImage');
-      addUploadListener('footerImageUpload', 'footerLogo');
-      addUploadListener('footerBgUpload', 'footerBg');
-      
-      // 监听动态添加的模块图片上传
-      document.addEventListener('moduleAdded', function(e) {
-        const moduleId = e.detail.moduleId;
-        const moduleEl = document.getElementById(moduleId);
-        
-        if (!moduleEl) return;
-        
-        // 为模块内的所有图片上传添加事件监听
-        moduleEl.querySelectorAll('input[type="file"]').forEach((input, index) => {
-          const inputType = input.className;
-          let storageKey = '';
-          
-          if (inputType.includes('prize-upload')) {
-            storageKey = `${moduleId}-prize-${index}`;
-          } else if (inputType.includes('derived-item-upload') || inputType.includes('nine-grid-bg')) {
-            storageKey = `${moduleId}-titlebg`;
-          } else if (inputType.includes('draw-btn')) {
-            storageKey = `${moduleId}-drawbtn`;
-          } else if (inputType.includes('prize-bg')) {
-            storageKey = `${moduleId}-prizebg`;
-          } else if (inputType.includes('sign-in-title-upload')) {
-            storageKey = `${moduleId}-title`;
-          } else if (inputType.includes('sign-in-bg-upload')) {
-            storageKey = `${moduleId}-bg`;
-          } else if (inputType.includes('day-icon-upload')) {
-            storageKey = `${moduleId}-dayicon`;
-          } else if (inputType.includes('sign-in-btn-upload')) {
-            storageKey = `${moduleId}-signbtn`;
-          } else if (inputType.includes('collect-title-upload')) {
-            storageKey = `${moduleId}-title`;
-          } else if (inputType.includes('collect-bg-upload')) {
-            storageKey = `${moduleId}-bg`;
-          } else if (inputType.includes('card-bg-upload')) {
-            storageKey = `${moduleId}-cardbg`;
-          } else if (inputType.includes('combine-button-upload')) {
-            storageKey = `${moduleId}-combinebtn`;
-          } else if (inputType.includes('activity-rule-item-upload')) {
-            storageKey = `${moduleId}-titlebg`;
-          } else if (inputType.includes('small-title-upload')) {
-            storageKey = `${moduleId}-subtitlebg`;
-          } else if (inputType.includes('activity-rule-text-upload')) {
-            storageKey = `${moduleId}-image`;
-          }
-          
-          if (storageKey) {
-            input.addEventListener('change', async function() {
-              if (this.files && this.files[0]) {
-                try {
-                  await handleImageUpload(this.files[0], storageKey);
-                  showNotification('图片上传成功', 'success');
-                } catch (error) {
-                  showNotification(`上传失败: ${error}`, 'error');
-                }
-              }
+        uploaders.forEach(({ id, key }) => {
+          const input = document.getElementById(id);
+          if (input) {
+            input.addEventListener('change', async (e) => {
+              await this.handleUpload(e.target, key);
             });
           }
         });
-      });
-    }
-    
-    /**
-     * 初始化创建按钮事件处理
-     */
-    function initCreateButtonHandler() {
-      const createButton = document.getElementById('create');
-      if (createButton) {
-        createButton.addEventListener('click', function() {
-          // 显示加载状态
-          this.disabled = true;
-          this.textContent = '处理中...';
+      }
+      
+      bindDynamicUploaders() {
+        document.addEventListener('moduleAdded', (e) => {
+          const moduleId = e.detail.moduleId;
+          const moduleEl = document.getElementById(moduleId);
           
-          try {
-            // 收集表单数据
-            const config = collectFormData();
-            console.log('收集的表单数据:', config);
-            
-            // 发送数据到插件
-            postMessageToPlugin('create-prototype', { config });
-            
-            // 创建过程可能需要一点时间，显示提示
-            showNotification('正在创建H5原型...', 'info');
-          } catch (error) {
-            console.error('创建失败:', error);
-            showNotification(`创建失败: ${error.message || '未知错误'}`, 'error');
-            this.disabled = false;
-            this.textContent = '创建原型';
+          if (moduleEl) {
+            this.bindModuleUploaders(moduleEl, moduleId);
           }
         });
       }
+      
+      bindModuleUploaders(moduleEl, moduleId) {
+        const inputs = moduleEl.querySelectorAll('input[type="file"]');
+        inputs.forEach((input, index) => {
+          const storageKey = this.getModuleStorageKey(input, moduleId, index);
+          if (storageKey) {
+            input.addEventListener('change', async (e) => {
+              await this.handleUpload(e.target, storageKey, true);
+            });
+          }
+        });
+      }
+      
+      getModuleStorageKey(input, moduleId, index) {
+        const classMap = {
+          'prize-upload': `${moduleId}-prize-${index}`,
+          'derived-item-upload': `${moduleId}-titlebg`,
+          'nine-grid-bg': `${moduleId}-gridbg`,
+          'draw-btn': `${moduleId}-drawbtn`,
+          'prize-bg': `${moduleId}-prizebg`,
+          'sign-in-title-upload': `${moduleId}-title`,
+          'sign-in-bg-upload': `${moduleId}-bg`,
+          'day-icon-upload': `${moduleId}-dayicon`,
+          'sign-in-btn-upload': `${moduleId}-signbtn`,
+          'collect-title-upload': `${moduleId}-title`,
+          'collect-bg-upload': `${moduleId}-bg`,
+          'card-bg-upload': `${moduleId}-cardbg`,
+          'combine-button-upload': `${moduleId}-combinebtn`,
+          'activity-rule-item-upload': `${moduleId}-titlebg`,
+          'small-title-upload': `${moduleId}-subtitlebg`,
+          'activity-rule-text-upload': `${moduleId}-image`
+        };
+        
+        for (const [className, key] of Object.entries(classMap)) {
+          if (input.classList.contains(className)) {
+            return key;
+          }
+        }
+        return null;
+      }
+      
+      async handleUpload(input, storageKey, isModule = false) {
+        if (!input.files?.[0]) return;
+        
+        try {
+          await fileProcessor.processImageFile(input.files[0], storageKey, isModule);
+          this.updatePreview(input);
+          notificationSystem.show('图片上传成功', 'success');
+        } catch (error) {
+          notificationSystem.show(`上传失败: ${error.message}`, 'error');
+        }
+      }
+      
+      updatePreview(input) {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const previewContainer = this.findPreviewContainer(input);
+          if (previewContainer) {
+            this.renderPreview(previewContainer, e.target.result);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      findPreviewContainer(input) {
+        const uploadBtn = input.nextElementSibling;
+        if (!uploadBtn) return null;
+        
+        if (input.classList.contains('prize-upload')) {
+          return uploadBtn.querySelector('.preview-container');
+        }
+        
+        return uploadBtn.querySelector('.img-preview-inline');
+      }
+      
+      renderPreview(container, src) {
+        container.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = "Preview";
+        img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
+        container.appendChild(img);
+        
+        // 更新按钮样式
+        const btn = container.closest('.upload-btn, .grid-btn');
+        if (btn) {
+          btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+        }
+      }
     }
     
-    // 添加模块事件分发
-    function dispatchModuleAddedEvent(moduleId) {
-      document.dispatchEvent(new CustomEvent('moduleAdded', { 
-        detail: { moduleId } 
-      }));
+    // ==================== 主题管理器 ====================
+    
+    class ThemeManager {
+      init() {
+        this.checkSystemTheme();
+        this.bindThemeButtons();
+        this.watchSystemTheme();
+      }
+      
+      checkSystemTheme() {
+        const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+        this.applyTheme(prefersDark ? 'dark' : 'light');
+      }
+      
+      applyTheme(theme) {
+        document.body.className = document.body.className.replace(/\b(light|dark)-theme\b/g, '');
+        document.body.classList.add(`${theme}-theme`);
+        
+        this.updateThemeButtons(theme);
+      }
+      
+      updateThemeButtons(theme) {
+        const lightBtn = document.getElementById('lightTheme');
+        const darkBtn = document.getElementById('darkTheme');
+        
+        if (lightBtn && darkBtn) {
+          lightBtn.classList.toggle('active', theme === 'light');
+          darkBtn.classList.toggle('active', theme === 'dark');
+        }
+      }
+      
+      bindThemeButtons() {
+        const lightBtn = document.getElementById('lightTheme');
+        const darkBtn = document.getElementById('darkTheme');
+        
+        if (lightBtn) {
+          lightBtn.addEventListener('click', () => this.applyTheme('light'));
+        }
+        
+        if (darkBtn) {
+          darkBtn.addEventListener('click', () => this.applyTheme('dark'));
+        }
+      }
+      
+      watchSystemTheme() {
+        if (window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: dark)')
+            .addEventListener('change', () => this.checkSystemTheme());
+        }
+      }
+    }
+    
+    // ==================== 表单重置器 ====================
+    
+    class FormResetter {
+      resetAll() {
+        imageManager.clear();
+        this.resetInputs();
+        this.resetModules();
+        this.resetPreviews();
+      }
+      
+      resetInputs() {
+        // 重置文本输入
+        const textInputs = document.querySelectorAll('input[type="text"], textarea');
+        textInputs.forEach(input => input.value = '');
+        
+        // 重置颜色输入
+        this.resetColorInput('#pageColor', '#FFFFFF');
+        this.resetColorInput('#btnTextColor', '#FFFFFF');
+        
+        // 重置文件输入
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => input.value = '');
+        
+        // 重置选择器
+        const selectors = document.querySelectorAll('select');
+        selectors.forEach(select => select.selectedIndex = 0);
+      }
+      
+      resetColorInput(selector, defaultValue) {
+        const colorInput = document.querySelector(selector);
+        if (colorInput) {
+          colorInput.value = defaultValue;
+          const textInput = colorInput.nextElementSibling;
+          if (textInput) textInput.value = defaultValue;
+        }
+      }
+      
+      resetModules() {
+        const container = document.getElementById('modulesContainer');
+        if (container) {
+          const modules = container.querySelectorAll('.module');
+          modules.forEach(module => {
+            module.style.opacity = '0';
+            module.style.transform = 'translateY(-10px)';
+            module.style.transition = 'all 0.3s ease';
+            setTimeout(() => module.remove(), 300);
+          });
+          
+          setTimeout(() => {
+            const moduleManager = new ModuleManager();
+            moduleManager.updateModuleCount();
+          }, 350);
+        }
+      }
+      
+      resetPreviews() {
+        const previews = document.querySelectorAll('.img-preview-inline, .preview-container');
+        previews.forEach(preview => {
+          preview.innerHTML = '<span class="upload-icon-inline">+</span>';
+        });
+        
+        const uploadBtns = document.querySelectorAll('.upload-btn, .grid-btn');
+        uploadBtns.forEach(btn => btn.style.border = '');
+      }
+    }
+    
+    // ==================== 初始化和消息处理 ====================
+    
+    // 注册消息处理器
+    pluginComm.on('init', (message) => {
+      console.log('插件初始化:', message.data);
+    });
+    
+    pluginComm.on('creation-success', () => {
+      notificationSystem.show('原型创建成功！', 'success');
+      const uiController = new UIController();
+      uiController.resetCreateButton();
+    });
+    
+    pluginComm.on('creation-error', (message) => {
+      notificationSystem.show(`创建失败: ${message.message}`, 'error');
+      const uiController = new UIController();
+      uiController.resetCreateButton();
+    });
+    
+    pluginComm.on('save-success', () => {
+      notificationSystem.show('配置已保存', 'success');
+    });
+    
+    pluginComm.on('load-config-success', (message) => {
+      if (message.config) {
+        // TODO: 实现配置加载逻辑
+        notificationSystem.show('配置加载成功', 'success');
+      }
+    });
+    
+    // DOM 加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      const uiController = new UIController();
+      uiController.init();
+    });
+    
+    // 兼容性函数 - 保持向后兼容
+    function previewImage(input, previewElement) {
+      const imageUploader = new ImageUploader();
+      imageUploader.updatePreview(input);
+    }
+    
+    function collectFormData() {
+      return dataCollector.collectFormData();
+    }
+    
+    function postMessageToPlugin(type, data) {
+      pluginComm.postMessage(type, data);
+    }
+    
+    function showNotification(message, type) {
+      notificationSystem.show(message, type);
     }
   </script>
 </body>
