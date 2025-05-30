@@ -1,40 +1,286 @@
-Below are the steps to get your plugin running. You can also find instructions at:
+# 渠道美术-H5延展工具
 
-  https://www.figma.com/plugin-docs/plugin-quickstart-guide/
+一个专为设计师打造的 Figma 插件，用于快速创建 H5 活动原型并生成多渠道延展版本。
 
-This plugin template uses Typescript and NPM, two standard tools in creating JavaScript applications.
+## 📖 概述
 
-First, download Node.js which comes with NPM. This will allow you to install TypeScript and other
-libraries. You can find the download link here:
+这是一个功能强大的 Figma 插件，旨在帮助设计师和产品团队快速创建 H5 活动页面原型，并自动生成适配不同渠道的延展版本。插件提供了丰富的模块化组件和智能的配置系统，让 H5 页面创建变得简单高效。
 
-  https://nodejs.org/en/download/
+## ✨ 主要功能
 
-Next, install TypeScript using the command:
+### 🎨 原型创建
 
-  npm install -g typescript
+- **页面基础设置**：自定义页面底色、背景图片
+- **头图配置**：支持头图和标题图片上传
+- **游戏信息模块**：
+  - 带 icon 版本（游戏图标 + 名称 + 描述）
+  - 单按钮版本（简洁的单一操作按钮）
+  - 双按钮版本（主次操作按钮组合）
+- **模块化组件**：
+  - 九宫格抽奖模块
+  - 签到活动模块
+  - 集卡活动模块
+  - 活动规则模块
 
-Finally, in the directory of your plugin, get the latest type definitions for the plugin API by running:
+### 🚀 渠道延展
+- **多渠道适配**：自动生成适配不同平台的版本
+- **智能预览**：实时预览不同渠道的效果
+- **一键生成**：批量输出多个渠道版本
 
-  npm install --save-dev @figma/plugin-typings
+### 🛠️ 工具集
+- **图片压缩**：自动优化上传的图片资源
+- **颜色管理**：支持颜色选择器和十六进制输入
+- **模块管理**：拖拽排序、动态添加/删除模块
 
-If you are familiar with JavaScript, TypeScript will look very familiar. In fact, valid JavaScript code
-is already valid Typescript code.
+### ⚙️ 设置选项
+- **主题切换**：支持明暗主题切换
+- **配置保存**：保存和加载配置文件
+- **重置功能**：一键重置所有设置
 
-TypeScript adds type annotations to variables. This allows code editors such as Visual Studio Code
-to provide information about the Figma API while you are writing code, as well as help catch bugs
-you previously didn't notice.
+## 🚀 快速开始
 
-For more information, visit https://www.typescriptlang.org/
+### 安装插件
 
-Using TypeScript requires a compiler to convert TypeScript (code.ts) into JavaScript (code.js)
-for the browser to run.
+1. 在 Figma 中打开 **Plugins** 面板
+2. 搜索 "渠道美术-H5延展工具"
+3. 点击安装并运行插件
 
-We recommend writing TypeScript code using Visual Studio code:
+### 创建第一个 H5 原型
 
-1. Download Visual Studio Code if you haven't already: https://code.visualstudio.com/.
-2. Open this directory in Visual Studio Code.
-3. Compile TypeScript to JavaScript: Run the "Terminal > Run Build Task..." menu item,
-    then select "npm: watch". You will have to do this again every time
-    you reopen Visual Studio Code.
+1. **基础设置**
+   ```
+   - 设置页面底色
+   - 上传页面背景图片（可选）
+   ```
 
-That's it! Visual Studio Code will regenerate the JavaScript file every time you save.
+2. **添加头图**
+   ```
+   - 上传头图
+   - 上传标题图片
+   ```
+
+3. **配置游戏信息**
+   ```
+   - 选择版本类型（带icon/单按钮/双按钮）
+   - 填写游戏名称和描述
+   - 设置按钮文案和颜色
+   ```
+
+4. **添加功能模块**
+   ```
+   - 点击"添加模块"按钮
+   - 选择模块类型
+   - 配置模块内容
+   ```
+
+5. **生成原型**
+   ```
+   - 点击"创建 H5 原型"按钮
+   - 等待生成完成
+   ```
+
+## 📋 模块详解
+
+### 九宫格抽奖模块
+
+- **标题背景**：自定义标题区域背景图
+- **九宫格背景**：抽奖区域背景图
+- **抽奖按钮**：中心抽奖按钮图片
+- **奖品配置**：9个奖品位置，支持单独配置图片
+- **奖品背景**：统一的奖品背景样式
+
+### 签到活动模块
+- **标题图片**：签到活动标题
+- **背景图片**：整体背景装饰
+- **签到按钮**：用户操作按钮
+- **日期图标**：日期显示相关图标
+- **配置选项**：签到天数、奖励类型等
+
+### 集卡活动模块
+- **标题图片**：集卡活动标题
+- **背景图片**：活动背景装饰
+- **卡片背景**：卡片样式背景
+- **合成按钮**：卡片合成操作按钮
+- **配置选项**：卡片数量、卡片类型等
+
+### 活动规则模块
+- **主标题**：活动规则主标题文本
+- **主标题背景**：主标题背景图片
+- **小标题**：子标题文本
+- **小标题背景**：子标题背景图片
+- **规则文本**：详细规则说明
+- **规则图片**：规则说明配图
+
+## 🎯 使用技巧
+
+### 图片上传建议
+
+- **推荐格式**：PNG、JPG、WEBP
+- **尺寸建议**：
+  - 页面背景：750×1334 或更高
+  - 头图：750×400
+  - 游戏图标：128×128
+  - 按钮图片：根据设计需求
+
+### 颜色配置
+- 支持颜色选择器直观选择
+- 支持十六进制代码精确输入
+- 自动同步颜色选择器和文本输入
+
+### 模块管理
+- 使用拖拽功能调整模块顺序
+- 折叠/展开模块节省空间
+- 动态添加多个同类型模块
+
+## 🔧 技术架构
+
+### 核心技术
+
+- **前端**：HTML5、CSS3、JavaScript ES6+
+- **UI 框架**：原生 Web Components
+- **图片处理**：Canvas API、FileReader API
+- **数据管理**：LocalStorage、IndexedDB
+
+### 插件架构
+```
+├── manifest.json          # 插件配置文件
+├── code.js               # 主逻辑代码（TypeScript编译后）
+├── code.ts               # 主逻辑源码
+├── ui.html               # 用户界面
+├── package.json          # 项目依赖配置
+└── README.md            # 项目文档
+```
+
+### 模块化设计
+- **UIController**：界面控制器
+- **DataCollector**：数据收集器  
+- **ImageManager**：图片管理器
+- **ModuleManager**：模块管理器
+- **FormResetter**：表单重置器
+- **ThemeManager**：主题管理器
+
+## 🎨 界面设计
+
+### 设计理念
+
+- **简洁直观**：清晰的视觉层次，易于理解的交互逻辑
+- **响应式设计**：适配不同屏幕尺寸
+- **明暗主题**：支持明暗模式切换
+- **Apple Design System**：遵循苹果设计规范
+
+### 颜色系统
+```css
+/* 主要颜色 */
+--primary-blue: #0071e3;
+--primary-text: #1d1d1f;
+--secondary-text: #86868b;
+
+/* 背景颜色 */
+--background-light: #ffffff;
+--background-dark: #1d1d1f;
+--surface-light: #f5f5f7;
+--surface-dark: #2c2c2e;
+```
+
+## 📱 兼容性
+
+### Figma 版本
+
+- **最低要求**：Figma Desktop App
+- **API 版本**：1.0.0+
+- **推荐版本**：最新版本
+
+### 浏览器支持
+- Chrome 88+
+- Firefox 85+
+- Safari 14+
+- Edge 88+
+
+## 🔄 更新日志
+
+### v1.0.0 (当前版本)
+
+- ✅ 基础原型创建功能
+- ✅ 模块化组件系统
+- ✅ 图片上传和管理
+- ✅ 颜色配置系统
+- ✅ 明暗主题切换
+- ✅ 表单重置功能
+
+### 计划中的功能
+- 🔄 渠道延展功能完善
+- 🔄 更多模块类型
+- 🔄 配置导入/导出
+- 🔄 模板系统
+- 🔄 批量处理工具
+
+## 🤝 贡献指南
+
+### 开发环境设置
+
+```bash
+# 克隆项目
+git clone <repository-url>
+
+# 安装依赖
+npm install
+
+# 编译 TypeScript
+npm run build
+
+# 监听文件变化
+npm run watch
+```
+
+### 开发流程
+1. Fork 项目仓库
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+### 代码规范
+- 使用 TypeScript 进行类型检查
+- 遵循 ESLint 配置
+- 保持良好的注释习惯
+- 编写单元测试
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+
+## 🙋‍♂️ 常见问题
+
+### Q: 插件无法加载图片怎么办？
+
+A: 请检查图片格式是否为 PNG、JPG 或 WEBP，图片大小不要超过 10MB。
+
+### Q: 创建的原型在哪里查看？
+
+A: 原型会直接在 Figma 画布中生成，请检查当前页面或新创建的页面。
+
+### Q: 如何保存我的配置？
+
+A: 目前配置会自动保存在浏览器本地，未来版本将支持配置文件导出。
+
+### Q: 插件卡顿怎么办？
+
+A: 请尝试重启插件，或者刷新 Figma 页面。如果问题持续存在，请联系技术支持。
+
+### Q: 能否添加自定义模块？
+
+A: 当前版本暂不支持自定义模块，但我们计划在后续版本中添加此功能。
+
+## 📞 技术支持
+
+如果您在使用过程中遇到问题或有改进建议，欢迎通过以下方式联系我们：
+
+- **Issue 反馈**：在 GitHub 仓库中提交 Issue
+- **功能建议**：通过 GitHub Discussions 参与讨论
+- **技术交流**：加入我们的开发者社群
+
+---
+
+**感谢您使用渠道美术-H5延展工具！** 🎉
+
+让设计创作更高效，让创意实现更便捷！
