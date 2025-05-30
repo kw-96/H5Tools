@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+
     
     /* 通知样式 */
     .notification {
@@ -56,7 +56,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Noto Sans SC', 'Source Han Sans CN', '思源黑体 CN', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
       color: #1d1d1f;
       background-color: #ffffff;
       -webkit-font-smoothing: antialiased;
@@ -636,6 +636,37 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    /* 版本切换相关样式 */
+    .version-content {
+      display: none;
+    }
+
+    .version-content.active {
+      display: block;
+    }
+
+    .collapsible-content {
+      transition: max-height 0.3s ease, opacity 0.2s ease;
+    }
+
+    .collapsible-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    .dropdown-selector-wide {
+      position: relative;
+      min-width: 180px;
+      max-width: 200px;
+      z-index: 10;
+    }
+
+    .wide-btn {
+      width: 100% !important;
+      min-width: 150px;
+    }
     
     /* 下拉选择器 */
     .dropdown-selector {
@@ -720,37 +751,114 @@
     
     /* 奖品网格 */
     .prize-grid {
+      display: flex;          /* 使用弹性布局 */
+      flex-wrap: wrap;        /* 允许项目换行 */
+      justify-content: space-between; /* 项目之间平均分配空间 */
+      gap: 8px;               /* 设置网格项之间的间隙 */
+      margin-top: 10px;       /* 顶部外边距 */
+    }
+    
+    /* 奖品网格 */
+    .prize-grid {
+      display: flex;          /* 使用弹性布局 */
+      flex-wrap: wrap;        /* 允许项目换行 */
+      justify-content: space-between; /* 项目之间平均分配空间 */
+      gap: 8px;               /* 设置网格项之间的间隙 */
+      margin-top: 10px;       /* 顶部外边距 */
+    }
+    
+    /* 自定义奖品网格布局 */
+    .prize-grid-custom {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      flex-direction: column;
       gap: 8px;
       margin-top: 10px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
     }
     
+    .prize-row {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 100%;
+    }
+    
+    .prize-row.top-row {
+      /* 第一行：3个奖品，均匀分布 */
+      justify-content: space-between;
+    }
+    
+    .prize-row.middle-row {
+      /* 第二行：2个奖品，左右对齐 */
+      justify-content: space-between;
+    }
+    
+    .prize-row.bottom-row {
+      /* 第三行：3个项目，均匀分布 */
+      justify-content: space-between;
+    }
+    
+    /* 网格项样式 */
     .grid-item {
-      flex: 0 0 calc(33.333% - 6px);
+      flex: 0 0 calc(33.333% - 6px); /* 设置网格项宽度为33.333%（减去间隙），不允许伸缩 */
     }
     
-    .img-upload-container {
+    /* 自定义布局下的网格项 */
+    .prize-grid-custom .grid-item {
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     
+    /* 第一行和第三行的项目：每个占33.33%宽度 */
+    .prize-row.top-row .grid-item,
+    .prize-row.bottom-row .grid-item {
+      flex: 0 0 calc(33.333% - 4px);
+      max-width: calc(33.333% - 4px);
+    }
+    
+    /* 第二行的项目：每个也占33.33%宽度，但只有两个 */
+    .prize-row.middle-row .grid-item {
+      flex: 0 0 calc(33.333% - 4px);
+      max-width: calc(33.333% - 4px);
+    }
+    
+    /* 图片上传容器 */
+    .img-upload-container {
+      display: flex;          /* 使用弹性布局 */
+      flex-direction: column; /* 设置主轴方向为垂直 */
+      align-items: center;    /* 在交叉轴上居中对齐项目 */
+      width: 100%;           /* 确保容器占满父元素宽度 */
+    }
+    
+    /* 网格按钮样式 */
     .grid-btn {
+      width: 100%;                          /* 设置宽度为100% */
+      aspect-ratio: 1/1;                    /* 设置宽高比为1:1，保持正方形 */
+      display: flex;                        /* 使用弹性布局 */
+      align-items: center;                  /* 垂直居中对齐 */
+      justify-content: center;              /* 水平居中对齐 */
+      background-color: #f5f5f7;            /* 设置背景颜色 */
+      border: 1px dashed rgba(0, 0, 0, 0.2);/* 设置虚线边框 */
+      border-radius: 6px;                   /* 设置圆角 */
+      cursor: pointer;                      /* 鼠标悬停时显示手型光标 */
+      position: relative;                   /* 设置相对定位 */
+      overflow: hidden;                     /* 隐藏溢出内容 */
+      padding: 0;                           /* 移除内边距 */
+      transition: all 0.2s;                 /* 添加过渡效果 */
+      box-sizing: border-box;               /* 包含边框在内的盒模型 */
+    }
+    
+    /* 自定义布局下的网格按钮 */
+    .prize-grid-custom .grid-btn {
       width: 100%;
+      height: auto;
       aspect-ratio: 1/1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f5f5f7;
-      border: 1px dashed rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      padding: 0;
-      transition: all 0.2s;
+      max-width: 100%;
+      max-height: none;
+      min-height: 50px;
     }
     
     .grid-btn:hover {
@@ -774,10 +882,14 @@
     
     .prize-label {
       margin-top: 4px;
-      font-size: 12px;
+      font-size: 11px;
       color: #86868b;
       text-align: center;
       width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
     }
     
     /* 创建按钮 */
@@ -962,6 +1074,192 @@
     body.dark-theme .upload-icon-inline {
       color: #a1a1a6;
     }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .empty-state p {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    .gray-text {
+      color: #999;
+      font-size: 14px;
+    }
+
+    /* 深色主题适配 - 空状态样式 */
+    body.dark-theme .empty-state {
+      color: #a1a1a6;
+    }
+
+    body.dark-theme .empty-state h3 {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .gray-text {
+      color: #86868b;
+    }
+
+    /* 渠道容器样式 */
+    .channels-container {
+      padding: 16 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .channel-section {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      padding: 16px;
+      background-color: #ffffff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .channel-section:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .channel-title {
+      margin: 0 0 16px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d1d1f;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .channel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .channel-preview-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .channel-preview-area {
+      width: 100%;
+      height: 140px;
+      border: 2px dashed rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f5f5f7;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .channel-preview-area:hover {
+      border-color: rgba(0, 0, 0, 0.2);
+      background-color: #efefef;
+    }
+
+    .channel-preview-placeholder {
+      color: #86868b;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .channel-preview-btn {
+      background-color: #f5f5f7;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1d1f;
+      transition: all 0.2s;
+    }
+
+    .channel-preview-btn:hover {
+      background-color: #e8e8ed;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .channel-generate-btn {
+      background-color: #0071e3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      min-width: 120px;
+    }
+
+    .channel-generate-btn:hover {
+      background-color: #0077ed;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+    }
+
+    .channel-generate-btn:disabled {
+      background-color: #86868b;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 深色主题适配 - 渠道样式 */
+    body.dark-theme .channel-section {
+      background-color: #1d1d1f;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .channel-title {
+      color: #f5f5f7;
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .channel-preview-area {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .channel-preview-area:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-theme .channel-preview-placeholder {
+      color: #a1a1a6;
+    }
+
+    body.dark-theme .channel-preview-btn {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .channel-preview-btn:hover {
+      background-color: #3a3a3c;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-theme .channel-generate-btn:disabled {
+      background-color: #48484a;
+      color: #a1a1a6;
+    }
+
   </style>
 </head>
 <body>
@@ -1031,7 +1329,7 @@
         </div>
       </div>
       
-      <!-- 页面内容板块 -->
+      <!-- 头图板块 -->
       <div class="form-section">
         <!-- 头图 -->
         <div class="form-group row-layout">
@@ -1102,28 +1400,36 @@
             </div>
 
             <div class="form-group row-layout">
-              <label for="gameCopyInput">文案</label>
+              <label for="gameCopyInput">游戏描述</label>
               <textarea id="gameCopyInput" class="text-area" placeholder="请输入游戏宣传文案"></textarea>
             </div>
             
             <div class="form-group row-layout">
-              <label class="non-interactive-label">文字颜色</label>
+              <label class="non-interactive-label">文案颜色</label>
               <div class="color-input-group">
-                <input type="color" id="btnTextColor" value="#FFFFFF">
+                <input type="color" id="gameCopyTextColor" value="#FFFFFF">
                 <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
               </div>
             </div>
 
             <div class="form-group row-layout">
-              <label for="buttonTextInput">按钮文案</label>
-              <input type="text" id="buttonTextInput" class="text-input" placeholder="请输入按钮文案">
+              <label for="iconButtonText">按钮文本</label>
+              <input type="text" id="iconButtonText" class="text-input" placeholder="请输入按钮文案" value="立即下载">
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文本颜色</label>
+              <div class="color-input-group">
+                <input type="color" id="iconButtonTextColor" value="#FFFFFF">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+              </div>
             </div>
 
             <div class="form-group row-layout">
               <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="btnImageUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
-                <button class="upload-btn" onclick="document.getElementById('btnImageUpload').click()">
+                <input type="file" id="iconButtonBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('iconButtonBgUpload').click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -1135,30 +1441,83 @@
           
           <!-- 单按钮版内容 -->
           <div class="version-content" id="singleButtonContent">
+
             <div class="form-group row-layout">
-              <label class="non-interactive-label">按钮样式</label>
+              <label for="singleButtonText">按钮文本</label>
+              <input type="text" id="singleButtonText" class="text-input" placeholder="请输入按钮文案" value="立即下载">
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文本颜色</label>
+              <div class="color-input-group">
+                <input type="color" id="singleButtonTextColor" value="#FFFFFF">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="moduleUpload" accept="image/*" style="display:none">
-                <button class="upload-btn wide-btn" onclick="document.getElementById('moduleUpload').click()">点击上传</button>
+                <input type="file" id="singleButtonBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('singleButtonBgUpload').click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
           </div>
           
           <!-- 双按钮版内容 -->
           <div class="version-content" id="doubleButtonContent">
+
             <div class="form-group row-layout">
-              <label class="non-interactive-label">左侧按钮</label>
+              <label for="leftButtonText">左侧按钮文本</label>
+              <input type="text" id="leftButtonText" class="text-input" placeholder="请输入按钮文案" value="左侧按钮">
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文本颜色</label>
+              <div class="color-input-group">
+                <input type="color" id="leftButtonTextColor" value="#FFFFFF">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">左侧按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="leftBtnUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('leftBtnUpload').click()">点击上传</button>
+                <input type="file" id="leftButtonBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('leftButtonBgUpload').click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group row-layout">
+              <label for="rightButtonText">右侧按钮文本</label>
+              <input type="text" id="rightButtonText" class="text-input" placeholder="请输入按钮文案" value="右侧按钮">
+            </div>
+
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">文本颜色</label>
+              <div class="color-input-group">
+                <input type="color" id="rightButtonTextColor" value="#FFFFFF">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
               </div>
             </div>
             
             <div class="form-group row-layout">
-              <label class="non-interactive-label">右侧按钮</label>
+              <label class="non-interactive-label">右侧按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="rightBtnUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('rightBtnUpload').click()">点击上传</button>
+                <input type="file" id="rightButtonBgUpload" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="document.getElementById('rightButtonBgUpload').click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
               </div>
             </div>
             
@@ -1255,7 +1614,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="derived-item-upload" accept="image/*" style="display:none">
+                <input type="file" class="derived-item-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -1268,7 +1627,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">九宫格背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="nine-grid-bg" accept="image/*" style="display:none">
+                <input type="file" class="nine-grid-bg" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -1281,7 +1640,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">抽奖按钮</label>
               <div class="file-upload-btn">
-                <input type="file" class="draw-btn" accept="image/*" style="display:none">
+                <input type="file" class="draw-btn" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -1294,7 +1653,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">奖品背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="prize-bg" accept="image/*" style="display:none">
+                <input type="file" class="prize-bg" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -1306,95 +1665,96 @@
             <!-- 奖品图 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">奖品图</label>
-              <div class="prize-grid">
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品01</div>
+              <div class="prize-grid-custom">
+                <!-- 第一行：3个奖品 -->
+                <div class="prize-row top-row">
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品01</div>
+                    </div>
+                  </div>
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品02</div>
+                    </div>
+                  </div>
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品03</div>
+                    </div>
                   </div>
                 </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品02</div>
+                
+                <!-- 第二行：2个奖品 -->
+                <div class="prize-row middle-row">
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品04</div>
+                    </div>
+                  </div>
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品05</div>
+                    </div>
                   </div>
                 </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品03</div>
+                
+                <!-- 第三行：2个奖品 + 谢谢参与 -->
+                <div class="prize-row bottom-row">
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品06</div>
+                    </div>
                   </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品04</div>
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">奖品07</div>
+                    </div>
                   </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品05</div>
-                  </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品06</div>
-                  </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品07</div>
-                  </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">奖品08</div>
-                  </div>
-                </div>
-                <div class="grid-item">
-                  <div class="img-upload-container">
-                    <input type="file" accept="image/*" class="prize-upload" style="display:none">
-                    <button class="grid-btn" onclick="this.previousElementSibling.click()">
-                      <div class="preview-container"></div>
-                      <span class="upload-icon">+</span>
-                    </button>
-                    <div class="prize-label">谢谢参与</div>
+                  <div class="grid-item">
+                    <div class="img-upload-container">
+                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <button class="grid-btn" onclick="this.previousElementSibling.click()">
+                        <div class="preview-container"></div>
+                        <span class="upload-icon">+</span>
+                      </button>
+                      <div class="prize-label">谢谢参与</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1791,22 +2151,76 @@
 
     <!-- 延展渠道内容 -->
     <div class="tab-content" id="extension-content">
-      <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="empty-icon" viewBox="0 0 16 16">
-          <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
-        </svg>
-        <h3>暂无可用渠道</h3>
-        <p>可通过创建原型进行渠道生成</p>
-        <p class="gray-text">敬请期待</p>
+      <div class="channels-container">
+        <!-- OPPO渠道 -->
+        <div class="channel-section">
+          <h3 class="channel-title">OPPO</h3>
+          <div class="channel-content">
+            <div class="channel-preview-container">
+              <div class="channel-preview-area" id="oppo-preview">
+                <div class="channel-preview-placeholder">
+                  <span>预览内容将在此显示</span>
+                </div>
+              </div>
+              <button class="channel-preview-btn" onclick="previewChannel('oppo')">预览</button>
+            </div>
+            <button class="channel-generate-btn" onclick="generateChannel('oppo')">生成 OPPO 版本</button>
+          </div>
+        </div>
+
+        <!-- VIVO渠道 -->
+        <div class="channel-section">
+          <h3 class="channel-title">VIVO</h3>
+          <div class="channel-content">
+            <div class="channel-preview-container">
+              <div class="channel-preview-area" id="vivo-preview">
+                <div class="channel-preview-placeholder">
+                  <span>预览内容将在此显示</span>
+                </div>
+              </div>
+              <button class="channel-preview-btn" onclick="previewChannel('vivo')">预览</button>
+            </div>
+            <button class="channel-generate-btn" onclick="generateChannel('vivo')">生成 VIVO 版本</button>
+          </div>
+        </div>
+
+        <!-- 华为渠道 -->
+        <div class="channel-section">
+          <h3 class="channel-title">华为</h3>
+          <div class="channel-content">
+            <div class="channel-preview-container">
+              <div class="channel-preview-area" id="huawei-preview">
+                <div class="channel-preview-placeholder">
+                  <span>预览内容将在此显示</span>
+                </div>
+              </div>
+              <button class="channel-preview-btn" onclick="previewChannel('huawei')">预览</button>
+            </div>
+            <button class="channel-generate-btn" onclick="generateChannel('huawei')">生成华为版本</button>
+          </div>
+        </div>
+
+        <!-- 小米渠道 -->
+        <div class="channel-section">
+          <h3 class="channel-title">小米</h3>
+          <div class="channel-content">
+            <div class="channel-preview-container">
+              <div class="channel-preview-area" id="xiaomi-preview">
+                <div class="channel-preview-placeholder">
+                  <span>预览内容将在此显示</span>
+                </div>
+              </div>
+              <button class="channel-preview-btn" onclick="previewChannel('xiaomi')">预览</button>
+            </div>
+            <button class="channel-generate-btn" onclick="generateChannel('xiaomi')">生成小米版本</button>
+          </div>
+        </div>
       </div>
     </div>
-
+    
     <!-- 工具集内容 -->
     <div class="tab-content" id="tools-content">
       <div class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="empty-icon" viewBox="0 0 16 16">
-          <path d="M1 0 0 1l2.2 3.081a1 1 0 0 0 .815.419h.07a1 1 0 0 1 .708.293l2.675 2.675-2.617 2.654A3.003 3.003 0 0 0 0 13a3 3 0 1 0 5.878-.851l2.654-2.617.968.968-.305.914a1 1 0 0 0 .242 1.023l3.27 3.27a.997.997 0 0 0 1.414 0l1.586-1.586a.997.997 0 0 0 0-1.414l-3.27-3.27a1 1 0 0 0-1.023-.242L10.5 9.5l-.96-.96 2.68-2.643A3.005 3.005 0 0 0 16 3c0-.269-.035-.53-.102-.777l-2.14 2.141L12 4l-.364-1.757L13.777.102a3 3 0 0 0-3.675 3.68L7.462 6.46 4.793 3.793a1 1 0 0 1-.293-.707v-.071a1 1 0 0 0-.419-.814L1 0Zm9.646 10.646a.5.5 0 0 1 .708 0l2.914 2.915a.5.5 0 0 1-.707.707l-2.915-2.914a.5.5 0 0 1 0-.708ZM3 11l.471.242.529.026.287.445.445.287.026.529L5 13l-.242.471-.026.529-.445.287-.287.445-.529.026L3 15l-.471-.242L2 14.732l-.287-.445L1.268 14l-.026-.529L1 13l.242-.471.026-.529.445-.287.287-.445.529-.026L3 11Z"/>
-        </svg>
         <h3>工具库开发中</h3>
         <p>更多实用设计工具正在开发中</p>
         <p class="gray-text">敬请期待</p>
@@ -1879,8 +2293,19 @@
       }
       
       clear() {
-        this.data = {};
+        // 重置为初始状态，保持数据结构
+        this.data = {
+          pageBackground: null,
+          headerImage: null,
+          titleUpload: null,
+          gameIcon: null,
+          btnImage: null,
+          footerLogo: null,
+          footerBg: null,
+          rulesBg: null
+        };
         this.moduleData = {};
+        console.log('图片管理器已清理');
       }
     }
     
@@ -1892,12 +2317,16 @@
     class PluginCommunicator {
       constructor() {
         this.messageHandlers = new Map();
+        this.isInitialized = false;
         this.init();
       }
       
       // 初始化通信
       init() {
+        if (this.isInitialized) return;
+        
         window.addEventListener('message', this.handleMessage.bind(this));
+        
         // 页面加载完成后通知插件
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', () => {
@@ -1906,27 +2335,50 @@
         } else {
           this.postMessage('ui-loaded', {});
         }
+        
+        this.isInitialized = true;
+        console.log('插件通信器已初始化');
       }
       
       // 发送消息到插件
       postMessage(type, data = {}) {
-        parent.postMessage({ pluginMessage: { type, ...data } }, '*');
+        try {
+          const message = { pluginMessage: { type, ...data } };
+          parent.postMessage(message, '*');
+          console.log(`发送消息到插件: ${type}`, message);
+        } catch (error) {
+          console.error(`发送消息失败: ${type}`, error);
+        }
       }
       
       // 处理插件消息
       handleMessage(event) {
-        const message = event.data.pluginMessage;
-        if (!message) return;
-        
-        const handler = this.messageHandlers.get(message.type);
-        if (handler) {
-          handler(message);
+        try {
+          const message = event.data.pluginMessage;
+          if (!message) return;
+          
+          console.log(`收到插件消息: ${message.type}`, message);
+          
+          const handler = this.messageHandlers.get(message.type);
+          if (handler) {
+            handler(message);
+          } else {
+            console.warn(`未找到消息处理器: ${message.type}`);
+          }
+        } catch (error) {
+          console.error('处理插件消息失败:', error);
         }
       }
       
       // 注册消息处理器
       on(type, handler) {
         this.messageHandlers.set(type, handler);
+        console.log(`注册消息处理器: ${type}`);
+      }
+      
+      // 测试通信连接
+      testConnection() {
+        this.postMessage('ping', { timestamp: Date.now() });
       }
     }
     
@@ -1997,18 +2449,41 @@
     class DataCollector {
       // 收集表单数据
       collectFormData() {
-        return {
+        const buttonVersion = this.getElementValue('#buttonVersionSelect', "imageButton");
+        
+        const data = {
           pageTitle: document.title || "未命名H5活动页",
           pageBgColor: this.getElementValue('#pageColor', "#D9D9D9"),
           pageBgImage: imageManager.get('pageBackground'),
           headerImage: imageManager.get('headerImage'),
+          titleUpload: imageManager.get('titleUpload'),
           gameIcon: imageManager.get('gameIcon'),
           gameName: this.getElementValue('#gameNameInput'),
           gameDesc: this.getElementValue('#gameCopyInput'),
-          buttonVersion: this.getElementValue('#buttonVersionSelect', "imageButton"),
-          buttonText: this.getElementValue('#buttonTextInput', "立即下载"),
-          buttonBgColor: this.getElementValue('#btnTextColor', "#FFFFFF"),
-          buttonImage: imageManager.get('btnImage'),
+          gameTextColor: this.getElementValue('#gameCopyTextColor', "#FFFFFF"),
+          
+          // 按钮版本
+          buttonVersion: buttonVersion,
+          
+          // 带icon版按钮
+          iconButtonText: this.getElementValue('#iconButtonText', "立即下载"),
+          iconButtonTextColor: this.getElementValue('#iconButtonTextColor', "#FFFFFF"),
+          iconButtonBg: imageManager.get('iconButtonBg'),
+          
+          // 单按钮版
+          singleButtonText: this.getElementValue('#singleButtonText', "立即下载"),
+          singleButtonTextColor: this.getElementValue('#singleButtonTextColor', "#FFFFFF"),
+          singleButtonBg: imageManager.get('singleButtonBg'),
+          
+          // 双按钮版
+          leftButtonText: this.getElementValue('#leftButtonText', "左侧按钮"),
+          leftButtonTextColor: this.getElementValue('#leftButtonTextColor', "#FFFFFF"),
+          leftButtonBg: imageManager.get('leftButtonBg'),
+          rightButtonText: this.getElementValue('#rightButtonText', "右侧按钮"),
+          rightButtonTextColor: this.getElementValue('#rightButtonTextColor', "#FFFFFF"),
+          rightButtonBg: imageManager.get('rightButtonBg'),
+          buttonSpacing: parseInt(this.getElementValue('#btnSpacing', "10")),
+          
           modules: this.collectModulesData(),
           rulesTitle: this.getElementValue('#titleText'),
           rulesBgImage: imageManager.get('rulesBg'),
@@ -2016,6 +2491,18 @@
           footerLogo: imageManager.get('footerLogo'),
           footerBg: imageManager.get('footerBg')
         };
+
+        // 调试日志
+        console.log('收集到的表单数据:', data);
+        console.log('当前按钮版本:', buttonVersion);
+        if (data.headerImage) {
+          console.log('headerImage 数据:', data.headerImage.data ? `${data.headerImage.data.length} bytes, 尺寸: ${data.headerImage.width}x${data.headerImage.height}` : 'null');
+        }
+        if (data.titleUpload) {
+          console.log('titleUpload 数据:', data.titleUpload.data ? `${data.titleUpload.data.length} bytes, 尺寸: ${data.titleUpload.width}x${data.titleUpload.height}` : 'null');
+        }
+        
+        return data;
       }
       
       // 获取元素值的通用方法
@@ -2074,11 +2561,18 @@
           activity: 'activityRules'
         };
         
+        // 检查模块ID和类名
         for (const [className, type] of Object.entries(typeMap)) {
-          if (moduleEl.className.includes(className)) {
+          if (moduleEl.className.includes(className) || moduleEl.id.includes(className)) {
             return type;
           }
         }
+        
+        // 特殊处理九宫格抽奖模块
+        if (moduleEl.id === 'lotteryModuleTemplate' || moduleEl.classList.contains('lottery-module')) {
+          return 'nineGrid';
+        }
+        
         return '';
       }
       
@@ -2086,11 +2580,11 @@
       collectNineGridData(moduleEl, moduleId) {
         return {
           mainTitle: moduleEl.querySelector('.big-title-input')?.value || "抽奖活动",
-          titleBgImage: imageManager.getModule(`${moduleId}-titlebg`),
-          gridBgImage: imageManager.getModule(`${moduleId}-gridbg`),
-          drawButtonImage: imageManager.getModule(`${moduleId}-drawbtn`),
-          prizeBgImage: imageManager.getModule(`${moduleId}-prizebg`),
-          prizes: this.collectPrizes(moduleEl, moduleId)
+          titleBgImage: imageManager.getModule(`${moduleId}-title-bg`),
+          gridBgImage: imageManager.getModule(`${moduleId}-grid-bg`), 
+          drawButtonImage: imageManager.getModule(`${moduleId}-draw-btn`),
+          prizeBgImage: imageManager.getModule(`${moduleId}-prize-bg`),
+          prizes: this.collectNineGridPrizes(moduleEl, moduleId)
         };
       }
       
@@ -2143,6 +2637,40 @@
         
         return prizes;
       }
+      
+      // 收集九宫格奖品数据（专门处理3-2-3布局）
+      collectNineGridPrizes(moduleEl, moduleId) {
+        const prizes = [];
+        const prizeElements = moduleEl.querySelectorAll('.prize-grid-custom .grid-item');
+        
+        prizeElements.forEach((prizeEl, index) => {
+          const prizeLabel = prizeEl.querySelector('.prize-label')?.textContent || `奖品${String(index + 1).padStart(2, '0')}`;
+          prizes.push({
+            image: imageManager.getModule(`${moduleId}-prize-${index}`),
+            name: prizeLabel,
+            position: this.getNineGridPosition(index) // 添加位置信息
+          });
+        });
+        
+        return prizes;
+      }
+      
+      // 获取九宫格位置（3-2-3布局转换为标准3x3位置）
+      getNineGridPosition(index) {
+        // 3-2-3布局对应的九宫格位置映射
+        const positionMap = {
+          0: 0, // 第一行第一个 -> 位置0
+          1: 1, // 第一行第二个 -> 位置1  
+          2: 2, // 第一行第三个 -> 位置2
+          3: 3, // 第二行第一个 -> 位置3
+          4: 5, // 第二行第二个 -> 位置5（跳过中间的抽奖按钮位置4）
+          5: 6, // 第三行第一个 -> 位置6
+          6: 7, // 第三行第二个 -> 位置7
+          7: 8  // 第三行第三个 -> 位置8
+        };
+        
+        return positionMap[index] || index;
+      }
     }
     
     // 创建数据收集器实例
@@ -2160,17 +2688,82 @@
         try {
           const uint8Array = await this.fileToUint8Array(file);
           
-          // 存储到相应的管理器
+          // 获取图片尺寸
+          const imageDimensions = await this.getImageDimensions(file);
+          console.log(`图片上传成功: ${storageKey}, 大小: ${uint8Array.length} bytes, 尺寸: ${imageDimensions.width}x${imageDimensions.height}`);
+          
+          // 存储图片数据和尺寸信息
+          const imageData = {
+            data: uint8Array,
+            width: imageDimensions.width,
+            height: imageDimensions.height,
+            name: file.name,
+            type: file.type
+          };
+          
           if (isModule) {
-            imageManager.setModule(storageKey, uint8Array);
+            imageManager.setModule(storageKey, imageData);
           } else {
-            imageManager.set(storageKey, uint8Array);
+            imageManager.set(storageKey, imageData);
           }
           
-          return uint8Array;
+          return imageData;
         } catch (error) {
+          console.error(`图片处理失败: ${storageKey}`, error);
           throw new Error(`图片处理失败: ${error.message}`);
         }
+      }
+
+      async handleImageUpload(e, storageKey) {
+        try {
+          await this.handleUpload(e.target, storageKey, false);
+        } catch (error) {
+          console.error(`基础图片上传失败 ${storageKey}:`, error);
+          notificationSystem.show(`上传失败: ${error.message}`, 'error');
+        }
+      }
+      
+      async handleModuleImageUpload(e) {
+        try {
+          const input = e.target;
+          const moduleEl = input.closest('.module');
+          if (!moduleEl) return;
+          
+          const moduleId = moduleEl.id;
+          const inputIndex = Array.from(moduleEl.querySelectorAll('input[type="file"]')).indexOf(input);
+          const storageKey = this.getModuleStorageKey(input, moduleId, inputIndex);
+          
+          if (storageKey) {
+            await this.handleUpload(input, storageKey, true);
+          }
+        } catch (error) {
+          console.error('模块图片上传失败:', error);
+          notificationSystem.show(`模块图片上传失败: ${error.message}`, 'error');
+        }
+      }
+
+      // 获取图片尺寸
+      async getImageDimensions(file) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          
+          img.onload = function() {
+            resolve({
+              width: this.naturalWidth,
+              height: this.naturalHeight
+            });
+            // 清理URL对象
+            URL.revokeObjectURL(img.src);
+          };
+          
+          img.onerror = function() {
+            URL.revokeObjectURL(img.src);
+            reject(new Error('无法读取图片尺寸'));
+          };
+          
+          // 创建临时URL
+          img.src = URL.createObjectURL(file);
+        });
       }
       
       // 验证是否为有效图片文件
@@ -2380,10 +2973,24 @@
           return;
         }
         
-        const formResetter = new FormResetter();
-        formResetter.resetAll();
-        
-        notificationSystem.show('所有设置已重置', 'success');
+        try {
+          console.log('开始执行重置操作...');
+          
+          const formResetter = new FormResetter();
+          const success = formResetter.resetAll();
+          
+          if (success) {
+            // 通知插件重置已完成
+            pluginComm.postMessage('reset-complete', {});
+            notificationSystem.show('所有设置已重置', 'success');
+            console.log('重置操作完成');
+          } else {
+            notificationSystem.show('重置失败，请重试', 'error');
+          }
+        } catch (error) {
+          console.error('重置操作失败:', error);
+          notificationSystem.show(`重置失败: ${error.message}`, 'error');
+        }
       }
       
       // 重置创建按钮
@@ -2474,6 +3081,32 @@
         if (moveDownBtn) {
           moveDownBtn.addEventListener('click', () => this.moveModuleDown(moduleEl));
         }
+        
+        // 绑定图片上传事件
+        this.bindModuleImageUploads(moduleEl);
+      }
+      
+      // 绑定模块内的图片上传事件
+      bindModuleImageUploads(moduleEl) {
+        const imageInputs = moduleEl.querySelectorAll('input[type="file"][accept="image/*"]');
+        imageInputs.forEach(input => {
+          // 移除现有的事件监听器（如果有）
+          const newInput = input.cloneNode(true);
+          input.parentNode.replaceChild(newInput, input);
+          
+          // 重新绑定 onchange 事件
+          if (newInput.classList.contains('prize-upload')) {
+            newInput.addEventListener('change', () => previewImage(newInput));
+          } else {
+            // 对于其他类型的图片上传，使用标准预览函数
+            newInput.addEventListener('change', () => {
+              const previewContainer = newInput.nextElementSibling?.querySelector('.img-preview-inline');
+              if (previewContainer) {
+                previewImage(newInput, previewContainer);
+              }
+            });
+          }
+        });
       }
       
       deleteModule(moduleEl) {
@@ -2522,41 +3155,38 @@
     
     // ==================== 图片上传管理器 ====================
     
+    // 图片上传处理类
     class ImageUploader {
       init() {
-        this.bindStaticUploaders();
-        this.bindDynamicUploaders();
+        this.bindImageUploaders();
+        this.bindModuleImageUploaders();
       }
       
-      bindStaticUploaders() {
+      bindImageUploaders() {
+        // 绑定基础图片上传
         const uploaders = [
           { id: 'pageBackground', key: 'pageBackground' },
           { id: 'headerImage', key: 'headerImage' },
           { id: 'titleUpload', key: 'titleUpload' },
           { id: 'gameIconUpload', key: 'gameIcon' },
-          { id: 'btnImageUpload', key: 'btnImage' },
-          { id: 'footerImageUpload', key: 'rulesBg' },
           { id: 'footerLogoUpload', key: 'footerLogo' },
-          { id: 'footerBgUpload', key: 'footerBg' }
+          { id: 'footerBgUpload', key: 'footerBg' },
+          { id: 'footerImageUpload', key: 'rulesBg' }
         ];
         
-        uploaders.forEach(({ id, key }) => {
-          const input = document.getElementById(id);
+        uploaders.forEach(uploader => {
+          const input = document.getElementById(uploader.id);
           if (input) {
-            input.addEventListener('change', async (e) => {
-              await this.handleUpload(e.target, key);
-            });
+            input.addEventListener('change', (e) => this.handleImageUpload(e, uploader.key));
           }
         });
       }
       
-      bindDynamicUploaders() {
-        document.addEventListener('moduleAdded', (e) => {
-          const moduleId = e.detail.moduleId;
-          const moduleEl = document.getElementById(moduleId);
-          
-          if (moduleEl) {
-            this.bindModuleUploaders(moduleEl, moduleId);
+      bindModuleImageUploaders() {
+        // 使用事件委托处理模块内的图片上传
+        document.addEventListener('change', (e) => {
+          if (e.target.type === 'file' && e.target.accept === 'image/*') {
+            this.handleModuleImageUpload(e);
           }
         });
       }
@@ -2575,7 +3205,6 @@
       
       getModuleStorageKey(input, moduleId, index) {
         const classMap = {
-          'prize-upload': `${moduleId}-prize-${index}`,
           'derived-item-upload': `${moduleId}-titlebg`,
           'nine-grid-bg': `${moduleId}-gridbg`,
           'draw-btn': `${moduleId}-drawbtn`,
@@ -2593,6 +3222,12 @@
           'activity-rule-text-upload': `${moduleId}-image`
         };
         
+        // 特殊处理奖品图片上传
+        if (input.classList.contains('prize-upload')) {
+          const prizeIndex = this.getPrizeIndex(input);
+          return `${moduleId}-prize-${prizeIndex}`;
+        }
+        
         for (const [className, key] of Object.entries(classMap)) {
           if (input.classList.contains(className)) {
             return key;
@@ -2601,14 +3236,31 @@
         return null;
       }
       
+      // 获取奖品在九宫格中的索引
+      getPrizeIndex(input) {
+        const moduleEl = input.closest('.module');
+        if (!moduleEl) return 0;
+        
+        const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
+        return prizeInputs.indexOf(input);
+      }
+      
       async handleUpload(input, storageKey, isModule = false) {
         if (!input.files?.[0]) return;
         
+        console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
+        
         try {
-          await fileProcessor.processImageFile(input.files[0], storageKey, isModule);
+          const imageData = await fileProcessor.processImageFile(input.files[0], storageKey, isModule);
           this.updatePreview(input);
+          
+          // 验证图片是否正确存储
+          const storedData = isModule ? imageManager.getModule(storageKey) : imageManager.get(storageKey);
+          console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
+          
           notificationSystem.show('图片上传成功', 'success');
         } catch (error) {
+          console.error(`图片上传失败 ${storageKey}:`, error);
           notificationSystem.show(`上传失败: ${error.message}`, 'error');
         }
       }
@@ -2631,6 +3283,11 @@
         const uploadBtn = input.nextElementSibling;
         if (!uploadBtn) return null;
         
+        // 特殊处理游戏icon预览
+        if (input.id === 'gameIconUpload') {
+          return document.getElementById('gameIconPreview');
+        }
+        
         if (input.classList.contains('prize-upload')) {
           return uploadBtn.querySelector('.preview-container');
         }
@@ -2643,7 +3300,14 @@
         const img = document.createElement('img');
         img.src = src;
         img.alt = "Preview";
-        img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
+        
+        // 游戏icon使用特殊样式
+        if (container.id === 'gameIconPreview') {
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px';
+        } else {
+          img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
+        }
+        
         container.appendChild(img);
         
         // 更新按钮样式
@@ -2710,65 +3374,167 @@
     
     class FormResetter {
       resetAll() {
-        imageManager.clear();
-        this.resetInputs();
-        this.resetModules();
-        this.resetPreviews();
+        try {
+          console.log('开始重置表单...');
+          
+          // 1. 清理图片管理器数据
+          if (window.imageManager) {
+            imageManager.clear();
+          }
+          
+          // 2. 立即重置表单输入
+          this.resetInputs();
+          
+          // 3. 立即重置模块（不使用动画）
+          this.resetModules();
+          
+          // 4. 立即重置预览
+          this.resetPreviews();
+          
+          // 5. 使用 requestAnimationFrame 优化重新初始化
+          requestAnimationFrame(() => {
+            this.reinitializeComponents();
+          });
+          
+          console.log('表单重置完成');
+          return true;
+        } catch (error) {
+          console.error('重置过程中发生错误:', error);
+          notificationSystem.show('重置时发生错误，请刷新页面', 'error');
+          return false;
+        }
       }
       
       resetInputs() {
-        // 重置文本输入
-        const textInputs = document.querySelectorAll('input[type="text"], textarea');
-        textInputs.forEach(input => input.value = '');
-        
-        // 重置颜色输入
-        this.resetColorInput('#pageColor', '#FFFFFF');
-        this.resetColorInput('#btnTextColor', '#FFFFFF');
-        
-        // 重置文件输入
-        const fileInputs = document.querySelectorAll('input[type="file"]');
-        fileInputs.forEach(input => input.value = '');
-        
-        // 重置选择器
-        const selectors = document.querySelectorAll('select');
-        selectors.forEach(select => select.selectedIndex = 0);
+        try {
+          // 使用文档片段批量操作，提高性能
+          const resetBatch = () => {
+            // 重置文本输入框
+            document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+              input.value = '';
+            });
+            
+            // 重置文件输入框
+            document.querySelectorAll('input[type="file"]').forEach(input => {
+              input.value = '';
+            });
+            
+            // 重置颜色输入框到默认值
+            const colorDefaults = {
+              '#pageColor': '#D9D9D9',
+              '#gameCopyTextColor': '#FFFFFF',
+              '#iconButtonTextColor': '#FFFFFF',
+              '#singleButtonTextColor': '#FFFFFF',
+              '#leftButtonTextColor': '#FFFFFF',
+              '#rightButtonTextColor': '#FFFFFF'
+            };
+            
+            Object.entries(colorDefaults).forEach(([selector, defaultValue]) => {
+              const colorInput = document.querySelector(selector);
+              if (colorInput) {
+                colorInput.value = defaultValue;
+                const textInput = colorInput.nextElementSibling;
+                if (textInput && textInput.classList.contains('color-value')) {
+                  textInput.value = defaultValue;
+                }
+              }
+            });
+            
+            // 重置选择框
+            document.querySelectorAll('select').forEach(select => {
+              if (select.options.length > 0) {
+                select.selectedIndex = 0;
+              }
+            });
+            
+            // 重置数字输入框
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+              const defaultValue = input.getAttribute('placeholder') || '0';
+              input.value = defaultValue;
+            });
+            
+            // 立即处理按钮版本选择器
+            const buttonVersionSelect = document.getElementById('buttonVersionSelect');
+            if (buttonVersionSelect) {
+              buttonVersionSelect.selectedIndex = 0;
+              switchButtonVersion(); // 直接调用函数而不是触发事件
+            }
+          };
+          
+          resetBatch();
+          console.log('输入字段重置完成');
+        } catch (error) {
+          console.error('重置输入字段失败:', error);
+          throw error;
+        }
       }
       
-      resetColorInput(selector, defaultValue) {
-        const colorInput = document.querySelector(selector);
-        if (colorInput) {
-          colorInput.value = defaultValue;
-          const textInput = colorInput.nextElementSibling;
-          if (textInput) textInput.value = defaultValue;
+      reinitializeComponents() {
+        try {
+          // 简化重新初始化过程
+          console.log('重新初始化组件...');
+          
+          // 直接重新绑定颜色输入事件，不替换DOM节点
+          document.querySelectorAll('.color-input-group').forEach(group => {
+            const colorInput = group.querySelector('input[type="color"]');
+            const textInput = group.querySelector('.color-value');
+            if (colorInput && textInput) {
+              // 清除现有事件（通过克隆节点）
+              const newColorInput = colorInput.cloneNode(true);
+              const newTextInput = textInput.cloneNode(true);
+              
+              colorInput.parentNode.replaceChild(newColorInput, colorInput);
+              textInput.parentNode.replaceChild(newTextInput, textInput);
+              
+              // 重新绑定事件
+              newColorInput.addEventListener('input', () => {
+                newTextInput.value = newColorInput.value.toUpperCase();
+              });
+              
+              newTextInput.addEventListener('input', () => {
+                if (/^#[0-9A-F]{6}$/i.test(newTextInput.value)) {
+                  newColorInput.value = newTextInput.value;
+                }
+              });
+            }
+          });
+          
+          console.log('组件重新初始化完成');
+        } catch (error) {
+          console.error('组件重新初始化失败:', error);
         }
       }
       
       resetModules() {
         const container = document.getElementById('modulesContainer');
         if (container) {
+          // 直接移除所有模块，不使用动画
           const modules = container.querySelectorAll('.module');
-          modules.forEach(module => {
-            module.style.opacity = '0';
-            module.style.transform = 'translateY(-10px)';
-            module.style.transition = 'all 0.3s ease';
-            setTimeout(() => module.remove(), 300);
-          });
+          modules.forEach(module => module.remove());
           
-          setTimeout(() => {
-            const moduleManager = new ModuleManager();
-            moduleManager.updateModuleCount();
-          }, 350);
+          // 立即更新模块计数
+          const moduleManager = new ModuleManager();
+          moduleManager.updateModuleCount();
         }
       }
       
       resetPreviews() {
+        // 批量重置预览
         const previews = document.querySelectorAll('.img-preview-inline, .preview-container');
         previews.forEach(preview => {
           preview.innerHTML = '<span class="upload-icon-inline">+</span>';
         });
         
-        const uploadBtns = document.querySelectorAll('.upload-btn, .grid-btn');
-        uploadBtns.forEach(btn => btn.style.border = '');
+        // 特殊处理游戏icon预览
+        const gameIconPreview = document.getElementById('gameIconPreview');
+        if (gameIconPreview) {
+          gameIconPreview.innerHTML = '<span class="upload-icon-text">+</span>';
+        }
+        
+        // 批量重置按钮样式
+        document.querySelectorAll('.upload-btn, .grid-btn').forEach(btn => {
+          btn.style.border = '';
+        });
       }
     }
     
@@ -2802,6 +3568,14 @@
       }
     });
     
+    pluginComm.on('reset-acknowledged', (message) => {
+      console.log('插件确认重置完成:', message.message);
+    });
+    
+    pluginComm.on('pong', (message) => {
+      console.log('插件连接正常:', message.message);
+    });
+    
     // DOM 加载完成后初始化
     document.addEventListener('DOMContentLoaded', () => {
       const uiController = new UIController();
@@ -2809,11 +3583,6 @@
     });
     
     // 兼容性函数 - 保持向后兼容
-    function previewImage(input, previewElement) {
-      const imageUploader = new ImageUploader();
-      imageUploader.updatePreview(input);
-    }
-    
     function collectFormData() {
       return dataCollector.collectFormData();
     }
@@ -2825,6 +3594,462 @@
     function showNotification(message, type) {
       notificationSystem.show(message, type);
     }
+
+    // 统一的图片预览函数
+    function previewImage(input, previewElement) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewElement.innerHTML = `<img src="${e.target.result}" alt="预览图片">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // 渠道预览功能
+    function previewChannel(channel) {
+      const previewArea = document.getElementById(`${channel}-preview`);
+      
+      // 显示加载状态
+      previewArea.innerHTML = `
+        <div class="preview-placeholder">
+          <span>正在生成预览...</span>
+        </div>
+      `;
+
+      // 模拟预览生成过程（后续完善）
+      setTimeout(() => {
+        previewArea.innerHTML = `
+          <div class="preview-placeholder">
+            <span>${channel.toUpperCase()} 版本预览</span>
+            <div style="margin-top: 8px; font-size: 12px; color: #666;">
+              预览功能正在开发中
+            </div>
+          </div>
+        `;
+      }, 1000);
+    }
+
+    // 渠道生成功能
+    function generateChannel(channel) {
+      // 显示加载状态
+      showLoading();
+      
+      // 模拟生成过程（后续完善）
+      setTimeout(() => {
+        hideLoading();
+        showNotification(`${channel.toUpperCase()} 版本生成功能正在开发中`, 'info');
+      }, 1500);
+    }
+
+    function switchTab(tabName) {
+      const tabs = document.querySelectorAll('.tab');
+      const contents = document.querySelectorAll('.tab-content');
+      
+      tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.tab === tabName) {
+          tab.classList.add('active');
+        }
+      });
+      
+      contents.forEach(content => {
+        content.classList.remove('active');
+        if (content.id === tabName + '-content') {
+          content.classList.add('active');
+        }
+      });
+    }
+
+    // 按钮版本切换功能
+    function switchButtonVersion() {
+      const select = document.getElementById('buttonVersionSelect');
+      const contents = document.querySelectorAll('.version-content');
+      
+      // 隐藏所有版本内容
+      contents.forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // 显示选中的版本内容
+      const selectedContent = document.getElementById(select.value + 'Content');
+      if (selectedContent) {
+        selectedContent.classList.add('active');
+      }
+    }
+
+    // 颜色输入同步功能
+    function syncColorInput(colorInput, textInput) {
+      colorInput.addEventListener('change', function() {
+        textInput.value = this.value;
+      });
+      
+      textInput.addEventListener('input', function() {
+        if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+          colorInput.value = this.value;
+        }
+      });
+    }
+
+    // 初始化颜色输入同步
+    function initColorInputs() {
+      const colorGroups = document.querySelectorAll('.color-input-group');
+      colorGroups.forEach(group => {
+        const colorInput = group.querySelector('input[type="color"]');
+        const textInput = group.querySelector('.color-value');
+        if (colorInput && textInput) {
+          syncColorInput(colorInput, textInput);
+        }
+      });
+    }
+
+    // 创建H5原型
+    function createPrototype() {
+      // 获取所有表单数据
+      const config = collectFormData();
+      
+      // 发送数据到插件
+      parent.postMessage({
+        pluginMessage: {
+          type: 'create-prototype',
+          config: config
+        }
+      }, '*');
+    }
+
+    // 获取图片数据
+    async function getImageData(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input || !input.files || !input.files[0]) {
+        return null;
+      }
+      
+      const file = input.files[0];
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            resolve({
+              data: new Uint8Array(e.target.result),
+              width: img.width,
+              height: img.height,
+              name: file.name,
+              type: file.type
+            });
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+
+
+    // 收集模块数据
+    function collectModuleData() {
+      const modules = [];
+      const moduleContainers = document.querySelectorAll('#modulesContainer .module');
+      
+      moduleContainers.forEach((container, index) => {
+        const moduleType = container.dataset.moduleType;
+        const moduleTitle = container.querySelector('.module-title')?.textContent || '';
+        
+        // 根据模块类型收集相应数据
+        const moduleData = {
+          id: `module-${index}`,
+          type: moduleType,
+          title: moduleTitle,
+          content: collectModuleContent(container, moduleType)
+        };
+        
+        modules.push(moduleData);
+      });
+      
+      return modules;
+    }
+
+    // 收集模块内容数据
+    function collectModuleContent(container, moduleType) {
+      const moduleId = container.id;
+      
+      switch (moduleType) {
+        case 'nineGrid':
+          return collectNineGridData(container, moduleId);
+        case 'signIn':
+          return collectSignInData(container, moduleId);
+        case 'collectCards':
+          return collectCardsData(container, moduleId);
+        case 'activityRules':
+          return collectActivityRulesData(container, moduleId);
+        default:
+          console.warn(`未知模块类型: ${moduleType}`);
+          return {};
+      }
+    }
+    
+    // 收集九宫格抽奖数据
+    function collectNineGridData(container, moduleId) {
+      const data = {
+        // 标题背景图
+        titleBg: imageManager.getModule(`${moduleId}-titlebg`),
+        
+        // 九宫格背景图
+        gridBg: imageManager.getModule(`${moduleId}-gridbg`),
+        
+        // 抽奖按钮图
+        drawButton: imageManager.getModule(`${moduleId}-drawbtn`),
+        
+        // 奖品背景图
+        prizeBg: imageManager.getModule(`${moduleId}-prizebg`),
+        
+        // 收集所有奖品数据
+        prizes: []
+      };
+      
+      // 收集9个奖品的数据
+      for (let i = 0; i < 9; i++) {
+        const prizeImage = imageManager.getModule(`${moduleId}-prize-${i}`);
+        if (prizeImage) {
+          data.prizes.push({
+            index: i,
+            image: prizeImage,
+            position: this.getPrizePosition(i) // 获取奖品在九宫格中的位置
+          });
+        }
+      }
+      
+      return data;
+    }
+    
+    // 收集签到数据
+    function collectSignInData(container, moduleId) {
+      return {
+        // 标题图片
+        titleImage: imageManager.getModule(`${moduleId}-title`),
+        
+        // 背景图片
+        backgroundImage: imageManager.getModule(`${moduleId}-bg`),
+        
+        // 签到按钮图片
+        signButton: imageManager.getModule(`${moduleId}-signbtn`),
+        
+        // 日期图标
+        dayIcon: imageManager.getModule(`${moduleId}-dayicon`),
+        
+        // 签到配置（可以扩展更多配置项）
+        config: {
+          daysCount: 7, // 默认7天签到
+          rewardType: 'daily' // 奖励类型
+        }
+      };
+    }
+    
+    // 收集集卡活动数据
+    function collectCardsData(container, moduleId) {
+      return {
+        // 标题图片
+        titleImage: imageManager.getModule(`${moduleId}-title`),
+        
+        // 背景图片
+        backgroundImage: imageManager.getModule(`${moduleId}-bg`),
+        
+        // 卡片背景图
+        cardBg: imageManager.getModule(`${moduleId}-cardbg`),
+        
+        // 合成按钮图
+        combineButton: imageManager.getModule(`${moduleId}-combinebtn`),
+        
+        // 集卡配置
+        config: {
+          cardCount: 6, // 默认6张卡片
+          cardTypes: ['普通卡', '稀有卡', '史诗卡'] // 卡片类型
+        }
+      };
+    }
+    
+    // 收集活动规则数据
+    function collectActivityRulesData(container, moduleId) {
+      return {
+        // 主标题
+        mainTitle: container.querySelector('.activity-rule-item input')?.value || '',
+        
+        // 主标题背景图
+        mainTitleBg: imageManager.getModule(`${moduleId}-titlebg`),
+        
+        // 小标题
+        subTitle: container.querySelector('.small-title-input input')?.value || '',
+        
+        // 小标题背景图
+        subTitleBg: imageManager.getModule(`${moduleId}-subtitlebg`),
+        
+        // 活动规则文本内容
+        text: container.querySelector('.activity-rule-text textarea')?.value || '',
+        
+        // 规则说明图片
+        image: imageManager.getModule(`${moduleId}-image`)
+      };
+    }
+    
+    // 获取奖品在九宫格中的位置
+    function getPrizePosition(index) {
+      // 九宫格位置映射 (3x3网格)
+      const positions = [
+        { row: 0, col: 0 }, // 位置0: 左上
+        { row: 0, col: 1 }, // 位置1: 上中
+        { row: 0, col: 2 }, // 位置2: 右上
+        { row: 1, col: 2 }, // 位置3: 右中
+        { row: 2, col: 2 }, // 位置4: 右下
+        { row: 2, col: 1 }, // 位置5: 下中
+        { row: 2, col: 0 }, // 位置6: 左下
+        { row: 1, col: 0 }, // 位置7: 左中
+        { row: 1, col: 1 }  // 位置8: 中心(抽奖按钮位置)
+      ];
+      
+      return positions[index] || { row: 0, col: 0 };
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeUI();
+    });
+
+    // 初始化UI
+    function initializeUI() {
+      // 初始化颜色输入同步
+      initColorInputs();
+      
+      // 初始化按钮版本选择器
+      const buttonVersionSelect = document.getElementById('buttonVersionSelect');
+      if (buttonVersionSelect) {
+        buttonVersionSelect.addEventListener('change', switchButtonVersion);
+        // 初始化显示
+        switchButtonVersion();
+      }
+      
+      // 初始化折叠按钮
+      initCollapseButtons();
+      
+      // 初始化主题切换
+      initThemeSwitch();
+      
+      // 初始化标签页切换
+      initTabSwitch();
+      
+      // 初始化文件上传预览
+      initFileUploadPreviews();
+    }
+
+    // 初始化折叠按钮
+    function initCollapseButtons() {
+      const collapseButtons = document.querySelectorAll('.collapse-btn');
+      collapseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const targetId = this.dataset.target;
+          const targetElement = document.getElementById(targetId);
+          
+          if (targetElement) {
+            targetElement.classList.toggle('collapsed');
+            this.classList.toggle('collapsed');
+          }
+        });
+      });
+    }
+
+    // 初始化主题切换
+    function initThemeSwitch() {
+      const themeButtons = document.querySelectorAll('.theme-btn');
+      themeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const theme = this.dataset.theme;
+          document.body.className = theme === 'dark' ? 'dark-theme' : '';
+          
+          // 更新按钮状态
+          themeButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+    }
+
+    // 初始化标签页切换
+    function initTabSwitch() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const tabName = this.dataset.tab;
+          switchTab(tabName);
+        });
+      });
+    }
+
+    // 初始化文件上传预览
+    function initFileUploadPreviews() {
+      // 游戏图标上传预览
+      const gameIconUpload = document.getElementById('gameIconUpload');
+      if (gameIconUpload) {
+        gameIconUpload.addEventListener('change', function() {
+          const preview = document.getElementById('gameIconPreview');
+          previewImage(this, preview);
+        });
+      }
+      
+      // 其他文件上传预览
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+          const preview = this.parentElement.querySelector('.img-preview-inline');
+          if (preview) {
+            previewImage(this, preview);
+          }
+        });
+      });
+    }
+
+    // 重置表单（兼容函数）
+    function resetForm() {
+      if (confirm('确定要重置所有设置吗？此操作无法撤销。')) {
+        try {
+          console.log('开始重置...');
+          
+          // 显示加载状态
+          const resetBtn = document.querySelector('[onclick="resetForm()"]');
+          const originalText = resetBtn ? resetBtn.textContent : '';
+          if (resetBtn) {
+            resetBtn.disabled = true;
+            resetBtn.textContent = '重置中...';
+          }
+          
+          const formResetter = new FormResetter();
+          const success = formResetter.resetAll();
+          
+          if (success) {
+            // 通知插件重置已完成
+            pluginComm.postMessage('reset-complete', {});
+            notificationSystem.show('所有设置已重置', 'success');
+          } else {
+            notificationSystem.show('重置失败，请重试', 'error');
+          }
+          
+          // 恢复按钮状态
+          if (resetBtn) {
+            resetBtn.disabled = false;
+            resetBtn.textContent = originalText;
+          }
+          
+        } catch (error) {
+          console.error('重置执行失败:', error);
+          notificationSystem.show(`重置失败: ${error.message}`, 'error');
+          
+          // 恢复按钮状态
+          const resetBtn = document.querySelector('[onclick="resetForm()"]');
+          if (resetBtn) {
+            resetBtn.disabled = false;
+            resetBtn.textContent = '重置';
+          }
+        }
+      }
+    }
+
   </script>
 </body>
 </html>
