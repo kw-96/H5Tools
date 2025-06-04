@@ -355,15 +355,7 @@
       font-weight: normal;
     }
     
-    .dropdown-selector-wide {
-      flex: 1;
-      min-width: 200px;
-      max-width: 100%;
-    }
-    
-    .dropdown-selector-wide .section-dropdown {
-      width: 100%;
-    }
+
     
     .module-action-row {
       justify-content: center;
@@ -676,20 +668,42 @@
       z-index: 10;
     }
     
+    .dropdown-selector-wide {
+      flex: 1;
+      min-width: 200px;
+      max-width: 100%;
+    }
+    
+    .dropdown-selector-wide .section-dropdown {
+      width: 100%;
+    }
+    
     .section-dropdown {
       appearance: none;
       -webkit-appearance: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.15);
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
       font-family: inherit;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       color: #1d1d1f;
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: #ffffff;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      box-shadow: none;
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+    
+    .section-dropdown:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+    
+    .section-dropdown:hover {
+      border-color: rgba(0, 0, 0, 0.2);
     }
     
     /* 主题切换和页脚 */
@@ -1058,9 +1072,18 @@
     }
     
     body.dark-theme .section-dropdown {
-      background-color: rgba(44, 44, 46, 0.8);
-      border-color: rgba(255, 255, 255, 0.15);
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
       color: #f5f5f7;
+    }
+    
+    body.dark-theme .section-dropdown:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+    }
+    
+    body.dark-theme .section-dropdown:hover {
+      border-color: rgba(255, 255, 255, 0.2);
     }
     
     body.dark-theme .page-footer {
@@ -1428,7 +1451,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="iconButtonBgUpload" accept="image/*" style="display:none">
+                <input type="file" id="iconButtonBgUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="document.getElementById('iconButtonBgUpload').click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -1540,12 +1563,13 @@
           <div class="form-group row-layout">
             <label for="moduleTypeSelect">模块类型</label>
             <div class="dropdown-selector-wide">
-              <select id="moduleTypeSelect" class="section-dropdown">
-                <option value="lotteryModule">九宫格抽奖</option>
-                <option value="signInModule">每日签到</option>
-                <option value="collectModule">集卡活动</option>
-                <option value="activityRules">活动内容</option>
-              </select>
+            <select id="moduleTypeSelect" class="section-dropdown">
+              <option value="">请选择模块类型</option>
+              <option value="lotteryModule">九宫格抽奖</option>
+              <option value="signInModule">签到模块</option>
+              <option value="collectModule">集卡模块</option>
+              <option value="activityContentModule">活动详情</option>
+            </select>
             </div>
           </div>
           <div class="form-group row-layout module-action-row">
@@ -1959,10 +1983,10 @@
           </div>
         </div>
 
-        <!-- 活动内容模板 -->
-        <div class="module-template" id="activityRulesTemplate">
+        <!-- 活动详情模板 -->
+        <div class="module-template" id="activityContentModuleTemplate">
           <div class="module-header">
-            <div class="module-title">活动内容</div>
+            <div class="module-title">活动详情</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -1991,14 +2015,14 @@
             <!-- 大标题文案 -->
             <div class="form-group row-layout">
               <label>大标题</label>
-              <input type="text" class="activity-rule-title-input text-input" placeholder="请输入大标题文本">
+              <input type="text" class="activity-content-main-title-input text-input" placeholder="请输入大标题文本">
             </div>
             
             <!-- 大标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="activity-rule-item-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="activity-content-main-title-bg-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -2010,14 +2034,14 @@
             <!-- 小标题文案 -->
             <div class="form-group row-layout">
               <label>小标题</label>
-              <input type="text" class="small-title-input text-input" placeholder="请输入小标题文本">
+              <input type="text" class="activity-content-sub-title-input text-input" placeholder="请输入小标题文本">
             </div>
 
             <!-- 小标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">小标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="small-title-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="activity-content-sub-title-bg-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -2026,18 +2050,18 @@
               </div>
             </div>
             
-            <!-- 文字 -->
+            <!-- 正文内容 -->
             <div class="form-group row-layout">
               <label>正文</label>
-              <textarea class="activity-rule-text-input text-area" placeholder="请输入活动正文内容"></textarea>
+              <textarea class="activity-content-text-input text-area" placeholder="请输入活动详情内容"></textarea>
             </div>
 
-            <!-- 图片 -->
+            <!-- 插图 -->
             <div class="form-group row-layout">
-              <label class="non-interactive-label">图片</label>
+              <label class="non-interactive-label">插图</label>
               <div class="file-upload-btn">
-                <input type="file" class="activity-rule-text-upload" accept="image/*" style="display:none">
-                <button class="upload-btn text-upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="activity-content-image-upload" accept="image/*" style="display:none">
+                <button class="upload-btn activity-content-image-upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -2046,7 +2070,6 @@
             </div>
           </div>
         </div>
-        
         <!-- 更多模板可继续添加 -->
       </div>
 
@@ -2538,7 +2561,7 @@
           nineGrid: () => this.collectNineGridData(moduleEl, moduleId),
           signIn: () => this.collectSignInData(moduleEl, moduleId),
           collectCards: () => this.collectCollectCardsData(moduleEl, moduleId),
-          activityRules: () => this.collectActivityRulesData(moduleEl, moduleId)
+          activityContent: () => this.collectActivityContentData(moduleEl, moduleId)
         };
         
         const collector = collectors[moduleType];
@@ -2554,36 +2577,18 @@
       
       // 获取模块类型
       getModuleType(moduleEl) {
-        const typeMap = {
-          lottery: 'nineGrid',
-          signIn: 'signIn',
-          collect: 'collectCards',
-          activity: 'activityRules'
-        };
-        
-        // 检查模块ID和类名
-        for (const [className, type] of Object.entries(typeMap)) {
-          if (moduleEl.className.includes(className) || moduleEl.id.includes(className)) {
-            return type;
-          }
-        }
-        
-        // 特殊处理九宫格抽奖模块
-        if (moduleEl.id === 'lotteryModuleTemplate' || moduleEl.classList.contains('lottery-module')) {
-          return 'nineGrid';
-        }
-        
-        return '';
+        // 直接使用 dataset 中的模块类型（已经在添加时统一设置）
+        return moduleEl.dataset.moduleType || '';
       }
       
       // 收集九宫格模块数据
       collectNineGridData(moduleEl, moduleId) {
         return {
           mainTitle: moduleEl.querySelector('.big-title-input')?.value || "抽奖活动",
-          titleBgImage: imageManager.getModule(`${moduleId}-title-bg`),
-          gridBgImage: imageManager.getModule(`${moduleId}-grid-bg`), 
-          drawButtonImage: imageManager.getModule(`${moduleId}-draw-btn`),
-          prizeBgImage: imageManager.getModule(`${moduleId}-prize-bg`),
+          titleBgImage: imageManager.getModule(`${moduleId}-titlebg`),
+          gridBgImage: imageManager.getModule(`${moduleId}-gridbg`), 
+          drawButtonImage: imageManager.getModule(`${moduleId}-drawbtn`),
+          prizeBgImage: imageManager.getModule(`${moduleId}-prizebg`),
           prizes: this.collectNineGridPrizes(moduleEl, moduleId)
         };
       }
@@ -2612,13 +2617,13 @@
       }
       
       // 收集活动内容模块数据
-      collectActivityRulesData(moduleEl, moduleId) {
+      collectActivityContentData(moduleEl, moduleId) {
         return {
-          mainTitle: moduleEl.querySelector('.activity-rule-title-input')?.value || "",
-          mainTitleBg: imageManager.getModule(`${moduleId}-titlebg`),
-          subTitle: moduleEl.querySelector('.small-title-input')?.value || "",
-          subTitleBg: imageManager.getModule(`${moduleId}-subtitlebg`),
-          text: moduleEl.querySelector('.activity-rule-text-input')?.value || "",
+          mainTitle: moduleEl.querySelector('.activity-content-main-title-input')?.value || "",
+          mainTitleBg: imageManager.getModule(`${moduleId}-main-title-bg`),
+          subTitle: moduleEl.querySelector('.activity-content-sub-title-input')?.value || "",
+          subTitleBg: imageManager.getModule(`${moduleId}-sub-title-bg`),
+          text: moduleEl.querySelector('.activity-content-text-input')?.value || "",
           image: imageManager.getModule(`${moduleId}-image`)
         };
       }
@@ -2723,6 +2728,25 @@
         }
       }
       
+      async handleUpload(input, storageKey, isModule = false) {
+        if (!input.files?.[0]) return;
+        
+        console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
+        
+        try {
+          const imageData = await this.processImageFile(input.files[0], storageKey, isModule);
+          
+          // 验证图片是否正确存储
+          const storedData = isModule ? imageManager.getModule(storageKey) : imageManager.get(storageKey);
+          console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
+          
+          notificationSystem.show('图片上传成功', 'success');
+        } catch (error) {
+          console.error(`图片上传失败 ${storageKey}:`, error);
+          notificationSystem.show(`上传失败: ${error.message}`, 'error');
+        }
+      }
+
       async handleModuleImageUpload(e) {
         try {
           const input = e.target;
@@ -2740,6 +2764,52 @@
           console.error('模块图片上传失败:', error);
           notificationSystem.show(`模块图片上传失败: ${error.message}`, 'error');
         }
+      }
+      
+      getModuleStorageKey(input, moduleId, index) {
+        const classMap = {
+          'derived-item-upload': `${moduleId}-titlebg`,
+          'nine-grid-bg': `${moduleId}-gridbg`,
+          'draw-btn': `${moduleId}-drawbtn`,
+          'prize-bg': `${moduleId}-prizebg`,
+          'sign-in-title-upload': `${moduleId}-title`,
+          'sign-in-bg-upload': `${moduleId}-bg`,
+          'day-icon-upload': `${moduleId}-dayicon`,
+          'sign-in-btn-upload': `${moduleId}-signbtn`,
+          'collect-title-upload': `${moduleId}-title`,
+          'collect-bg-upload': `${moduleId}-bg`,
+          'card-bg-upload': `${moduleId}-cardbg`,
+          'combine-button-upload': `${moduleId}-combinebtn`,
+          'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
+          'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
+          'activity-content-image-upload': `${moduleId}-image`
+        };
+        
+        // 特殊处理奖品图片上传
+        if (input.classList.contains('prize-upload')) {
+          const prizeIndex = this.getPrizeIndex(input);
+          return `${moduleId}-prize-${prizeIndex}`;
+        }
+        
+        // 检查所有可能的类名匹配
+        for (const [className, key] of Object.entries(classMap)) {
+          if (input.classList.contains(className)) {
+            return key;
+          }
+        }
+        
+        // 调试信息
+        console.log(`未找到匹配的存储键，输入类名:`, input.className, `模块ID: ${moduleId}`);
+        return null;
+      }
+      
+      // 获取奖品在九宫格中的索引
+      getPrizeIndex(input) {
+        const moduleEl = input.closest('.module');
+        if (!moduleEl) return 0;
+        
+        const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
+        return prizeInputs.indexOf(input);
       }
 
       // 获取图片尺寸
@@ -3030,32 +3100,67 @@
       }
       
       addModule(moduleType) {
-        const template = document.getElementById(`${moduleType}Template`);
-        if (!template) return;
+        // 统一使用 moduleType + "Template" 的命名规则
+        const templateId = `${moduleType}Template`;
+        const template = document.getElementById(templateId);
         
-        const moduleEl = template.cloneNode(true);
-        const moduleId = `module-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        if (!template) {
+          console.error(`找不到模板: ${templateId}`);
+          notificationSystem.show(`模板 ${templateId} 不存在`, 'error');
+          return;
+        }
         
-        moduleEl.id = moduleId;
-        moduleEl.classList.remove('module-template');
-        moduleEl.classList.add('module');
+        // 创建新模块
+        this.moduleCounter++;
+        const moduleId = `module-${this.moduleCounter}`;
+        const newModule = template.cloneNode(true);
         
-        this.bindModuleEvents(moduleEl);
+        newModule.id = moduleId;
+        newModule.className = 'module';
+        newModule.style.display = 'block';
+        
+        // 统一模块类型标识符
+        const moduleTypeMapping = {
+          'lotteryModule': 'nineGrid',
+          'signInModule': 'signIn', 
+          'collectModule': 'collectCards',
+          'activityContentModule': 'activityContent'
+        };
+        
+        newModule.dataset.moduleType = moduleTypeMapping[moduleType] || moduleType;
+        
+        this.bindModuleEvents(newModule);
         
         const container = document.getElementById('modulesContainer');
-        container.appendChild(moduleEl);
+        const emptyMessage = container.querySelector('.empty-modules-message');
+        if (emptyMessage) {
+          emptyMessage.style.display = 'none';
+        }
+        
+        container.appendChild(newModule);
         
         this.updateModuleCount();
         
         // 滚动到新模块
         requestAnimationFrame(() => {
-          moduleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          newModule.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
         
         // 触发模块添加事件
         document.dispatchEvent(new CustomEvent('moduleAdded', { 
           detail: { moduleId } 
         }));
+      }
+      
+      // 模块类型映射
+      getModuleTypeMapping(templateType) {
+        const typeMap = {
+          'lotteryModule': 'nineGrid',
+          'signInModule': 'signIn', 
+          'collectModule': 'collectCards',
+          'activityContentModule': 'activityContent'
+        };
+        return typeMap[templateType] || templateType;
       }
       
       bindModuleEvents(moduleEl) {
@@ -3110,14 +3215,28 @@
       }
       
       deleteModule(moduleEl) {
-        moduleEl.style.opacity = '0';
-        moduleEl.style.transform = 'translateY(-10px)';
-        moduleEl.style.transition = 'all 0.3s ease';
-        
-        setTimeout(() => {
+        if (confirm('确定要删除这个模块吗？')) {
+          // 获取模块ID用于清理相关数据
+          const moduleId = moduleEl.id;
+          
+          // 清理该模块的图片数据
+          if (moduleId) {
+            const keys = Object.keys(imageManager.moduleData);
+            keys.forEach(key => {
+              if (key.startsWith(moduleId)) {
+                delete imageManager.moduleData[key];
+              }
+            });
+          }
+          
           moduleEl.remove();
           this.updateModuleCount();
-        }, 300);
+          
+          // 触发模块删除事件
+          document.dispatchEvent(new CustomEvent('moduleDeleted', { 
+            detail: { moduleId } 
+          }));
+        }
       }
       
       moveModuleUp(moduleEl) {
@@ -3135,20 +3254,17 @@
       }
       
       updateModuleCount() {
-        const container = document.getElementById('modulesContainer');
-        const emptyMessage = document.getElementById('emptyModulesMessage');
         const counter = document.getElementById('moduleCounter');
-        
-        if (!container) return;
-        
-        const moduleCount = container.querySelectorAll('.module').length;
-        
-        if (emptyMessage) {
-          emptyMessage.style.display = moduleCount > 0 ? 'none' : 'flex';
-        }
+        const modules = document.querySelectorAll('#modulesContainer .module');
+        const emptyMessage = document.getElementById('emptyModulesMessage');
         
         if (counter) {
-          counter.textContent = moduleCount;
+          counter.textContent = modules.length;
+        }
+        
+        // 显示或隐藏空状态消息
+        if (emptyMessage) {
+          emptyMessage.style.display = modules.length === 0 ? 'block' : 'none';
         }
       }
     }
@@ -3169,6 +3285,10 @@
           { id: 'headerImage', key: 'headerImage' },
           { id: 'titleUpload', key: 'titleUpload' },
           { id: 'gameIconUpload', key: 'gameIcon' },
+          { id: 'iconButtonBgUpload', key: 'iconButtonBg' },
+          { id: 'singleButtonBgUpload', key: 'singleButtonBg' },
+          { id: 'leftButtonBgUpload', key: 'leftButtonBg' },
+          { id: 'rightButtonBgUpload', key: 'rightButtonBg' },
           { id: 'footerLogoUpload', key: 'footerLogo' },
           { id: 'footerBgUpload', key: 'footerBg' },
           { id: 'footerImageUpload', key: 'rulesBg' }
@@ -3181,12 +3301,16 @@
           }
         });
       }
+
+      handleImageUpload(e, storageKey) {
+        this.handleUpload(e.target, storageKey, false);
+      }      
       
       bindModuleImageUploaders() {
         // 使用事件委托处理模块内的图片上传
         document.addEventListener('change', (e) => {
-          if (e.target.type === 'file' && e.target.accept === 'image/*') {
-            this.handleModuleImageUpload(e);
+          if (e.target.type === 'file' && e.target.accept === 'image/*' && e.target.closest('.module')) {
+            fileProcessor.handleModuleImageUpload(e);
           }
         });
       }
@@ -3217,9 +3341,9 @@
           'collect-bg-upload': `${moduleId}-bg`,
           'card-bg-upload': `${moduleId}-cardbg`,
           'combine-button-upload': `${moduleId}-combinebtn`,
-          'activity-rule-item-upload': `${moduleId}-titlebg`,
-          'small-title-upload': `${moduleId}-subtitlebg`,
-          'activity-rule-text-upload': `${moduleId}-image`
+          'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
+          'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
+          'activity-content-image-upload': `${moduleId}-image`
         };
         
         // 特殊处理奖品图片上传
@@ -3252,7 +3376,9 @@
         
         try {
           const imageData = await fileProcessor.processImageFile(input.files[0], storageKey, isModule);
-          this.updatePreview(input);
+          
+          // 更新预览
+          this.updatePreview(input, storageKey);
           
           // 验证图片是否正确存储
           const storedData = isModule ? imageManager.getModule(storageKey) : imageManager.get(storageKey);
@@ -3265,28 +3391,28 @@
         }
       }
       
-      updatePreview(input) {
+      updatePreview(input, storageKey) {
         const file = input.files[0];
         if (!file) return;
         
         const reader = new FileReader();
         reader.onload = (e) => {
-          const previewContainer = this.findPreviewContainer(input);
+          const previewContainer = this.findPreviewContainer(input, storageKey);
           if (previewContainer) {
-            this.renderPreview(previewContainer, e.target.result);
+            this.renderPreview(previewContainer, e.target.result, storageKey);
           }
         };
         reader.readAsDataURL(file);
       }
       
-      findPreviewContainer(input) {
-        const uploadBtn = input.nextElementSibling;
-        if (!uploadBtn) return null;
-        
+      findPreviewContainer(input, storageKey) {
         // 特殊处理游戏icon预览
-        if (input.id === 'gameIconUpload') {
+        if (storageKey === 'gameIcon') {
           return document.getElementById('gameIconPreview');
         }
+        
+        const uploadBtn = input.nextElementSibling;
+        if (!uploadBtn) return null;
         
         if (input.classList.contains('prize-upload')) {
           return uploadBtn.querySelector('.preview-container');
@@ -3295,15 +3421,16 @@
         return uploadBtn.querySelector('.img-preview-inline');
       }
       
-      renderPreview(container, src) {
+      renderPreview(container, src, storageKey) {
         container.innerHTML = '';
         const img = document.createElement('img');
         img.src = src;
         img.alt = "Preview";
         
         // 游戏icon使用特殊样式
-        if (container.id === 'gameIconPreview') {
+        if (storageKey === 'gameIcon') {
           img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px';
+          container.style.border = '1px solid rgba(0, 113, 227, 0.5)';
         } else {
           img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
         }
@@ -3317,7 +3444,7 @@
         }
       }
     }
-    
+
     // ==================== 主题管理器 ====================
     
     class ThemeManager {
@@ -3595,14 +3722,27 @@
       notificationSystem.show(message, type);
     }
 
-    // 统一的图片预览函数
+    // 通用图片预览函数
     function previewImage(input, previewElement) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          previewElement.innerHTML = `<img src="${e.target.result}" alt="预览图片">`;
-        };
-        reader.readAsDataURL(input.files[0]);
+      if (!input.files || input.files.length === 0) return;
+      
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        alert('请选择有效的图片文件');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        if (previewElement) {
+          previewElement.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        }
+      };
+      reader.readAsDataURL(file);
+      
+      // 处理模块图片上传
+      if (input.closest('.module')) {
+        fileProcessor.handleModuleImageUpload({ target: input });
       }
     }
 
@@ -3780,47 +3920,15 @@
           return collectSignInData(container, moduleId);
         case 'collectCards':
           return collectCardsData(container, moduleId);
-        case 'activityRules':
-          return collectActivityRulesData(container, moduleId);
+        case 'activityContent':
+          return collectActivityContentData(container, moduleId);
         default:
           console.warn(`未知模块类型: ${moduleType}`);
           return {};
       }
     }
     
-    // 收集九宫格抽奖数据
-    function collectNineGridData(container, moduleId) {
-      const data = {
-        // 标题背景图
-        titleBg: imageManager.getModule(`${moduleId}-titlebg`),
-        
-        // 九宫格背景图
-        gridBg: imageManager.getModule(`${moduleId}-gridbg`),
-        
-        // 抽奖按钮图
-        drawButton: imageManager.getModule(`${moduleId}-drawbtn`),
-        
-        // 奖品背景图
-        prizeBg: imageManager.getModule(`${moduleId}-prizebg`),
-        
-        // 收集所有奖品数据
-        prizes: []
-      };
-      
-      // 收集9个奖品的数据
-      for (let i = 0; i < 9; i++) {
-        const prizeImage = imageManager.getModule(`${moduleId}-prize-${i}`);
-        if (prizeImage) {
-          data.prizes.push({
-            index: i,
-            image: prizeImage,
-            position: this.getPrizePosition(i) // 获取奖品在九宫格中的位置
-          });
-        }
-      }
-      
-      return data;
-    }
+
     
     // 收集签到数据
     function collectSignInData(container, moduleId) {
@@ -3868,25 +3976,25 @@
       };
     }
     
-    // 收集活动规则数据
-    function collectActivityRulesData(container, moduleId) {
+    // 收集活动内容数据
+    function collectActivityContentData(container, moduleId) {
       return {
         // 主标题
-        mainTitle: container.querySelector('.activity-rule-item input')?.value || '',
+        mainTitle: container.querySelector('.activity-content-main-title-input')?.value || '',
         
         // 主标题背景图
-        mainTitleBg: imageManager.getModule(`${moduleId}-titlebg`),
+        mainTitleBg: imageManager.getModule(`${moduleId}-main-title-bg`),
         
         // 小标题
-        subTitle: container.querySelector('.small-title-input input')?.value || '',
+        subTitle: container.querySelector('.activity-content-sub-title-input')?.value || '',
         
         // 小标题背景图
-        subTitleBg: imageManager.getModule(`${moduleId}-subtitlebg`),
+        subTitleBg: imageManager.getModule(`${moduleId}-sub-title-bg`),
         
-        // 活动规则文本内容
-        text: container.querySelector('.activity-rule-text textarea')?.value || '',
+        // 活动内容文本
+        text: container.querySelector('.activity-content-text-input')?.value || '',
         
-        // 规则说明图片
+        // 插图
         image: imageManager.getModule(`${moduleId}-image`)
       };
     }
