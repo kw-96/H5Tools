@@ -98,15 +98,6 @@ interface ActivityContentData {
   image: Uint8Array | ImageInfo | null;     // 活动内容插图
 }
 
-// 活动规则内容接口
-interface ActivityRulesContent {
-  mainTitle: string;            // 主标题
-  mainTitleBg: Uint8Array | null; // 主标题背景图片
-  subTitle: string;             // 副标题
-  subTitleBg: Uint8Array | null;  // 副标题背景图片
-  text: string;                 // 规则文本内容
-  image: Uint8Array | null;     // 规则相关图片
-}
 
 // 签到内容接口
 interface SignInContent {
@@ -289,6 +280,116 @@ const NodeUtils = {
   }
 };
 
+// ==================== 图片处理模块 ====================
+
+// 统一的图片处理类
+class ImageNodeBuilder {
+  // 创建图片对象
+  static async createImage(bytes: Uint8Array): Promise<Image | null> {
+    try {
+      return figma.createImage(bytes);
+    } catch (error) {
+      console.error('图片创建失败:', error);
+      return null;
+    }
+  }
+
+  // 创建图片填充
+  static async createImageFill(bytes: Uint8Array, scaleMode: 'FILL' | 'FIT' = 'FILL'): Promise<SolidPaint | ImagePaint> {
+    const image = await this.createImage(bytes);
+    
+    if (image) {
+      return {
+        type: 'IMAGE',
+        imageHash: image.hash,
+        scaleMode: scaleMode
+      } as ImagePaint;
+    }
+    
+    // 失败时返回灰色填充
+    return ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 });
+  }
+
+  // 直接插入图片节点，使用前端获取的真实尺寸
+  static async insertImage(
+    imageData: ImageInfo | Uint8Array, 
+    name: string, 
+    defaultWidth: number = 800, 
+    defaultHeight: number = 600
+  ): Promise<RectangleNode | null> {
+    try {
+      let uint8Array: Uint8Array;
+      let width: number;
+      let height: number;
+
+      // 处理不同的数据格式
+      if (imageData && typeof imageData === 'object' && 'data' in imageData) {
+        // 新格式：包含尺寸信息的ImageInfo
+        uint8Array = imageData.data;
+        width = imageData.width;
+        height = imageData.height;
+      } else if (imageData instanceof Uint8Array) {
+        // 旧格式：纯Uint8Array
+        uint8Array = imageData;
+        width = defaultWidth;
+        height = defaultHeight;
+      } else {
+        console.warn(`图片数据格式错误: ${name}`);
+        return null;
+      }
+
+      if (!uint8Array || uint8Array.length === 0) {
+        console.warn(`图片数据为空: ${name}`);
+        return null;
+      }
+
+      const image = await this.createImage(uint8Array);
+      if (!image) {
+        console.warn(`图片创建失败: ${name}`);
+        return null;
+      }
+
+      // 直接创建图片节点
+      const imageNode = figma.createRectangle();
+      imageNode.name = name;
+      
+      // 使用真实尺寸
+      imageNode.resize(width, height);
+      
+      // 应用图片填充
+      imageNode.fills = [{
+        type: 'IMAGE',
+        imageHash: image.hash,
+        scaleMode: 'FILL'
+      }];
+
+      return imageNode;
+    } catch (error) {
+      console.error(`图片插入失败: ${name}`, error);
+      return null;
+    }
+  }
+
+  // 为现有节点设置图片填充
+  static async setImageFill(
+    node: FrameNode | RectangleNode, 
+    imageData: ImageInfo | Uint8Array | null, 
+    scaleMode: 'FILL' | 'FIT' = 'FILL'
+  ): Promise<void> {
+    if (!imageData) return;
+
+    const uint8Array = Utils.extractUint8Array(imageData);
+    if (!uint8Array) return;
+
+    try {
+      const imageFill = await this.createImageFill(uint8Array, scaleMode);
+      node.fills = [imageFill];
+    } catch (error) {
+      console.error('设置图片填充失败:', error);
+    }
+  }
+}
+
 // 辅助函数-创建标题容器
 async function createTitleContainer(
   title: string, 
@@ -313,9 +414,10 @@ async function createTitleContainer(
         height
       );
       if (backgroundNode) {
-        // 上下左右居中对齐
-        backgroundNode.x = (width - backgroundNode.width) / 2;
-        backgroundNode.y = (height - backgroundNode.height) / 2;
+        // 背景图片完全填充容器
+        backgroundNode.x = 0;
+        backgroundNode.y = 0;
+        backgroundNode.resize(width, height);
         container.appendChild(backgroundNode);
       }
     } catch (error) {
@@ -325,14 +427,209 @@ async function createTitleContainer(
     }
   }
 
-  // 添加标题文本
-  const titleText = await NodeUtils.createText(title, fontSize, fontWeight);
-  titleText.resize(width, titleText.height);
-  titleText.textAlignHorizontal = "CENTER";
-  titleText.y = (height - titleText.height) / 2;
-  
-  container.appendChild(titleText);
+  // 添加标题文本（只有当标题不为空时才添加）
+  if (title && title.trim() !== '') {
+    const titleText = await NodeUtils.createText(title, fontSize, fontWeight);
+    titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 设置文字为白色
+    titleText.resize(width, titleText.height);
+    titleText.textAlignHorizontal = "CENTER";
+    titleText.y = (height - titleText.height) / 2;
+    
+    container.appendChild(titleText);
+  }
   return container;
+}
+
+
+// ==================== 羽化蒙版工具函数 ====================
+
+/**
+ * 羽化蒙版工具类
+ * 用于创建羽化效果，解决模块之间的背景衔接问题
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+class FeatherMaskUtils {
+  
+  /**
+   * 为节点创建羽化蒙版
+   * @param node 需要添加蒙版的节点
+   * @param parent 蒙版的父容器（可选，默认为节点的父容器）
+   * @returns 返回创建的羽化蒙版组
+   */
+  static createFeatherMask(
+    node: FrameNode | RectangleNode, 
+    parent?: BaseNode & ChildrenMixin
+  ): GroupNode {
+    try {
+      const targetParent = parent || node.parent || figma.currentPage;
+      
+      // 1. 计算模糊参数
+      const blurRadius = node.width * 0.1;
+      
+      // 2. 创建蒙版矩形
+      const maskRect = figma.createRectangle();
+      maskRect.name = "蒙版";
+      maskRect.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+      
+      // 3. 计算并设置矩形大小
+      const rectWidth = node.width + blurRadius * 2 + 25;
+      const rectHeight = node.height - blurRadius * 2;
+      maskRect.resize(rectWidth, rectHeight);
+      
+      // 4. 将矩形添加到父容器并创建组
+      targetParent.appendChild(maskRect);
+      const featherGroup = figma.group([maskRect], targetParent);
+      featherGroup.name = "羽化蒙版";
+      
+      // 5. 设置图层模糊效果
+      try {
+        featherGroup.effects = [{
+          type: "LAYER_BLUR",
+          radius: blurRadius,
+          visible: true
+        } as any];
+      } catch (effectError) {
+        console.warn('设置模糊效果失败，跳过此步骤:', effectError);
+      }
+      
+      // 6. 调整蒙版矩形位置（相对于组内坐标）
+      maskRect.x = -(rectWidth - node.width) / 2;
+      maskRect.y = -(rectHeight - node.height) / 2;
+      
+      // 7. 设置为剪切蒙版
+      featherGroup.isMask = true;
+      
+      console.log(`羽化蒙版创建成功: 模糊半径=${blurRadius.toFixed(1)}px, 蒙版尺寸=${rectWidth.toFixed(1)}x${rectHeight.toFixed(1)}`);
+      
+      return featherGroup;
+      
+    } catch (error) {
+      console.error('创建羽化蒙版失败:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * 为节点添加羽化蒙版并重新组织结构
+   * @param node 需要添加蒙版的节点
+   * @returns 返回包含羽化效果的容器组
+   */
+  static addFeatherMaskToNode(node: FrameNode | RectangleNode): GroupNode | null {
+    try {
+      // 保存原始信息
+      const originalParent = node.parent;
+      const originalX = node.x;
+      const originalY = node.y;
+      const originalName = node.name;
+      
+      if (!originalParent) {
+        console.warn('节点没有父容器，无法添加羽化蒙版');
+        return null;
+      }
+      
+      // 获取节点在父容器中的索引
+      const nodeIndex = originalParent.children.indexOf(node);
+      
+      // 创建羽化蒙版（在当前页面临时创建）
+      const featherMask = this.createFeatherMask(node, figma.currentPage);
+      
+      // 从原始父容器中移除节点
+      node.remove();
+      
+      // 将节点和羽化蒙版添加到原始父容器
+      originalParent.insertChild(nodeIndex, node);
+      originalParent.insertChild(nodeIndex + 1, featherMask);
+      
+      // 创建容器组（羽化蒙版在前，被蒙版节点在后，确保正确的层级关系）
+      const containerGroup = figma.group([featherMask, node], originalParent);
+      containerGroup.name = originalName;
+      containerGroup.x = originalX;
+      containerGroup.y = originalY;
+      
+      // 重置组内元素的相对位置
+      node.x = 0;
+      node.y = 0;
+      featherMask.x = 0;
+      featherMask.y = 0;
+      
+      console.log('羽化蒙版已应用到节点，创建了包含组:', containerGroup.name);
+      
+      return containerGroup;
+      
+    } catch (error) {
+      console.error('添加羽化蒙版到节点失败:', error);
+      return null;
+    }
+  }
+  
+  /**
+   * 创建自定义羽化蒙版
+   * @param node 需要添加蒙版的节点
+   * @param parent 蒙版的父容器
+   * @param blurRadius 自定义模糊半径（可选）
+   * @param maskHeight 自定义蒙版高度（可选）
+   * @param offsetY 蒙版Y轴偏移量（可选）
+   * @returns 返回创建的羽化蒙版组
+   */
+  static createCustomFeatherMask(
+    node: FrameNode | RectangleNode,
+    parent: BaseNode & ChildrenMixin,
+    blurRadius?: number,
+    maskHeight?: number,
+    offsetY?: number
+  ): GroupNode {
+    try {
+      // 使用自定义参数或默认计算
+      const radius = blurRadius || node.width * 0.1;
+      const rectWidth = node.width + radius * 2 + 25;
+      const rectHeight = maskHeight || (node.height - radius * 2);
+      
+      // 创建蒙版矩形
+      const maskRect = figma.createRectangle();
+      maskRect.name = "蒙版";
+      maskRect.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+      maskRect.resize(rectWidth, rectHeight);
+      
+      // 添加到父容器并创建组
+      parent.appendChild(maskRect);
+      const featherGroup = figma.group([maskRect], parent);
+      featherGroup.name = "羽化蒙版";
+      
+      // 设置模糊效果
+      try {
+        featherGroup.effects = [{
+          type: "LAYER_BLUR",
+          radius: radius,
+          visible: true
+        } as any];
+      } catch (effectError) {
+        console.warn('设置模糊效果失败:', effectError);
+      }
+      
+      // 设置位置：1. 矩形要与头图图片节点水平居中
+      maskRect.x = 0; // 水平居中，相对于组的中心位置
+      maskRect.y = offsetY || (-(rectHeight - node.height) / 2);
+      
+      // 设置为剪切蒙版
+      featherGroup.isMask = true;
+      
+      console.log(`自定义羽化蒙版创建成功: 模糊半径=${radius.toFixed(1)}px, 蒙版尺寸=${rectWidth.toFixed(1)}x${rectHeight.toFixed(1)}`);
+      
+      return featherGroup;
+      
+    } catch (error) {
+      console.error('创建自定义羽化蒙版失败:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * 简化版本：为节点添加羽化蒙版（保持接口兼容性）
+   * @param node 需要添加蒙版的节点
+   */
+  static addFeatherMaskToNodeSimple(node: FrameNode | RectangleNode): void {
+    this.addFeatherMaskToNode(node);
+  }
 }
 
 // ==================== 主程序入口 ====================
@@ -548,13 +845,17 @@ class H5PrototypeBuilder {
       this.createGameInfoModuleIfNeeded(),   // 创建游戏信息模块（如果需要）
       ...this.createCustomModules(),         // 创建自定义模块（展开数组）
       this.createRulesModuleIfNeeded(),      // 创建规则模块（如果需要）
-      this.createFooterModule()              // 创建底部模块
+      this.createFooterModuleIfNeeded()              // 创建底部模块
     ]);
   }
 
   private async createHeaderModuleIfNeeded(): Promise<FrameNode | null> {
     if (this.config.headerImage || this.config.titleUpload) {
-      return createHeaderModule(this.config.headerImage, this.config.titleUpload);
+      const module = await createHeaderModule(this.config.headerImage, this.config.titleUpload);
+      if (module) {
+        module.layoutAlign = "CENTER";
+        return module;
+      }
     }
     return null;
   }
@@ -576,18 +877,37 @@ class H5PrototypeBuilder {
   }
 
   private async createRulesModuleIfNeeded(): Promise<FrameNode | null> {
-    if (this.config.rulesContent) {
+    // 检查是否有任何活动规则相关内容
+    const hasRulesTitle = this.config.rulesTitle && this.config.rulesTitle.trim() !== '';
+    const hasRulesBgImage = this.config.rulesBgImage !== null && this.config.rulesBgImage !== undefined;
+    const hasRulesContent = this.config.rulesContent && this.config.rulesContent.trim() !== '';
+    
+    // 只有当标题文案、标题背景图或活动规则内容任一存在时才创建模块
+    if (hasRulesTitle || hasRulesBgImage || hasRulesContent) {
+      console.log('创建活动规则模块，因为存在以下内容：', {
+        hasRulesTitle,
+        hasRulesBgImage,
+        hasRulesContent
+      });
+      
       const module = await createRulesModule(this.config);
       module.layoutAlign = "CENTER";
       return module;
     }
+    
+    console.log('跳过活动规则模块创建：没有任何规则相关内容');
     return null;
   }
 
-  private async createFooterModule(): Promise<FrameNode> {
-    const module = await createFooterModule(this.config);
-    module.layoutAlign = "STRETCH";
-    return module;
+  private async createFooterModuleIfNeeded(): Promise<FrameNode | null> {
+    if (this.config.footerLogo || this.config.footerBg) {
+      const module = await createFooterModule(this.config);
+      if (module) {
+        module.layoutAlign = "CENTER";
+        return module;
+      }
+    }
+    return null;
   }
 
   private finalizeLayout(): void {
@@ -612,115 +932,6 @@ async function createH5Prototype(config: H5Config): Promise<FrameNode> {
   }
 }
 
-// ==================== 图片处理模块 ====================
-
-// 统一的图片处理类
-class ImageNodeBuilder {
-  // 创建图片对象
-  static async createImage(bytes: Uint8Array): Promise<Image | null> {
-    try {
-      return figma.createImage(bytes);
-    } catch (error) {
-      console.error('图片创建失败:', error);
-      return null;
-    }
-  }
-
-  // 创建图片填充
-  static async createImageFill(bytes: Uint8Array, scaleMode: 'FILL' | 'FIT' = 'FILL'): Promise<SolidPaint | ImagePaint> {
-    const image = await this.createImage(bytes);
-    
-    if (image) {
-      return {
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: scaleMode
-      } as ImagePaint;
-    }
-    
-    // 失败时返回灰色填充
-    return ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 });
-  }
-
-  // 直接插入图片节点，使用前端获取的真实尺寸
-  static async insertImage(
-    imageData: ImageInfo | Uint8Array, 
-    name: string, 
-    defaultWidth: number = 800, 
-    defaultHeight: number = 600
-  ): Promise<RectangleNode | null> {
-    try {
-      let uint8Array: Uint8Array;
-      let width: number;
-      let height: number;
-
-      // 处理不同的数据格式
-      if (imageData && typeof imageData === 'object' && 'data' in imageData) {
-        // 新格式：包含尺寸信息的ImageInfo
-        uint8Array = imageData.data;
-        width = imageData.width;
-        height = imageData.height;
-      } else if (imageData instanceof Uint8Array) {
-        // 旧格式：纯Uint8Array
-        uint8Array = imageData;
-        width = defaultWidth;
-        height = defaultHeight;
-      } else {
-        console.warn(`图片数据格式错误: ${name}`);
-        return null;
-      }
-
-      if (!uint8Array || uint8Array.length === 0) {
-        console.warn(`图片数据为空: ${name}`);
-        return null;
-      }
-
-      const image = await this.createImage(uint8Array);
-      if (!image) {
-        console.warn(`图片创建失败: ${name}`);
-        return null;
-      }
-
-      // 直接创建图片节点
-      const imageNode = figma.createRectangle();
-      imageNode.name = name;
-      
-      // 使用真实尺寸
-      imageNode.resize(width, height);
-      
-      // 应用图片填充
-      imageNode.fills = [{
-        type: 'IMAGE',
-        imageHash: image.hash,
-        scaleMode: 'FILL'
-      }];
-
-      return imageNode;
-    } catch (error) {
-      console.error(`图片插入失败: ${name}`, error);
-      return null;
-    }
-  }
-
-  // 为现有节点设置图片填充
-  static async setImageFill(
-    node: FrameNode | RectangleNode, 
-    imageData: ImageInfo | Uint8Array | null, 
-    scaleMode: 'FILL' | 'FIT' = 'FILL'
-  ): Promise<void> {
-    if (!imageData) return;
-
-    const uint8Array = Utils.extractUint8Array(imageData);
-    if (!uint8Array) return;
-
-    try {
-      const imageFill = await this.createImageFill(uint8Array, scaleMode);
-      node.fills = [imageFill];
-    } catch (error) {
-      console.error('设置图片填充失败:', error);
-    }
-  }
-}
 
 // ==================== 模块创建器 ====================
 
@@ -728,7 +939,19 @@ class ImageNodeBuilder {
 async function createHeaderModule(
   headerImage: ImageInfo | null, 
   titleUpload: ImageInfo | null
-): Promise<FrameNode> {
+): Promise<FrameNode | null> {
+  // 如果只有标题图片没有头图，则跳过头图模块的创建
+  if (!headerImage && titleUpload) {
+    console.log('跳过头图模块创建：只有标题图片没有头图');
+    return null;
+  }
+
+  // 如果既没有头图也没有标题图片，也跳过创建
+  if (!headerImage && !titleUpload) {
+    console.log('跳过头图模块创建：没有任何图片');
+    return null;
+  }
+
   // 固定尺寸为1080x1080px
   const frame = NodeUtils.createFrame("头图", 1080, 1080);
   frame.clipsContent = true; // 打开裁剪内容
@@ -738,12 +961,14 @@ async function createHeaderModule(
   frame.layoutMode = "NONE";
 
   let currentY = 0; // 用于垂直排列
+  let headerNode: RectangleNode | null = null;
+  let titleNode: RectangleNode | null = null;
 
   // 添加头图
   if (headerImage) {
     try {
       // 直接插入头图，不调整尺寸
-      const headerNode = await ImageNodeBuilder.insertImage(headerImage, "头图图片");
+      headerNode = await ImageNodeBuilder.insertImage(headerImage, "头图图片");
       
       if (headerNode) {
         frame.appendChild(headerNode); // 先将图片添加到画板
@@ -769,7 +994,7 @@ async function createHeaderModule(
   if (titleUpload) {
     try {
       // 直接插入标题图片，不调整尺寸
-      const titleNode = await ImageNodeBuilder.insertImage(titleUpload, "标题图片");
+      titleNode = await ImageNodeBuilder.insertImage(titleUpload, "标题图片");
       
       if (titleNode) {
         frame.appendChild(titleNode);
@@ -790,8 +1015,144 @@ async function createHeaderModule(
     }
   }
 
+  // 调整头图容器高度
+  adjustHeaderFrameHeight(frame, headerNode, titleNode);
+
+  // 1. 在完成头图模块的创建后，对头图图片节点进行添加羽化蒙版
+  if (headerNode) {
+    try {
+      console.log('开始为头图图片添加羽化蒙版');
+      addFeatherMaskToHeaderImage(headerNode, frame);
+      console.log('头图图片羽化蒙版添加完成');
+    } catch (error) {
+      console.error('头图图片添加羽化蒙版失败:', error);
+    }
+  }
+
   return frame;
 }
+
+// 调整头图容器高度的辅助函数
+function adjustHeaderFrameHeight(
+  frame: FrameNode, 
+  headerNode: RectangleNode | null, 
+  titleNode: RectangleNode | null
+): void {
+  // 如果只有头图，没有标题图片
+  if (headerNode && !titleNode) {
+    // 无论头图高度大于或小于1080px，都将容器高度调整为头图高度
+    console.log(`调整头图容器高度：从1080px调整为${headerNode.height}px`);
+    frame.resize(1080, headerNode.height);
+  }
+  // 如果既有头图又有标题图片
+  else if (headerNode && titleNode) {
+    // 先将容器高度调整为头图高度
+    console.log(`调整头图容器高度：从1080px调整为${headerNode.height}px（匹配头图高度）`);
+    frame.resize(1080, headerNode.height);
+    
+    // 重新设置标题图片位置：底部对齐调整后的容器
+    titleNode.y = headerNode.height - titleNode.height; // 底部对齐头图高度的容器
+    titleNode.constraints = {
+      horizontal: "CENTER",
+      vertical: "MAX" // 保持底部对齐
+    };
+  }
+  // 注意：不再处理只有标题图片没有头图的情况，因为这种情况下不会创建头图模块
+}
+
+// 为头图图片添加羽化蒙版的专用函数
+function addFeatherMaskToHeaderImage(
+  headerNode: RectangleNode, 
+  frame: FrameNode
+): void {
+  try {
+    console.log('开始为头图添加羽化蒙版');
+    
+    // 1. 先对头图图片节点复制一份
+    const headerNodeCopy = headerNode.clone();
+    headerNodeCopy.name = "头图图片";
+    
+    // 保存原始信息
+    const originalX = headerNode.x;
+    const originalY = headerNode.y;
+    const originalConstraints = headerNode.constraints;
+    
+    console.log('头图节点已复制');
+    
+    // 2. 对原来的头图图片节点进行羽化蒙版操作
+    // 计算参数
+    // 计算模糊半径，为头图宽度的10%
+    const blurRadius = headerNode.width * 0.1;
+    // 计算矩形高度，为头图高度减去两倍模糊半径
+    const rectHeight = headerNode.height;
+    // 计算调整后的矩形高度，为矩形高度减去模糊半径
+    const adjustedRectHeight = rectHeight - blurRadius;
+    // 计算矩形宽度，为头图宽度加上两倍模糊半径再加25
+    const rectWidth = headerNode.width + blurRadius * 2 + 25;
+    
+    // 创建蒙版矩形
+    const maskRect = figma.createRectangle();
+    maskRect.name = "蒙版";
+    maskRect.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+    maskRect.resize(rectWidth, adjustedRectHeight);
+    
+    // 将蒙版矩形添加到frame
+    frame.appendChild(maskRect);
+    
+    // 将蒙版矩形组合成羽化蒙版组（不包含原头图节点）
+    const featherGroup = figma.group([maskRect], frame);
+    featherGroup.name = "羽化蒙版";
+    
+    // 设置模糊效果
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blurEffect = {
+        type: "LAYER_BLUR" as const,
+        radius: blurRadius,
+        visible: true as const
+      } as any;
+      featherGroup.effects = [blurEffect];
+    } catch (effectError) {
+      console.warn('设置模糊效果失败:', effectError);
+    }
+    
+    // 设置为剪切蒙版
+    featherGroup.isMask = true;
+    
+    // 设置羽化蒙版组的位置
+    featherGroup.x = originalX;
+    featherGroup.y = originalY;
+    
+    // 调整蒙版矩形在组内的位置
+    maskRect.x = -(rectWidth - headerNodeCopy.width) / 2; // 水平居中
+    maskRect.y = 0 - blurRadius; // 羽化效果不影响顶部
+    
+    console.log('羽化蒙版组已创建');
+    
+    // 删除原来的头图图片节点
+    headerNode.remove();
+    console.log('原头图节点已删除');
+    
+    // 3. 将复制的头图节点添加到frame中（自动位于最上层）
+    frame.appendChild(headerNodeCopy);
+    
+    // 设置复制节点的位置和约束
+    headerNodeCopy.x = originalX;
+    headerNodeCopy.y = originalY;
+    headerNodeCopy.constraints = originalConstraints;
+    
+    console.log('复制的头图节点已添加到frame最上层');
+    
+    console.log(`头图羽化蒙版创建成功: 模糊半径=${blurRadius.toFixed(1)}px`);
+    console.log(`蒙版尺寸=${rectWidth.toFixed(1)}x${adjustedRectHeight.toFixed(1)}`);
+    console.log('头图图片节点位于羽化蒙版组上方');
+    
+  } catch (error) {
+    console.error('为头图图片添加羽化蒙版失败:', error);
+    throw error;
+  }
+}
+
 
 // ==================== 游戏信息模块创建器 ====================
 
@@ -1142,73 +1503,6 @@ class GameInfoLayoutManager {
   }
 }
 
-// ==================== 页面底部活动规则模块创建器 ====================
-// 注意：此模块用于创建页面底部的活动规则，区别于上面的活动内容模块
-
-// 页面底部活动规则模块创建器
-async function createRulesModule(config: H5Config): Promise<FrameNode> {
-  const frame = NodeUtils.createFrame("页面底部活动规则", CONSTANTS.MODULE_WIDTH, 150);
-  frame.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-
-  let yPos = CONSTANTS.DEFAULT_SPACING;
-
-  // 添加规则标题
-  if (config.rulesTitle) {
-    const titleContainer = await createTitleContainer(
-      config.rulesTitle, 
-      Utils.extractUint8Array(config.rulesBgImage),
-      CONSTANTS.MODULE_WIDTH,
-      60,
-      24, // 24px字体大小
-      'Bold'
-    );
-    titleContainer.y = yPos;
-    frame.appendChild(titleContainer);
-    yPos += 80;
-  }
-
-  // 添加规则内容
-  if (config.rulesContent) {
-    const contentContainer = await createContentContainer(
-      config.rulesContent,
-      CONSTANTS.MODULE_WIDTH - 40,
-      yPos
-    );
-    frame.appendChild(contentContainer);
-    yPos += contentContainer.height + 30;
-  } else {
-    const defaultText = await NodeUtils.createText("暂无活动规则", 16);
-    defaultText.x = CONSTANTS.DEFAULT_SPACING;
-    defaultText.y = yPos;
-    frame.appendChild(defaultText);
-    yPos += defaultText.height + 30;
-  }
-
-  // 调整模块高度
-  frame.resize(CONSTANTS.MODULE_WIDTH, Math.max(yPos, 150));
-  return frame;
-}
-
-// 辅助函数：创建内容容器
-async function createContentContainer(
-  content: string,
-  width: number,
-  yPos: number
-): Promise<FrameNode> {
-  const container = NodeUtils.createFrame("规则内容", width, 0);
-  container.x = CONSTANTS.DEFAULT_SPACING;
-  container.y = yPos;
-  container.fills = [];
-
-  const contentText = await NodeUtils.createText(content, 16);
-  contentText.lineHeight = { value: 24, unit: 'PIXELS' };
-  contentText.resize(width, contentText.height);
-  
-  container.appendChild(contentText);
-  container.resize(width, contentText.height);
-  
-  return container;
-}
 
 // ==================== 自定义模块创建器 ====================
 
@@ -2037,7 +2331,7 @@ class ActivityContentBuilder {
     const subTitleText = await NodeUtils.createText(this.content.subTitle, 44, 'Medium');
     subTitleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
     subTitleText.resize(1080, subTitleText.height);
-    subTitleText.textAlignHorizontal = "CENTER";
+    subTitleText.textAlignHorizontal = "CENTER"; // 设置小标题文本水平居中对齐
     subTitleText.x = 0;
     subTitleText.y = (100 - subTitleText.height) / 2; // 垂直居中
 
@@ -2057,7 +2351,8 @@ class ActivityContentBuilder {
     textNode.resize(950, textNode.height);
     textNode.textAlignHorizontal = "LEFT";
     textNode.lineHeight = { value: 40, unit: 'PIXELS' }; // 设置行高
-    textNode.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })]; // 黑色文字
+    textNode.fills = [ColorUtils.createSolidFill({ r: 255, g: 255, b: 255 })]; // 白色文字
+    textNode.textAlignHorizontal = "CENTER";
 
     this.frame.appendChild(textNode);
   }
@@ -2095,9 +2390,189 @@ class ActivityContentBuilder {
   }
 }
 
+// ==================== 页面底部活动规则模块创建器 ====================
+// 注意：此模块用于创建页面底部的活动规则，区别于上面的活动内容模块
+
+// 活动规则内容接口
+interface ActivityRulesContent {
+  rulesTitle: string;               // 规则标题
+  rulesBgImage: ImageInfo | null;   // 规则标题背景图片
+  rulesContent: string;             // 规则内容文本
+}
+
+// 页面底部活动规则模块创建器
+async function createRulesModule(config: H5Config): Promise<FrameNode> {
+  console.log('开始创建活动规则模块，内容：', {
+    rulesTitle: config.rulesTitle,
+    rulesBgImage: !!config.rulesBgImage,
+    rulesContent: config.rulesContent
+  });
+
+  // 创建活动规则模块容器：1080宽，背景透明，高度按实际创建内容来调整
+  const frame = NodeUtils.createFrame("活动规则", 1080, 1000);
+  frame.fills = []; // 背景填充为透明
+
+  try {
+    // 构建活动规则内容数据
+    const rulesData: ActivityRulesContent = {
+      rulesTitle: config.rulesTitle || '',
+      rulesBgImage: config.rulesBgImage,
+      rulesContent: config.rulesContent || ''
+    };
+
+    // 实例化活动规则模块构建器
+    const builder = new ActivityRulesModuleBuilder(frame, rulesData);
+    // 调用构建器的build方法来构建活动规则模块
+    await builder.build();
+
+    console.log('活动规则模块创建完成，最终高度：', frame.height);
+
+    // 返回构建完成的框架
+    return frame;
+  } catch (error) {
+    console.error('活动规则模块创建失败：', error);
+    // 创建一个错误信息显示框
+    const errorText = await NodeUtils.createText(`活动规则模块创建失败: ${error instanceof Error ? error.message : '未知错误'}`, 16);
+    errorText.x = 20;
+    errorText.y = 20;
+    errorText.fills = [ColorUtils.createSolidFill({ r: 1, g: 0, b: 0 })];
+    frame.appendChild(errorText);
+    frame.resize(1080, 100);
+    return frame;
+  }
+}
+
+// 活动规则模块构建器类
+class ActivityRulesModuleBuilder {
+  private frame: FrameNode; // 存储活动规则模块的框架节点
+  private content: ActivityRulesContent; // 存储活动规则模块的内容
+  private currentY = 0; // 当前Y位置
+
+  // 构造函数，初始化活动规则模块构建器
+  constructor(frame: FrameNode, content: ActivityRulesContent) {
+    this.frame = frame; // 设置框架节点
+    this.content = content; // 设置内容
+  }
+
+  // 构建活动规则模块的主要方法
+  async build(): Promise<void> {
+    console.log('开始构建活动规则模块');
+
+    try {
+      // 检查是否有任何内容需要构建
+      const hasRulesTitle = this.content.rulesTitle && this.content.rulesTitle.trim() !== '';
+      const hasRulesBgImage = this.content.rulesBgImage !== null && this.content.rulesBgImage !== undefined;
+      const hasRulesContent = this.content.rulesContent && this.content.rulesContent.trim() !== '';
+
+      // 如果没有任何内容，直接返回
+      if (!hasRulesTitle && !hasRulesBgImage && !hasRulesContent) {
+        console.log('活动规则模块：没有任何内容需要构建，跳过');
+        this.frame.resize(1080, 0); // 设置高度为0
+        return;
+      }
+
+      // 添加标题（如果有标题文案或标题背景）
+      if (hasRulesTitle || hasRulesBgImage) {
+        console.log('添加活动规则标题...');
+        await this.addTitle();
+      }
+
+      // 添加规则内容（如果有）
+      if (hasRulesContent) {
+        console.log('添加活动规则内容...');
+        await this.addRulesContent();
+      }
+
+      // 调整整个模块的高度
+      console.log('调整模块高度...');
+      this.adjustFrameHeight();
+
+      console.log('活动规则模块构建完成');
+    } catch (error) {
+      console.error('活动规则模块构建过程中出错：', error);
+      throw error;
+    }
+  }
+
+  // 添加标题
+  private async addTitle(): Promise<void> {
+    const hasRulesTitle = this.content.rulesTitle && this.content.rulesTitle.trim() !== '';
+    const hasRulesBgImage = this.content.rulesBgImage !== null && this.content.rulesBgImage !== undefined;
+    
+    // 如果既没有标题文案也没有标题背景，直接返回
+    if (!hasRulesTitle && !hasRulesBgImage) return;
+
+    // 添加上边距
+    this.currentY += 90;
+
+    // 使用统一的标题容器创建函数
+    // 如果没有标题文案，使用空字符串，但仍然可以显示背景图片
+    const titleText = hasRulesTitle ? this.content.rulesTitle : '';
+    
+    const titleContainer = await createTitleContainer(
+      titleText,
+      this.content.rulesBgImage,
+      1080,
+      120,
+      48, // 48px字体大小
+      'Bold'
+    );
+    
+    titleContainer.x = 0;
+    titleContainer.y = this.currentY;
+    
+    this.frame.appendChild(titleContainer);
+    this.currentY += 120;
+  }
+
+  // 添加规则内容
+  private async addRulesContent(): Promise<void> {
+    // 如果没有规则内容，直接返回
+    if (!this.content.rulesContent) return;
+
+    console.log('添加规则内容...');
+
+    // 添加上边距
+    this.currentY += 90;
+
+    // 创建规则内容文本节点，直接插入到活动规则容器中（与活动详情模块的正文文本节点实现方式一致）
+    const contentText = await NodeUtils.createText(this.content.rulesContent, 28, 'Regular');
+    
+    // 设置文本样式（与活动详情模块的正文文本完全一致）
+    contentText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })]; // 黑色文字
+    contentText.lineHeight = { value: 40, unit: 'PIXELS' }; // 设置行高40px（与活动详情模块一致）
+    contentText.resize(950, contentText.height); // 设置宽度为950px（与活动详情模块一致）
+    contentText.textAlignHorizontal = "LEFT"; // 左对齐（与活动详情模块一致）
+    
+    // 设置文本位置：水平居中，垂直按当前Y位置放置
+    contentText.x = (1080 - 950) / 2; // 水平居中（左右各留65px边距）
+    contentText.y = this.currentY;
+
+    // 直接将文本节点添加到活动规则容器中
+    this.frame.appendChild(contentText);
+    
+    // 更新当前Y位置
+    this.currentY += contentText.height;
+  }
+
+  // 调整整个模块的高度
+  private adjustFrameHeight(): void {
+    // 添加下边距
+    this.currentY += 90;
+    // 调整框架高度
+    this.frame.resize(1080, this.currentY);
+  }
+}
+
 // ==================== 尾版模块创建器 ====================
 
-async function createFooterModule(config: H5Config): Promise<FrameNode> {
+async function createFooterModule(config: H5Config): Promise<FrameNode | null> {
+  // 当同时没有LOGO图片和尾版背景图片时，直接跳过创建尾版模块
+  if (!config.footerLogo && !config.footerBg) {
+    console.log('跳过尾版模块创建：没有LOGO图片和尾版背景图片');
+    return null;
+  }
+
   // 创建尾版框架
   const frame = NodeUtils.createFrame("尾版", CONSTANTS.H5_WIDTH, 480);
   

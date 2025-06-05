@@ -587,6 +587,17 @@
       color: inherit;
       fill: currentColor;
       stroke: currentColor;
+      transition: transform 0.3s ease;
+    }
+    
+    .collapse-btn.collapsed svg,
+    .collapse-btn.collapsed .chevron-icon {
+      transform: rotate(180deg);
+    }
+    
+    .module-collapsed .collapse-btn svg,
+    .module-collapsed .collapse-btn .chevron-icon {
+      transform: rotate(180deg);
     }
     
     .collapse-btn.collapsed {
@@ -629,23 +640,31 @@
       white-space: nowrap;
     }
 
-    /* 版本切换相关样式 */
+    /* 折叠内容区域 */
     .version-content {
-      display: none;
-    }
-
-    .version-content.active {
-      display: block;
-    }
-
-    .collapsible-content {
-      transition: max-height 0.3s ease, opacity 0.2s ease;
-    }
-
-    .collapsible-content.collapsed {
       max-height: 0;
       opacity: 0;
       overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      padding-left: 24px;
+    }
+
+    .version-content.active {
+      max-height: 800px;
+      opacity: 1;
+      padding-bottom: 15px;
+    }
+    
+    .collapsible-content {
+      max-height: 1000px;
+      opacity: 1;
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .collapsible-content.collapsed {
+      max-height: 0;
+      opacity: 0;
     }
 
     .dropdown-selector-wide {
@@ -2093,15 +2112,15 @@
           <!-- 标题文案 -->
           <div class="form-group row-layout">
             <label class="non-interactive-label">标题文案</label>
-            <input type="text" id="titleText" class="text-input" placeholder="请输入标题文案">
+            <input type="text" id="rulesTitle" class="text-input" placeholder="请输入标题文案">
           </div>
 
           <!-- 标题背景 -->
           <div class="form-group row-layout">
             <label class="non-interactive-label">标题背景</label>
             <div class="file-upload-btn">
-              <input type="file" id="footerImageUpload" accept="image/*" style="display:none">
-              <button class="upload-btn" onclick="document.getElementById('footerImageUpload').click()">
+              <input type="file" id="rulesBgUpload" accept="image/*" style="display:none">
+              <button class="upload-btn" onclick="document.getElementById('rulesBgUpload').click()">
                 <div class="img-preview-inline">
                   <span class="upload-icon-inline">+</span>
                 </div>
@@ -2112,7 +2131,7 @@
           <!-- 活动规则内容 -->
           <div class="form-group row-layout">
             <label class="non-interactive-label">活动规则</label>
-            <textarea id="activityRules" class="text-area" placeholder="请输入活动规则内容"></textarea>
+            <textarea id="rulesContent" class="text-area" placeholder="请输入活动规则内容"></textarea>
           </div>
           
         </div>
@@ -3170,27 +3189,42 @@
         const moveDownBtn = moduleEl.querySelector('.move-down-btn');
         
         if (deleteBtn) {
-          deleteBtn.addEventListener('click', () => this.deleteModule(moduleEl));
+          deleteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.deleteModule(moduleEl);
+          });
         }
         
         if (collapseBtn) {
-          collapseBtn.addEventListener('click', () => {
+          collapseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             moduleEl.classList.toggle('module-collapsed');
+            collapseBtn.classList.toggle('collapsed');
           });
         }
         
         if (moveUpBtn) {
-          moveUpBtn.addEventListener('click', () => this.moveModuleUp(moduleEl));
+          moveUpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.moveModuleUp(moduleEl);
+          });
         }
         
         if (moveDownBtn) {
-          moveDownBtn.addEventListener('click', () => this.moveModuleDown(moduleEl));
+          moveDownBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.moveModuleDown(moduleEl);
+          });
         }
         
         // 绑定图片上传事件
         this.bindModuleImageUploads(moduleEl);
-      }
-      
+      }     
+
       // 绑定模块内的图片上传事件
       bindModuleImageUploads(moduleEl) {
         const imageInputs = moduleEl.querySelectorAll('input[type="file"][accept="image/*"]');
@@ -3291,7 +3325,7 @@
           { id: 'rightButtonBgUpload', key: 'rightButtonBg' },
           { id: 'footerLogoUpload', key: 'footerLogo' },
           { id: 'footerBgUpload', key: 'footerBg' },
-          { id: 'footerImageUpload', key: 'rulesBg' }
+          { id: 'rulesBgUpload', key: 'rulesBgImage' }
         ];
         
         uploaders.forEach(uploader => {
@@ -4052,13 +4086,23 @@
     function initCollapseButtons() {
       const collapseButtons = document.querySelectorAll('.collapse-btn');
       collapseButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
           const targetId = this.dataset.target;
           const targetElement = document.getElementById(targetId);
           
           if (targetElement) {
             targetElement.classList.toggle('collapsed');
             this.classList.toggle('collapsed');
+            
+            // 特殊处理带有.collapsible-content类的元素
+            if (targetElement.classList.contains('collapsible-content')) {
+              const isCollapsed = targetElement.classList.contains('collapsed');
+              targetElement.style.maxHeight = isCollapsed ? '0' : 'none';
+              targetElement.style.opacity = isCollapsed ? '0' : '1';
+            }
           }
         });
       });
