@@ -2353,6 +2353,411 @@
     
     // 创建全局图片管理器实例
     const imageManager = new ImageDataManager();
+
+    // ==================== 文件处理器 ====================
+    
+    class FileProcessor {
+      // 处理图片文件上传
+      async processImageFile(file, storageKey, isModule = false) {
+        if (!this.isValidImageFile(file)) {
+          throw new Error('请上传有效的图片文件');
+        }
+        
+        try {
+          const uint8Array = await this.fileToUint8Array(file);
+          
+          // 获取图片尺寸
+          const imageDimensions = await this.getImageDimensions(file);
+          console.log(`图片上传成功: ${storageKey}, 大小: ${uint8Array.length} bytes, 尺寸: ${imageDimensions.width}x${imageDimensions.height}`);
+          
+          // 存储图片数据和尺寸信息
+          const imageData = {
+            data: uint8Array,
+            width: imageDimensions.width,
+            height: imageDimensions.height,
+            name: file.name,
+            type: file.type
+          };
+          
+          if (isModule) {
+            imageManager.setModule(storageKey, imageData);
+          } else {
+            imageManager.set(storageKey, imageData);
+          }
+          
+          return imageData;
+        } catch (error) {
+          console.error(`图片处理失败: ${storageKey}`, error);
+          throw new Error(`图片处理失败: ${error.message}`);
+        }
+      }
+
+      async handleImageUpload(e, storageKey) {
+        try {
+          await this.handleUpload(e.target, storageKey, false);
+        } catch (error) {
+          console.error(`基础图片上传失败 ${storageKey}:`, error);
+          notificationSystem.show(`上传失败: ${error.message}`, 'error');
+        }
+      }
+      
+      async handleUpload(input, storageKey, isModule = false) {
+        if (!input.files?.[0]) return;
+        
+        console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
+        
+        try {
+          const imageData = await this.processImageFile(input.files[0], storageKey, isModule);
+          
+          // 验证图片是否正确存储
+          const storedData = isModule ? imageManager.getModule(storageKey) : imageManager.get(storageKey);
+          console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
+          
+          notificationSystem.show('图片上传成功', 'success');
+        } catch (error) {
+          console.error(`图片上传失败 ${storageKey}:`, error);
+          notificationSystem.show(`上传失败: ${error.message}`, 'error');
+        }
+      }
+
+      async handleModuleImageUpload(e) {
+        try {
+          const input = e.target;
+          const moduleEl = input.closest('.module');
+          if (!moduleEl) return;
+          
+          const moduleId = moduleEl.id;
+          const inputIndex = Array.from(moduleEl.querySelectorAll('input[type="file"]')).indexOf(input);
+          const storageKey = this.getModuleStorageKey(input, moduleId, inputIndex);
+          
+          if (storageKey) {
+            await this.handleUpload(input, storageKey, true);
+          }
+        } catch (error) {
+          console.error('模块图片上传失败:', error);
+          notificationSystem.show(`模块图片上传失败: ${error.message}`, 'error');
+        }
+      }
+      
+      getModuleStorageKey(input, moduleId, index) {
+        const classMap = {
+          'derived-item-upload': `${moduleId}-titlebg`,
+          'nine-grid-bg': `${moduleId}-gridbg`,
+          'draw-btn': `${moduleId}-drawbtn`,
+          'prize-bg': `${moduleId}-prizebg`,
+          'sign-in-title-upload': `${moduleId}-title`,
+          'sign-in-bg-upload': `${moduleId}-bg`,
+          'day-icon-upload': `${moduleId}-dayicon`,
+          'sign-in-btn-upload': `${moduleId}-signbtn`,
+          'collect-title-upload': `${moduleId}-title`,
+          'collect-bg-upload': `${moduleId}-bg`,
+          'card-bg-upload': `${moduleId}-cardbg`,
+          'combine-button-upload': `${moduleId}-combinebtn`,
+          'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
+          'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
+          'activity-content-image-upload': `${moduleId}-image`
+        };
+        
+        // 特殊处理奖品图片上传
+        if (input.classList.contains('prize-upload')) {
+          const prizeIndex = this.getPrizeIndex(input);
+          return `${moduleId}-prize-${prizeIndex}`;
+        }
+        
+        // 检查所有可能的类名匹配
+        for (const [className, key] of Object.entries(classMap)) {
+          if (input.classList.contains(className)) {
+            return key;
+          }
+        }
+        
+        // 调试信息
+        console.log(`未找到匹配的存储键，输入类名:`, input.className, `模块ID: ${moduleId}`);
+        return null;
+      }
+      
+      // 获取奖品在九宫格中的索引
+      getPrizeIndex(input) {
+        const moduleEl = input.closest('.module');
+        if (!moduleEl) return 0;
+        
+        const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
+        return prizeInputs.indexOf(input);
+      }
+
+      // 获取图片尺寸
+      async getImageDimensions(file) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          
+          img.onload = function() {
+            resolve({
+              width: this.naturalWidth,
+              height: this.naturalHeight
+            });
+            // 清理URL对象
+            URL.revokeObjectURL(img.src);
+          };
+          
+          img.onerror = function() {
+            URL.revokeObjectURL(img.src);
+            reject(new Error('无法读取图片尺寸'));
+          };
+          
+          // 创建临时URL
+          img.src = URL.createObjectURL(file);
+        });
+      }
+      
+      // 验证是否为有效图片文件
+      isValidImageFile(file) {
+        return file && file.type.startsWith('image/');
+      }
+      
+      // 将文件转换为 Uint8Array
+      fileToUint8Array(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const arrayBuffer = e.target.result;
+            const uint8Array = new Uint8Array(arrayBuffer);
+            resolve(uint8Array);
+          };
+          reader.onerror = () => reject(new Error('文件读取失败'));
+          reader.readAsArrayBuffer(file);
+        });
+      }
+      
+      // 切片大图方法
+      async sliceLargeImage(imageData, sliceWidth = 750, sliceHeight = 1334) {
+        try {
+          console.log(`开始切片图片: ${imageData.name || '未知图片'}`);
+          console.log(`目标切片尺寸: ${sliceWidth}x${sliceHeight}`);
+          
+          // 创建画布来处理图片
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            throw new Error('无法创建 Canvas 上下文');
+          }
+          
+          // 从 Uint8Array 创建图片
+          const blob = new Blob([imageData.data], { type: imageData.type || 'image/png' });
+          const img = new Image();
+          const imgUrl = URL.createObjectURL(blob);
+          
+          return new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              URL.revokeObjectURL(imgUrl);
+              reject(new Error('图片加载超时'));
+            }, 30000); // 30秒超时
+            
+            img.onload = () => {
+              clearTimeout(timeoutId);
+              
+              try {
+                const originalWidth = img.width;
+                const originalHeight = img.height;
+                
+                console.log(`原图尺寸: ${originalWidth}x${originalHeight}`);
+                console.log(`切片尺寸: ${sliceWidth}x${sliceHeight}`);
+                
+                // 计算需要切片的数量
+                const cols = Math.ceil(originalWidth / sliceWidth);
+                const rows = Math.ceil(originalHeight / sliceHeight);
+                const totalSlices = cols * rows;
+                
+                console.log(`切片数量: ${cols}列 x ${rows}行 = ${totalSlices}片`);
+                
+                const slices = [];
+                let completedSlices = 0;
+                
+                // 处理完成检查函数
+                const checkCompletion = () => {
+                  if (completedSlices === totalSlices) {
+                    // 按行列顺序排序
+                    slices.sort((a, b) => {
+                      if (a.row !== b.row) return a.row - b.row;
+                      return a.col - b.col;
+                    });
+                    
+                    URL.revokeObjectURL(imgUrl);
+                    console.log(`图片切片完成，共 ${slices.length} 片`);
+                    
+                    resolve({
+                      slices: slices,
+                      originalWidth: originalWidth,
+                      originalHeight: originalHeight,
+                      sliceWidth: sliceWidth,
+                      sliceHeight: sliceHeight,
+                      cols: cols,
+                      rows: rows
+                    });
+                  }
+                };
+                
+                // 生成每个切片
+                for (let row = 0; row < rows; row++) {
+                  for (let col = 0; col < cols; col++) {
+                    // 计算当前切片的位置和尺寸
+                    const x = col * sliceWidth;
+                    const y = row * sliceHeight;
+                    const currentSliceWidth = Math.min(sliceWidth, originalWidth - x);
+                    const currentSliceHeight = Math.min(sliceHeight, originalHeight - y);
+                    
+                    // 设置画布尺寸
+                    canvas.width = currentSliceWidth;
+                    canvas.height = currentSliceHeight;
+                    
+                    // 清空画布
+                    ctx.clearRect(0, 0, currentSliceWidth, currentSliceHeight);
+                    
+                    // 绘制图片的对应部分
+                    ctx.drawImage(
+                      img,
+                      x, y, currentSliceWidth, currentSliceHeight,
+                      0, 0, currentSliceWidth, currentSliceHeight
+                    );
+                    
+                    // 转换为 Uint8Array（使用立即执行函数保持作用域）
+                    ((currentRow, currentCol, sliceX, sliceY, width, height) => {
+                      canvas.toBlob((blob) => {
+                        if (!blob) {
+                          completedSlices++;
+                          console.warn(`切片 ${currentRow}_${currentCol} 创建失败`);
+                          checkCompletion();
+                          return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          try {
+                            const sliceData = new Uint8Array(e.target.result);
+                            slices.push({
+                              data: sliceData,
+                              width: width,
+                              height: height,
+                              row: currentRow,
+                              col: currentCol,
+                              x: sliceX,
+                              y: sliceY,
+                              name: `slice_${currentRow}_${currentCol}.png`
+                            });
+                            
+                            completedSlices++;
+                            console.log(`切片进度: ${completedSlices}/${totalSlices}`);
+                            checkCompletion();
+                          } catch (sliceError) {
+                            console.error(`切片 ${currentRow}_${currentCol} 处理失败:`, sliceError);
+                            completedSlices++;
+                            checkCompletion();
+                          }
+                        };
+                        
+                        reader.onerror = () => {
+                          console.error(`切片 ${currentRow}_${currentCol} 读取失败`);
+                          completedSlices++;
+                          checkCompletion();
+                        };
+                        
+                        reader.readAsArrayBuffer(blob);
+                      }, 'image/png', 0.9); // 添加质量参数
+                    })(row, col, x, y, currentSliceWidth, currentSliceHeight);
+                  }
+                }
+                
+              } catch (error) {
+                clearTimeout(timeoutId);
+                URL.revokeObjectURL(imgUrl);
+                reject(error);
+              }
+            };
+            
+            img.onerror = () => {
+              clearTimeout(timeoutId);
+              URL.revokeObjectURL(imgUrl);
+              reject(new Error('图片加载失败'));
+            };
+            
+            img.src = imgUrl;
+          });
+        } catch (error) {
+          console.error('图片切片失败:', error);
+          throw error;
+        }
+      }
+    }
+    
+    // 创建文件处理器实例
+    const fileProcessor = new FileProcessor();
+
+    // ==================== 图片切片处理器 ====================
+    
+    class ImageSliceHandler {
+      async handleSliceRequest(msg) {
+        try {
+          console.log('收到图片切片请求:', msg.imageData.name);
+          
+          const { bytes, width, height, name, sliceStrategy } = msg.imageData;
+          
+          // 将字节数组转换回 Uint8Array
+          const uint8Array = new Uint8Array(bytes);
+          
+          // 创建 ImageInfo 对象
+          const imageInfo = {
+            data: uint8Array,
+            width: width,
+            height: height,
+            name: name,
+            type: 'image/png'
+          };
+          
+          // 使用 FileProcessor 的切片方法
+          const sliceResult = await fileProcessor.sliceLargeImage(
+            imageInfo, 
+            sliceStrategy.sliceWidth, 
+            sliceStrategy.sliceHeight
+          );
+          
+          // 准备切片数据
+          const slicesData = sliceResult.slices.map(slice => ({
+            bytes: Array.from(slice.data),
+            width: slice.width,
+            height: slice.height,
+            x: slice.x,
+            y: slice.y,
+            row: slice.row,
+            col: slice.col
+          }));
+          
+          // 发送切片结果回插件
+          pluginComm.postMessage('slice-image-response', {
+            success: true,
+            imageName: name,
+            slices: slicesData,
+            originalWidth: width,
+            originalHeight: height
+          });
+          
+          console.log(`图片切片完成: ${name}, 切片数: ${slicesData.length}`);
+          
+        } catch (error) {
+          console.error('图片切片失败:', error);
+          
+          // 发送失败响应
+          pluginComm.postMessage('slice-image-response', {
+            success: false,
+            imageName: msg.imageData.name,
+            error: error.message
+          });
+        }
+      }
+    }
+    
+    // 创建图片切片处理器实例
+    const imageSliceHandler = new ImageSliceHandler();
+
     
     // ==================== 插件通信管理 ====================
     
@@ -2426,6 +2831,54 @@
     
     // 创建通信器实例
     const pluginComm = new PluginCommunicator();
+    
+    // 注册图片切片消息处理器
+    pluginComm.on('slice-large-image', async (message) => {
+      try {
+        console.log('收到图片切片请求:', message.imageData?.name);
+        await imageSliceHandler.handleSliceRequest(message);
+      } catch (error) {
+        console.error('处理图片切片请求失败:', error);
+        // 发送失败响应
+        pluginComm.postMessage('slice-image-response', {
+          success: false,
+          imageName: message.imageData?.name || '未知图片',
+          error: error.message
+        });
+      }
+    });
+    
+    // 注册创建原型错误处理器
+    pluginComm.on('create-prototype-error', (message) => {
+      console.error('创建原型失败:', message.message);
+      notificationSystem.show(`创建失败: ${message.message}`, 'error');
+    });
+    
+    // 注册原型生成相关消息处理器
+    pluginComm.on('generate-complete', (message) => {
+      hideLoading();
+      showNotification('H5原型生成完成！', 'success');
+    });
+    
+    pluginComm.on('generate-error', (message) => {
+      hideLoading();
+      showNotification(`生成失败: ${message.error}`, 'error');
+    });
+    
+    pluginComm.on('channel-generate-complete', (message) => {
+      hideLoading();
+      showNotification(`${message.channel.toUpperCase()} 版本生成完成！`, 'success');
+    });
+    
+    pluginComm.on('channel-generate-error', (message) => {
+      hideLoading();
+      showNotification(`生成 ${message.channel.toUpperCase()} 版本失败: ${message.error}`, 'error');
+    });
+    
+    pluginComm.on('error', (message) => {
+      hideLoading();
+      showNotification(`错误: ${message.error}`, 'error');
+    });
     
     // ==================== UI 通知系统 ====================
     
@@ -2699,184 +3152,8 @@
     
     // 创建数据收集器实例
     const dataCollector = new DataCollector();
-    
-    // ==================== 文件处理器 ====================
-    
-    class FileProcessor {
-      // 处理图片文件上传
-      async processImageFile(file, storageKey, isModule = false) {
-        if (!this.isValidImageFile(file)) {
-          throw new Error('请上传有效的图片文件');
-        }
         
-        try {
-          const uint8Array = await this.fileToUint8Array(file);
-          
-          // 获取图片尺寸
-          const imageDimensions = await this.getImageDimensions(file);
-          console.log(`图片上传成功: ${storageKey}, 大小: ${uint8Array.length} bytes, 尺寸: ${imageDimensions.width}x${imageDimensions.height}`);
-          
-          // 存储图片数据和尺寸信息
-          const imageData = {
-            data: uint8Array,
-            width: imageDimensions.width,
-            height: imageDimensions.height,
-            name: file.name,
-            type: file.type
-          };
-          
-          if (isModule) {
-            imageManager.setModule(storageKey, imageData);
-          } else {
-            imageManager.set(storageKey, imageData);
-          }
-          
-          return imageData;
-        } catch (error) {
-          console.error(`图片处理失败: ${storageKey}`, error);
-          throw new Error(`图片处理失败: ${error.message}`);
-        }
-      }
 
-      async handleImageUpload(e, storageKey) {
-        try {
-          await this.handleUpload(e.target, storageKey, false);
-        } catch (error) {
-          console.error(`基础图片上传失败 ${storageKey}:`, error);
-          notificationSystem.show(`上传失败: ${error.message}`, 'error');
-        }
-      }
-      
-      async handleUpload(input, storageKey, isModule = false) {
-        if (!input.files?.[0]) return;
-        
-        console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
-        
-        try {
-          const imageData = await this.processImageFile(input.files[0], storageKey, isModule);
-          
-          // 验证图片是否正确存储
-          const storedData = isModule ? imageManager.getModule(storageKey) : imageManager.get(storageKey);
-          console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
-          
-          notificationSystem.show('图片上传成功', 'success');
-        } catch (error) {
-          console.error(`图片上传失败 ${storageKey}:`, error);
-          notificationSystem.show(`上传失败: ${error.message}`, 'error');
-        }
-      }
-
-      async handleModuleImageUpload(e) {
-        try {
-          const input = e.target;
-          const moduleEl = input.closest('.module');
-          if (!moduleEl) return;
-          
-          const moduleId = moduleEl.id;
-          const inputIndex = Array.from(moduleEl.querySelectorAll('input[type="file"]')).indexOf(input);
-          const storageKey = this.getModuleStorageKey(input, moduleId, inputIndex);
-          
-          if (storageKey) {
-            await this.handleUpload(input, storageKey, true);
-          }
-        } catch (error) {
-          console.error('模块图片上传失败:', error);
-          notificationSystem.show(`模块图片上传失败: ${error.message}`, 'error');
-        }
-      }
-      
-      getModuleStorageKey(input, moduleId, index) {
-        const classMap = {
-          'derived-item-upload': `${moduleId}-titlebg`,
-          'nine-grid-bg': `${moduleId}-gridbg`,
-          'draw-btn': `${moduleId}-drawbtn`,
-          'prize-bg': `${moduleId}-prizebg`,
-          'sign-in-title-upload': `${moduleId}-title`,
-          'sign-in-bg-upload': `${moduleId}-bg`,
-          'day-icon-upload': `${moduleId}-dayicon`,
-          'sign-in-btn-upload': `${moduleId}-signbtn`,
-          'collect-title-upload': `${moduleId}-title`,
-          'collect-bg-upload': `${moduleId}-bg`,
-          'card-bg-upload': `${moduleId}-cardbg`,
-          'combine-button-upload': `${moduleId}-combinebtn`,
-          'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
-          'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
-          'activity-content-image-upload': `${moduleId}-image`
-        };
-        
-        // 特殊处理奖品图片上传
-        if (input.classList.contains('prize-upload')) {
-          const prizeIndex = this.getPrizeIndex(input);
-          return `${moduleId}-prize-${prizeIndex}`;
-        }
-        
-        // 检查所有可能的类名匹配
-        for (const [className, key] of Object.entries(classMap)) {
-          if (input.classList.contains(className)) {
-            return key;
-          }
-        }
-        
-        // 调试信息
-        console.log(`未找到匹配的存储键，输入类名:`, input.className, `模块ID: ${moduleId}`);
-        return null;
-      }
-      
-      // 获取奖品在九宫格中的索引
-      getPrizeIndex(input) {
-        const moduleEl = input.closest('.module');
-        if (!moduleEl) return 0;
-        
-        const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
-        return prizeInputs.indexOf(input);
-      }
-
-      // 获取图片尺寸
-      async getImageDimensions(file) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          
-          img.onload = function() {
-            resolve({
-              width: this.naturalWidth,
-              height: this.naturalHeight
-            });
-            // 清理URL对象
-            URL.revokeObjectURL(img.src);
-          };
-          
-          img.onerror = function() {
-            URL.revokeObjectURL(img.src);
-            reject(new Error('无法读取图片尺寸'));
-          };
-          
-          // 创建临时URL
-          img.src = URL.createObjectURL(file);
-        });
-      }
-      
-      // 验证是否为有效图片文件
-      isValidImageFile(file) {
-        return file && file.type.startsWith('image/');
-      }
-      
-      // 将文件转换为 Uint8Array
-      fileToUint8Array(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const arrayBuffer = e.target.result;
-            const uint8Array = new Uint8Array(arrayBuffer);
-            resolve(uint8Array);
-          };
-          reader.onerror = () => reject(new Error('文件读取失败'));
-          reader.readAsArrayBuffer(file);
-        });
-      }
-    }
-    
-    // 创建文件处理器实例
-    const fileProcessor = new FileProcessor();
     
     // ==================== UI 控制器 ====================
     
@@ -3188,11 +3465,12 @@
         const moveUpBtn = moduleEl.querySelector('.move-up-btn');
         const moveDownBtn = moduleEl.querySelector('.move-down-btn');
         
+        // 为删除按钮添加事件监听器
         if (deleteBtn) {
           deleteBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.deleteModule(moduleEl);
+            e.preventDefault(); // 阻止默认行为
+            e.stopPropagation(); // 阻止事件冒泡
+            this.deleteModule(moduleEl); // 调用删除模块方法
           });
         }
         
@@ -3250,27 +3528,27 @@
       
       deleteModule(moduleEl) {
         if (confirm('确定要删除这个模块吗？')) {
-          // 获取模块ID用于清理相关数据
           const moduleId = moduleEl.id;
           
-          // 清理该模块的图片数据
-          if (moduleId) {
-            const keys = Object.keys(imageManager.moduleData);
-            keys.forEach(key => {
-              if (key.startsWith(moduleId)) {
-                delete imageManager.moduleData[key];
-              }
-            });
-          }
-          
+          // 一步完成：DOM + 数据 + 更新
           moduleEl.remove();
+          this.cleanupModuleData(moduleId);
           this.updateModuleCount();
-          
-          // 触发模块删除事件
-          document.dispatchEvent(new CustomEvent('moduleDeleted', { 
-            detail: { moduleId } 
-          }));
         }
+      }
+      
+      // 极简高效清理
+      cleanupModuleData(moduleId) {
+        if (!moduleId || !imageManager?.moduleData) return;
+        
+        // 直接过滤重建，比逐个删除更高效
+        const newData = {};
+        for (const key in imageManager.moduleData) {
+          if (!key.startsWith(moduleId)) {
+            newData[key] = imageManager.moduleData[key];
+          }
+        }
+        imageManager.moduleData = newData;
       }
       
       moveModuleUp(moduleEl) {
@@ -3546,16 +3824,11 @@
           // 2. 立即重置表单输入
           this.resetInputs();
           
-          // 3. 立即重置模块（不使用动画）
+          // 3. 立即重置模块
           this.resetModules();
           
           // 4. 立即重置预览
           this.resetPreviews();
-          
-          // 5. 使用 requestAnimationFrame 优化重新初始化
-          requestAnimationFrame(() => {
-            this.reinitializeComponents();
-          });
           
           console.log('表单重置完成');
           return true;
@@ -3568,61 +3841,58 @@
       
       resetInputs() {
         try {
-          // 使用文档片段批量操作，提高性能
-          const resetBatch = () => {
-            // 重置文本输入框
-            document.querySelectorAll('input[type="text"], textarea').forEach(input => {
-              input.value = '';
-            });
-            
-            // 重置文件输入框
-            document.querySelectorAll('input[type="file"]').forEach(input => {
-              input.value = '';
-            });
-            
-            // 重置颜色输入框到默认值
-            const colorDefaults = {
-              '#pageColor': '#D9D9D9',
-              '#gameCopyTextColor': '#FFFFFF',
-              '#iconButtonTextColor': '#FFFFFF',
-              '#singleButtonTextColor': '#FFFFFF',
-              '#leftButtonTextColor': '#FFFFFF',
-              '#rightButtonTextColor': '#FFFFFF'
-            };
-            
-            Object.entries(colorDefaults).forEach(([selector, defaultValue]) => {
-              const colorInput = document.querySelector(selector);
-              if (colorInput) {
-                colorInput.value = defaultValue;
-                const textInput = colorInput.nextElementSibling;
-                if (textInput && textInput.classList.contains('color-value')) {
-                  textInput.value = defaultValue;
-                }
-              }
-            });
-            
-            // 重置选择框
-            document.querySelectorAll('select').forEach(select => {
-              if (select.options.length > 0) {
-                select.selectedIndex = 0;
-              }
-            });
-            
-            // 重置数字输入框
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-              const defaultValue = input.getAttribute('placeholder') || '0';
-              input.value = defaultValue;
-            });
-            
-            // 立即处理按钮版本选择器
-            const buttonVersionSelect = document.getElementById('buttonVersionSelect');
-            if (buttonVersionSelect) {
-              buttonVersionSelect.selectedIndex = 0;
-              switchButtonVersion(); // 直接调用函数而不是触发事件
-            }
+          // 立即重置所有输入，保持原有功能
+          // 重置文本输入框
+          document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+            input.value = '';
+          });
+          
+          // 重置文件输入框
+          document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.value = '';
+          });
+          
+          // 重置颜色输入框到默认值
+          const colorDefaults = {
+            '#pageColor': '#D9D9D9',
+            '#gameCopyTextColor': '#FFFFFF',
+            '#iconButtonTextColor': '#FFFFFF',
+            '#singleButtonTextColor': '#FFFFFF',
+            '#leftButtonTextColor': '#FFFFFF',
+            '#rightButtonTextColor': '#FFFFFF'
           };
           
-          resetBatch();
+          for (const [selector, defaultValue] of Object.entries(colorDefaults)) {
+            const colorInput = document.querySelector(selector);
+            if (colorInput) {
+              colorInput.value = defaultValue;
+              const textInput = colorInput.nextElementSibling;
+              if (textInput && textInput.classList.contains('color-value')) {
+                textInput.value = defaultValue;
+              }
+            }
+          }
+          
+          // 重置选择框
+          document.querySelectorAll('select').forEach(select => {
+            if (select.options.length > 0) {
+              select.selectedIndex = 0;
+            }
+          });
+          
+          // 重置数字输入框
+          document.querySelectorAll('input[type="number"]').forEach(input => {
+            const defaultValue = input.getAttribute('placeholder') || '0';
+            input.value = defaultValue;
+          });
+          
+          // 立即处理按钮版本选择器
+          const buttonVersionSelect = document.getElementById('buttonVersionSelect');
+          if (buttonVersionSelect) {
+            buttonVersionSelect.selectedIndex = 0;
+            switchButtonVersion(); // 直接调用函数而不是触发事件
+          }
+          
           console.log('输入字段重置完成');
         } catch (error) {
           console.error('重置输入字段失败:', error);
@@ -3632,38 +3902,40 @@
       
       reinitializeComponents() {
         try {
-          // 简化重新初始化过程
           console.log('重新初始化组件...');
           
-          // 直接重新绑定颜色输入事件，不替换DOM节点
-          document.querySelectorAll('.color-input-group').forEach(group => {
-            const colorInput = group.querySelector('input[type="color"]');
-            const textInput = group.querySelector('.color-value');
-            if (colorInput && textInput) {
-              // 清除现有事件（通过克隆节点）
-              const newColorInput = colorInput.cloneNode(true);
-              const newTextInput = textInput.cloneNode(true);
-              
-              colorInput.parentNode.replaceChild(newColorInput, colorInput);
-              textInput.parentNode.replaceChild(newTextInput, textInput);
-              
-              // 重新绑定事件
-              newColorInput.addEventListener('input', () => {
-                newTextInput.value = newColorInput.value.toUpperCase();
-              });
-              
-              newTextInput.addEventListener('input', () => {
-                if (/^#[0-9A-F]{6}$/i.test(newTextInput.value)) {
-                  newColorInput.value = newTextInput.value;
-                }
-              });
-            }
-          });
+          // 只重新绑定必要的颜色输入事件，不克隆DOM节点
+          this.rebindColorInputs();
           
           console.log('组件重新初始化完成');
         } catch (error) {
           console.error('组件重新初始化失败:', error);
         }
+      }
+      
+      // 高效重新绑定颜色输入事件
+      rebindColorInputs() {
+        document.querySelectorAll('.color-input-group').forEach(group => {
+          const colorInput = group.querySelector('input[type="color"]');
+          const textInput = group.querySelector('.color-value');
+          
+          if (colorInput && textInput && !colorInput.dataset.bound) {
+            // 标记已绑定，避免重复绑定
+            colorInput.dataset.bound = 'true';
+            textInput.dataset.bound = 'true';
+            
+            // 直接绑定事件，不克隆节点
+            colorInput.addEventListener('input', () => {
+              textInput.value = colorInput.value.toUpperCase();
+            });
+            
+            textInput.addEventListener('input', () => {
+              if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+                colorInput.value = textInput.value;
+              }
+            });
+          }
+        });
       }
       
       resetModules() {
@@ -3672,6 +3944,13 @@
           // 直接移除所有模块，不使用动画
           const modules = container.querySelectorAll('.module');
           modules.forEach(module => module.remove());
+          
+          // 延迟清理模块数据，避免阻塞UI
+          setTimeout(() => {
+            if (imageManager.moduleData) {
+              imageManager.moduleData = {};
+            }
+          }, 50);
           
           // 立即更新模块计数
           const moduleManager = new ModuleManager();
@@ -3713,9 +3992,27 @@
     });
     
     pluginComm.on('creation-error', (message) => {
-      notificationSystem.show(`创建失败: ${message.message}`, 'error');
+      console.error('创建原型失败:', message);
+      
+      // 显示详细错误信息
+      const errorMsg = message.message || '未知错误';
+      notificationSystem.show(`创建失败: ${errorMsg}`, 'error');
+      
+      // 重置创建按钮状态
       const uiController = new UIController();
       uiController.resetCreateButton();
+      
+      // 可选：记录错误日志或发送错误报告
+      if (message.details) {
+        console.error('错误详情:', message.details);
+      }
+      
+      // 可选：根据错误类型提供不同的用户提示
+      if (message.errorType === 'validation') {
+        notificationSystem.show('请检查输入的数据是否完整', 'warning', 3000);
+      } else if (message.errorType === 'network') {
+        notificationSystem.show('网络连接异常，请稍后重试', 'warning', 3000);
+      }
     });
     
     pluginComm.on('save-success', () => {
@@ -3806,76 +4103,74 @@
 
     // 渠道生成功能
     function generateChannel(channel) {
-      // 显示加载状态
-      showLoading();
-      
-      // 模拟生成过程（后续完善）
-      setTimeout(() => {
+      try {
+        // 显示加载状态
+        showLoading();
+        
+        // 发送消息到插件主线程
+        parent.postMessage({
+          pluginMessage: {
+            type: 'generate-channel',
+            channel: channel
+          }
+        }, '*');
+        
+      } catch (error) {
+        console.error('生成渠道版本失败:', error);
         hideLoading();
-        showNotification(`${channel.toUpperCase()} 版本生成功能正在开发中`, 'info');
-      }, 1500);
-    }
-
-    function switchTab(tabName) {
-      const tabs = document.querySelectorAll('.tab');
-      const contents = document.querySelectorAll('.tab-content');
-      
-      tabs.forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.dataset.tab === tabName) {
-          tab.classList.add('active');
-        }
-      });
-      
-      contents.forEach(content => {
-        content.classList.remove('active');
-        if (content.id === tabName + '-content') {
-          content.classList.add('active');
-        }
-      });
-    }
-
-    // 按钮版本切换功能
-    function switchButtonVersion() {
-      const select = document.getElementById('buttonVersionSelect');
-      const contents = document.querySelectorAll('.version-content');
-      
-      // 隐藏所有版本内容
-      contents.forEach(content => {
-        content.classList.remove('active');
-      });
-      
-      // 显示选中的版本内容
-      const selectedContent = document.getElementById(select.value + 'Content');
-      if (selectedContent) {
-        selectedContent.classList.add('active');
+        showNotification(`生成 ${channel.toUpperCase()} 版本失败`, 'error');
       }
     }
 
-    // 颜色输入同步功能
-    function syncColorInput(colorInput, textInput) {
-      colorInput.addEventListener('change', function() {
-        textInput.value = this.value;
+    // DOM缓存优化
+    let tabCache = null;
+    let contentCache = null;
+    
+    function switchTab(tabName) {
+      // 初始化缓存
+      if (!tabCache) {
+        tabCache = document.querySelectorAll('.tab');
+        contentCache = document.querySelectorAll('.tab-content');
+      }
+      
+      // 使用缓存进行操作
+      tabCache.forEach(tab => {
+        const isActive = tab.dataset.tab === tabName;
+        tab.classList.toggle('active', isActive);
       });
       
-      textInput.addEventListener('input', function() {
-        if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
-          colorInput.value = this.value;
-        }
+      contentCache.forEach(content => {
+        const isActive = content.id === tabName + '-content';
+        content.classList.toggle('active', isActive);
       });
     }
 
-    // 初始化颜色输入同步
-    function initColorInputs() {
-      const colorGroups = document.querySelectorAll('.color-input-group');
-      colorGroups.forEach(group => {
-        const colorInput = group.querySelector('input[type="color"]');
-        const textInput = group.querySelector('.color-value');
-        if (colorInput && textInput) {
-          syncColorInput(colorInput, textInput);
-        }
-      });
+    // 极速版本切换 - 预缓存DOM
+    let versionCache = null;
+    
+    function switchButtonVersion() {
+      const select = document.getElementById('buttonVersionSelect');
+      if (!select) return;
+      
+      // 初始化缓存
+      if (!versionCache) {
+        versionCache = {
+          contents: document.querySelectorAll('.version-content'),
+          map: {}
+        };
+        // 预建映射
+        versionCache.contents.forEach(content => {
+          const id = content.id.replace('Content', '');
+          versionCache.map[id] = content;
+        });
+      }
+      
+      // 极速切换
+      versionCache.contents.forEach(content => content.classList.remove('active'));
+      const target = versionCache.map[select.value];
+      if (target) target.classList.add('active');
     }
+
 
     // 创建H5原型
     function createPrototype() {
@@ -4056,106 +4351,112 @@
       initializeUI();
     });
 
-    // 初始化UI
+    // 极致优化的UI初始化 - 使用事件委托
     function initializeUI() {
-      // 初始化颜色输入同步
-      initColorInputs();
+      // 单一事件委托处理所有交互
+      document.addEventListener('click', globalClickHandler);
+      document.addEventListener('change', globalChangeHandler);
+      document.addEventListener('input', globalInputHandler);
       
-      // 初始化按钮版本选择器
-      const buttonVersionSelect = document.getElementById('buttonVersionSelect');
-      if (buttonVersionSelect) {
-        buttonVersionSelect.addEventListener('change', switchButtonVersion);
-        // 初始化显示
+      // 初始化显示状态
+      switchButtonVersion();
+    }
+    
+    // 全局点击事件处理器
+    function globalClickHandler(e) {
+      const target = e.target;
+      const btn = target.closest('.control-btn, .tab, .theme-btn');
+      
+      if (!btn) return;
+      
+      // 折叠按钮
+      if (btn.classList.contains('collapse-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetId = btn.dataset.target;
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.classList.toggle('collapsed');
+          btn.classList.toggle('collapsed');
+          
+          if (targetElement.classList.contains('collapsible-content')) {
+            const isCollapsed = targetElement.classList.contains('collapsed');
+            targetElement.style.maxHeight = isCollapsed ? '0' : 'none';
+            targetElement.style.opacity = isCollapsed ? '0' : '1';
+          }
+        }
+        return;
+      }
+      
+      // 标签页切换
+      if (btn.classList.contains('tab')) {
+        const tabName = btn.dataset.tab;
+        switchTab(tabName);
+        return;
+      }
+      
+      // 主题切换
+      if (btn.classList.contains('theme-btn')) {
+        const theme = btn.dataset.theme;
+        document.body.className = theme === 'dark' ? 'dark-theme' : '';
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        return;
+      }
+    }
+    
+    // 全局输入变化处理器
+    function globalChangeHandler(e) {
+      const target = e.target;
+      
+      // 按钮版本选择器
+      if (target.id === 'buttonVersionSelect') {
         switchButtonVersion();
+        return;
       }
       
-      // 初始化折叠按钮
-      initCollapseButtons();
+      // 文件上传
+      if (target.type === 'file' && target.accept === 'image/*') {
+        handleFileUpload(target);
+        return;
+      }
+    }
+    
+    // 全局输入处理器（颜色同步）
+    function globalInputHandler(e) {
+      const target = e.target;
+      const group = target.closest('.color-input-group');
+      if (!group) return;
       
-      // 初始化主题切换
-      initThemeSwitch();
+      const colorInput = group.querySelector('input[type="color"]');
+      const textInput = group.querySelector('.color-value');
       
-      // 初始化标签页切换
-      initTabSwitch();
-      
-      // 初始化文件上传预览
-      initFileUploadPreviews();
+      if (target === colorInput) {
+        textInput.value = colorInput.value.toUpperCase();
+      } else if (target === textInput && /^#[0-9A-F]{6}$/i.test(textInput.value)) {
+        colorInput.value = textInput.value;
+      }
     }
-
-    // 初始化折叠按钮
-    function initCollapseButtons() {
-      const collapseButtons = document.querySelectorAll('.collapse-btn');
-      collapseButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const targetId = this.dataset.target;
-          const targetElement = document.getElementById(targetId);
-          
-          if (targetElement) {
-            targetElement.classList.toggle('collapsed');
-            this.classList.toggle('collapsed');
-            
-            // 特殊处理带有.collapsible-content类的元素
-            if (targetElement.classList.contains('collapsible-content')) {
-              const isCollapsed = targetElement.classList.contains('collapsed');
-              targetElement.style.maxHeight = isCollapsed ? '0' : 'none';
-              targetElement.style.opacity = isCollapsed ? '0' : '1';
-            }
-          }
-        });
-      });
-    }
-
-    // 初始化主题切换
-    function initThemeSwitch() {
-      const themeButtons = document.querySelectorAll('.theme-btn');
-      themeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const theme = this.dataset.theme;
-          document.body.className = theme === 'dark' ? 'dark-theme' : '';
-          
-          // 更新按钮状态
-          themeButtons.forEach(btn => btn.classList.remove('active'));
-          this.classList.add('active');
-        });
-      });
-    }
-
-    // 初始化标签页切换
-    function initTabSwitch() {
-      const tabs = document.querySelectorAll('.tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          const tabName = this.dataset.tab;
-          switchTab(tabName);
-        });
-      });
-    }
-
-    // 初始化文件上传预览
-    function initFileUploadPreviews() {
-      // 游戏图标上传预览
-      const gameIconUpload = document.getElementById('gameIconUpload');
-      if (gameIconUpload) {
-        gameIconUpload.addEventListener('change', function() {
-          const preview = document.getElementById('gameIconPreview');
-          previewImage(this, preview);
-        });
+    
+    // 统一文件上传处理
+    function handleFileUpload(input) {
+      if (input.id === 'gameIconUpload') {
+        const preview = document.getElementById('gameIconPreview');
+        previewImage(input, preview);
+      } else {
+        const preview = input.parentElement.querySelector('.img-preview-inline');
+        if (preview) {
+          previewImage(input, preview);
+        }
       }
       
-      // 其他文件上传预览
-      const fileInputs = document.querySelectorAll('input[type="file"]');
-      fileInputs.forEach(input => {
-        input.addEventListener('change', function() {
-          const preview = this.parentElement.querySelector('.img-preview-inline');
-          if (preview) {
-            previewImage(this, preview);
-          }
-        });
-      });
+      // 处理模块图片上传
+      if (input.closest('.module')) {
+        fileProcessor.handleModuleImageUpload({ target: input });
+      }
     }
+
 
     // 重置表单（兼容函数）
     function resetForm() {
