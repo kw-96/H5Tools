@@ -35,6 +35,50 @@
     .notification.warning {
       background-color: #ff9500;
     }
+
+    /* 加载遮罩样式 */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      min-width: 200px;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007AFF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-message {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
     
     .notification.info {
       background-color: #0071e3;
@@ -727,6 +771,12 @@
     
     /* 主题切换和页脚 */
     .theme-switcher {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background-color: #f5f5f7;
+      border-radius: 12px;
       margin-bottom: 20px;
     }
     
@@ -736,29 +786,54 @@
     }
     
     .theme-btn {
+      padding: 8px 16px;
+      background-color: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      color: #1d1d1f;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      padding: 8px 16px;
-      background-color: #f0f0f0;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 6px;
-      color: #333;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
     }
-    
-    .theme-btn.active {
-      background-color: #0071e3;
-      color: white;
+
+    .theme-btn:hover {
+      background-color: rgba(0, 113, 227, 0.1);
       border-color: #0071e3;
     }
-    
-    .theme-btn:hover:not(.active) {
-      background-color: #e5e5e5;
+
+    .theme-btn.active {
+      background-color: #0071e3;
+      color: #ffffff;
+      border-color: #0071e3;
+    }
+
+    /* 深色主题下的主题切换器样式 */
+    body.dark-theme .theme-switcher {
+      background-color: #2c2c2e;
+    }
+
+    body.dark-theme .theme-switcher label {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .theme-btn {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .theme-btn:hover {
+      background-color: rgba(0, 113, 227, 0.2);
+      border-color: #0071e3;
+    }
+
+    body.dark-theme .theme-btn.active {
+      background-color: #0071e3;
+      color: #ffffff;
+      border-color: #0071e3;
     }
     
     .page-footer {
@@ -1151,6 +1226,214 @@
       color: #86868b;
     }
 
+    /* 渠道设置视图样式 */
+    .channel-settings-view {
+      padding: 20px;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background-color: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      color: #1d1d1f;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .settings-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin: 0;
+      text-align: center;
+      flex: 1;
+    }
+
+    .settings-content {
+      max-width: 600px;
+    }
+
+    .setting-group {
+      margin-bottom: 32px;
+    }
+
+    .setting-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-group-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .setting-item {
+      margin-bottom: 20px;
+    }
+
+    .setting-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .setting-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background-color: #ffffff;
+      transition: all 0.2s;
+    }
+
+    .setting-input:focus {
+      outline: none;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+
+    .setting-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .setting-upload-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-upload-btn {
+      padding: 10px 16px;
+      background-color: #f5f5f7;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      color: #1d1d1f;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .setting-upload-btn:hover {
+      background-color: #e8e8ed;
+    }
+
+    .setting-preview {
+      width: 60px;
+      height: 60px;
+      border: 2px dashed rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #fafafa;
+      overflow: hidden;
+    }
+
+    .setting-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .setting-preview-placeholder {
+      font-size: 12px;
+      color: #86868b;
+      text-align: center;
+    }
+
+    .setting-description {
+      font-size: 12px;
+      color: #86868b;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* 深色主题适配 */
+    body.dark-theme .settings-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .back-btn {
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .back-btn:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-theme .settings-title,
+    body.dark-theme .setting-group-title,
+    body.dark-theme .setting-label {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .setting-group-title {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-theme .setting-input {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .setting-input:focus {
+      border-color: #0071e3;
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+    }
+
+    body.dark-theme .setting-upload-btn {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .setting-upload-btn:hover {
+      background-color: #3a3a3c;
+    }
+
+    body.dark-theme .setting-preview {
+      background-color: #2c2c2e;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark-theme .setting-description {
+      color: #a1a1a6;
+    }
+
     /* 渠道容器样式 */
     .channels-container {
       padding: 16 0;
@@ -1172,13 +1455,50 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
+    .channel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
     .channel-title {
-      margin: 0 0 16px 0;
+      margin: 0;
       font-size: 16px;
       font-weight: 600;
       color: #1d1d1f;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      padding-bottom: 8px;
+      flex: 1;
+    }
+
+    .channel-settings-btn {
+      width: 32px;
+      height: 32px;
+      background-color: transparent;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-left: 12px;
+      position: relative;
+    }
+
+    .channel-settings-btn {
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .channel-settings-btn:hover {
+      background-color: #f5f5f7;
+      border-color: #0071e3;
+      color: #0071e3;
+      transform: scale(1.05);
     }
 
     .channel-content {
@@ -1267,11 +1587,25 @@
       border-color: rgba(255, 255, 255, 0.1);
     }
 
-    body.dark-theme .channel-title {
-      color: #f5f5f7;
+    body.dark-theme .channel-header {
       border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 
+    body.dark-theme .channel-title {
+      color: #f5f5f7;
+    }
+
+    body.dark-theme .channel-settings-btn {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #a1a1a6;
+    }
+
+    body.dark-theme .channel-settings-btn:hover {
+      background-color: #2c2c2e;
+      border-color: #0071e3;
+      color: #0071e3;
+      transform: scale(1.05);
+    }
     body.dark-theme .channel-preview-area {
       background-color: #2c2c2e;
       border-color: rgba(255, 255, 255, 0.1);
@@ -2193,10 +2527,16 @@
 
     <!-- 延展渠道内容 -->
     <div class="tab-content" id="extension-content">
-      <div class="channels-container">
+      <!-- 渠道列表视图 -->
+      <div class="channels-container" id="channelsMainView">
         <!-- OPPO渠道 -->
         <div class="channel-section">
-          <h3 class="channel-title">OPPO</h3>
+          <div class="channel-header">
+            <h3 class="channel-title">OPPO</h3>
+            <button class="channel-settings-btn" onclick="showChannelSettings('oppo')" title="渠道设置">
+              ⚙️
+            </button>
+          </div>
           <div class="channel-content">
             <div class="channel-preview-container">
               <div class="channel-preview-area" id="oppo-preview">
@@ -2212,7 +2552,12 @@
 
         <!-- VIVO渠道 -->
         <div class="channel-section">
-          <h3 class="channel-title">VIVO</h3>
+          <div class="channel-header">
+            <h3 class="channel-title">VIVO</h3>
+            <button class="channel-settings-btn" onclick="showChannelSettings('vivo')" title="渠道设置">
+              ⚙️
+            </button>
+          </div>
           <div class="channel-content">
             <div class="channel-preview-container">
               <div class="channel-preview-area" id="vivo-preview">
@@ -2228,7 +2573,12 @@
 
         <!-- 华为渠道 -->
         <div class="channel-section">
-          <h3 class="channel-title">华为</h3>
+          <div class="channel-header">
+            <h3 class="channel-title">华为</h3>
+            <button class="channel-settings-btn" onclick="showChannelSettings('huawei')" title="渠道设置">
+              ⚙️
+            </button>
+          </div>
           <div class="channel-content">
             <div class="channel-preview-container">
               <div class="channel-preview-area" id="huawei-preview">
@@ -2244,7 +2594,12 @@
 
         <!-- 小米渠道 -->
         <div class="channel-section">
-          <h3 class="channel-title">小米</h3>
+          <div class="channel-header">
+            <h3 class="channel-title">小米</h3>
+            <button class="channel-settings-btn" onclick="showChannelSettings('xiaomi')" title="渠道设置">
+              ⚙️
+            </button>
+          </div>
           <div class="channel-content">
             <div class="channel-preview-container">
               <div class="channel-preview-area" id="xiaomi-preview">
@@ -2256,6 +2611,25 @@
             </div>
             <button class="channel-generate-btn" onclick="generateChannel('xiaomi')">生成小米版本</button>
           </div>
+        </div>
+      </div>
+
+      <!-- 渠道设置视图 -->
+      <div class="channel-settings-view" id="channelSettingsView" style="display: none;">
+        <!-- 设置页头部 -->
+        <div class="settings-header">
+          <button class="back-btn" onclick="backToChannelsList()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 12l-4-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <h2 class="settings-title" id="settingsTitle">渠道设置</h2>
+          <div style="width: 40px;"></div> <!-- 占位元素保持居中平衡 -->
+        </div>
+
+        <!-- 设置内容区域 -->
+        <div class="settings-content" id="settingsContent">
+          <!-- 动态内容将在这里插入 -->
         </div>
       </div>
     </div>
@@ -2276,11 +2650,11 @@
         <div class="form-group row-layout theme-switcher">
           <label>切换主题</label>
           <div class="theme-buttons">
-            <button id="lightTheme" class="theme-btn active">
+            <button id="lightTheme" class="theme-btn active" data-theme="light">
               <!-- <i class="bi bi-sun"></i> -->
               <span>浅色模式</span>
             </button>
-            <button id="darkTheme" class="theme-btn">
+            <button id="darkTheme" class="theme-btn" data-theme="dark">
               <!-- <i class="bi bi-moon"></i> -->
               <span>深色模式</span>
             </button>
@@ -2938,6 +3312,39 @@
     
     // 创建通知系统实例
     const notificationSystem = new NotificationSystem();
+    
+    // ==================== 加载状态管理 ====================
+    
+    // 显示加载状态
+    function showLoading(message = '正在处理...') {
+      // 创建或获取加载遮罩层
+      let loadingOverlay = document.getElementById('loadingOverlay');
+      if (!loadingOverlay) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loadingOverlay';
+        loadingOverlay.innerHTML = `
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-message">${message}</div>
+          </div>
+        `;
+        document.body.appendChild(loadingOverlay);
+      } else {
+        loadingOverlay.querySelector('.loading-message').textContent = message;
+      }
+      
+      loadingOverlay.style.display = 'flex';
+      console.log('显示加载状态:', message);
+    }
+    
+    // 隐藏加载状态
+    function hideLoading() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+      console.log('隐藏加载状态');
+    }
     
     // ==================== 数据收集器 ====================
     
@@ -4122,6 +4529,385 @@
       }
     }
 
+    // 渠道设置功能
+    function showChannelSettings(channel) {
+      try {
+        console.log(`打开 ${channel.toUpperCase()} 渠道设置`);
+        
+        // 隐藏主视图，显示设置视图
+        document.getElementById('channelsMainView').style.display = 'none';
+        document.getElementById('channelSettingsView').style.display = 'block';
+        
+        // 更新设置标题
+        const settingsTitle = document.getElementById('settingsTitle');
+        if (settingsTitle) {
+          settingsTitle.textContent = `${getChannelDisplayName(channel)} 设置`;
+        }
+        
+        // 生成设置内容
+        generateChannelSettingsContent(channel);
+        
+        // 滚动到页面顶部 - 针对Figma插件环境
+        requestAnimationFrame(() => {
+          try {
+            // 查找并滚动所有可能的滚动容器
+            const scrollableContainers = [
+              document.documentElement,
+              document.body,
+              document.querySelector('.container'),
+              document.querySelector('.main-content'),
+              document.querySelector('#app'),
+              document.getElementById('channelSettingsView')
+            ].filter(Boolean);
+            
+            scrollableContainers.forEach(container => {
+              if (container) {
+                container.scrollTop = 0;
+                // 也尝试scrollLeft以防万一
+                if (container.scrollLeft !== undefined) {
+                  container.scrollLeft = 0;
+                }
+              }
+            });
+            
+            // 尝试将设置标题滚动到视图中
+            const settingsTitle = document.getElementById('settingsTitle');
+            if (settingsTitle) {
+              settingsTitle.scrollIntoView({
+                behavior: 'auto',
+                block: 'start'
+              });
+            }
+            
+            console.log('已尝试滚动到顶部');
+          } catch (scrollError) {
+            console.warn('滚动操作失败:', scrollError);
+          }
+        });
+        
+        // 显示提示信息
+        notificationSystem.show(`已进入 ${getChannelDisplayName(channel)} 设置页面`, 'info');
+        
+      } catch (error) {
+        console.error('打开渠道设置失败:', error);
+        notificationSystem.show('打开设置页面失败', 'error');
+      }
+    }
+
+    // 返回渠道列表
+    function backToChannelsList() {
+      document.getElementById('channelSettingsView').style.display = 'none';
+      document.getElementById('channelsMainView').style.display = 'block';
+    }
+
+    // 获取渠道显示名称
+    function getChannelDisplayName(channel) {
+      const channelNames = {
+        'oppo': 'OPPO',
+        'vivo': 'VIVO', 
+        'huawei': '华为',
+        'xiaomi': '小米'
+      };
+      return channelNames[channel] || channel.toUpperCase();
+    }
+
+    // 生成渠道设置内容
+    function generateChannelSettingsContent(channel) {
+      const settingsContent = document.getElementById('settingsContent');
+      if (!settingsContent) return;
+
+      const settingsConfig = getChannelSettingsConfig(channel);
+      
+      let html = '';
+      settingsConfig.forEach(group => {
+        html += `
+          <div class="setting-group">
+            ${group.items.map(item => generateSettingItemHTML(item, channel)).join('')}
+          </div>
+        `;
+      });
+      
+      settingsContent.innerHTML = html;
+      
+      // 绑定事件
+      bindSettingsEvents(channel);
+    }
+
+    // 获取渠道设置配置
+    function getChannelSettingsConfig(channel) {
+      const configs = {
+        'oppo': [
+          {
+            title: '',
+            items: [
+              { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+              { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+            ]
+          }
+        ],
+        'vivo': [
+          {
+            title: '',
+            items: [
+              { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+              { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+            ]
+          }
+        ],
+        'huawei': [
+          {
+            title: '',
+            items: [
+              { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+              { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+            ]
+          }
+        ],
+        'xiaomi': [
+          {
+            title: '',
+            items: [
+              { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+              { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+            ]
+          }
+        ]
+      };
+      
+      return configs[channel] || [];
+    }
+
+    // 生成设置项HTML
+    function generateSettingItemHTML(item, channel) {
+      const { type, key, label, placeholder, description } = item;
+      
+      let inputHTML = '';
+      
+      if (type === 'text') {
+        inputHTML = `<input type="text" class="setting-input" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}">`;
+      } else if (type === 'textarea') {
+        inputHTML = `<textarea class="setting-input setting-textarea" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}"></textarea>`;
+      } else if (type === 'image') {
+        inputHTML = `
+          <div class="setting-upload-group">
+            <input type="file" accept="image/*" style="display:none" id="${channel}-${key}-input" data-key="${key}">
+            <button type="button" class="setting-upload-btn" onclick="document.getElementById('${channel}-${key}-input').click()">选择图片</button>
+            <div class="setting-preview" id="${channel}-${key}-preview">
+              <div class="setting-preview-placeholder">预览</div>
+            </div>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="setting-item">
+          <label class="setting-label">${label}</label>
+          ${inputHTML}
+          ${description ? `<div class="setting-description">${description}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // 绑定设置事件
+    function bindSettingsEvents(channel) {
+      // 绑定文本输入事件
+      const textInputs = document.querySelectorAll(`#settingsContent input[type="text"], #settingsContent textarea`);
+      textInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+          const key = e.target.dataset.key;
+          const value = e.target.value;
+          saveChannelSetting(channel, key, value);
+        });
+      });
+
+      // 绑定图片上传事件
+      const imageInputs = document.querySelectorAll(`#settingsContent input[type="file"]`);
+      imageInputs.forEach(input => {
+        input.addEventListener('change', async (e) => {
+          const key = e.target.dataset.key;
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              // 处理图片文件并保存到图片管理器
+              const storageKey = `${channel}-${key}`;
+              const imageData = await fileProcessor.processImageFile(file, storageKey, true);
+              
+              // 更新预览
+              updateImagePreview(channel, key, file);
+              
+              // 保存到本地存储
+              saveChannelImageToLocal(channel, key, imageData);
+              
+              // 通知主程序图片已上传
+              pluginComm.postMessage('channel-image-uploaded', {
+                channel: channel,
+                imageType: key,
+                imageData: {
+                  data: Array.from(imageData.data), // 转换为数组以便传输
+                  width: imageData.width,
+                  height: imageData.height,
+                  name: imageData.name,
+                  type: imageData.type
+                }
+              });
+              
+              notificationSystem.show(`${key === 'eggBreaking' ? '砸蛋样式' : '尾版样式'}上传成功`, 'success');
+            } catch (error) {
+              console.error(`${channel}-${key} 图片上传失败:`, error);
+              notificationSystem.show(`图片上传失败: ${error.message}`, 'error');
+            }
+          }
+        });
+      });
+      
+      // 加载已保存的图片
+      loadSavedChannelImages(channel);
+    }
+
+    // 更新图片预览
+    function updateImagePreview(channel, key, file) {
+      const preview = document.getElementById(`${channel}-${key}-preview`);
+      if (preview && file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          preview.innerHTML = `<img src="${e.target.result}" alt="预览">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 保存渠道设置
+    function saveChannelSetting(channel, key, value) {
+      try {
+        const storageKey = `channel-settings-${channel}`;
+        let settings = {};
+        
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) {
+            settings = JSON.parse(stored);
+          }
+        } catch (e) {
+          console.warn('读取渠道设置失败，使用默认设置');
+        }
+        
+        settings[key] = value;
+        localStorage.setItem(storageKey, JSON.stringify(settings));
+        
+        console.log(`${channel} 渠道设置已保存:`, { [key]: value });
+        
+      } catch (error) {
+        console.error('保存渠道设置失败:', error);
+        notificationSystem.show('设置保存失败', 'error');
+      }
+    }
+
+    // 保存渠道图片到本地存储
+    function saveChannelImageToLocal(channel, imageType, imageData) {
+      try {
+        const storageKey = `channel-image-${channel}-${imageType}`;
+        const imageInfo = {
+          data: Array.from(imageData.data),
+          width: imageData.width,
+          height: imageData.height,
+          name: imageData.name,
+          type: imageData.type,
+          timestamp: Date.now()
+        };
+        
+        localStorage.setItem(storageKey, JSON.stringify(imageInfo));
+        console.log(`${channel} ${imageType} 图片已保存到本地`);
+      } catch (error) {
+        console.error('保存图片到本地失败:', error);
+        // 如果localStorage空间不足，尝试清理旧数据
+        if (error.name === 'QuotaExceededError') {
+          try {
+            clearOldChannelImages();
+            localStorage.setItem(storageKey, JSON.stringify(imageInfo));
+            console.log('清理后重新保存图片成功');
+          } catch (retryError) {
+            console.error('清理后仍然保存失败:', retryError);
+          }
+        }
+      }
+    }
+
+    // 加载已保存的渠道图片
+    function loadSavedChannelImages(channel) {
+      const imageTypes = ['eggBreaking', 'footerStyle'];
+      
+      imageTypes.forEach(imageType => {
+        try {
+          const storageKey = `channel-image-${channel}-${imageType}`;
+          const saved = localStorage.getItem(storageKey);
+          
+          if (saved) {
+            const imageInfo = JSON.parse(saved);
+            const imageData = {
+              data: new Uint8Array(imageInfo.data),
+              width: imageInfo.width,
+              height: imageInfo.height,
+              name: imageInfo.name,
+              type: imageInfo.type
+            };
+            
+            // 保存到图片管理器
+            const managerKey = `${channel}-${imageType}`;
+            imageManager.setModule(managerKey, imageData);
+            
+            // 更新预览
+            updateImagePreviewFromData(channel, imageType, imageData);
+            
+            console.log(`已加载 ${channel} ${imageType} 图片`);
+          }
+        } catch (error) {
+          console.error(`加载 ${channel} ${imageType} 图片失败:`, error);
+        }
+      });
+    }
+
+    // 清理旧的渠道图片数据
+    function clearOldChannelImages() {
+      try {
+        const keys = Object.keys(localStorage);
+        const channelImageKeys = keys.filter(key => key.startsWith('channel-image-'));
+        
+        // 按时间戳排序，删除最旧的50%
+        const keyTimestamps = channelImageKeys.map(key => {
+          try {
+            const data = JSON.parse(localStorage.getItem(key));
+            return { key, timestamp: data.timestamp || 0 };
+          } catch {
+            return { key, timestamp: 0 };
+          }
+        }).sort((a, b) => a.timestamp - b.timestamp);
+        
+        const toDelete = keyTimestamps.slice(0, Math.floor(keyTimestamps.length / 2));
+        toDelete.forEach(item => {
+          localStorage.removeItem(item.key);
+        });
+        
+        console.log(`已清理 ${toDelete.length} 个旧图片数据`);
+      } catch (error) {
+        console.error('清理旧图片数据失败:', error);
+      }
+    }
+
+    // 从图片数据更新预览
+    function updateImagePreviewFromData(channel, imageType, imageData) {
+      try {
+        const preview = document.getElementById(`${channel}-${imageType}-preview`);
+        if (preview && imageData) {
+          const blob = new Blob([imageData.data], { type: imageData.type });
+          const url = URL.createObjectURL(blob);
+          
+          preview.innerHTML = `<img src="${url}" alt="预览" onload="URL.revokeObjectURL(this.src)">`;
+        }
+      } catch (error) {
+        console.error('更新图片预览失败:', error);
+      }
+    }
+
     // DOM缓存优化
     let tabCache = null;
     let contentCache = null;
@@ -4348,8 +5134,170 @@
 
     // 页面加载完成后初始化
     document.addEventListener('DOMContentLoaded', function() {
+      // 初始化UI
       initializeUI();
+      
+      // 绑定主题按钮事件
+      bindThemeButtonEvents();
+      
+      // 加载保存的主题设置
+      loadThemePreference();
+      
+      // 监听系统主题变化
+      setupSystemThemeListener();
+      
+      console.log('页面初始化完成');
     });
+
+    // 设置系统主题监听器
+    function setupSystemThemeListener() {
+      try {
+        if (window.matchMedia) {
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+          
+          // 使用兼容性更好的监听方法
+          const handleThemeChange = (e) => {
+            const savedTheme = localStorage.getItem('theme-preference');
+            
+            // 只有在用户没有手动设置主题时才跟随系统主题
+            if (!savedTheme) {
+              const newTheme = e.matches ? 'dark' : 'light';
+              applyTheme(newTheme);
+              console.log(`系统主题已变化，自动切换到: ${newTheme}`);
+            }
+          };
+
+          // 优先使用现代API，回退到旧API
+          if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', handleThemeChange);
+          } else if (mediaQuery.addListener) {
+            mediaQuery.addListener(handleThemeChange);
+          }
+          
+          console.log('系统主题监听器已设置');
+        }
+      } catch (error) {
+        console.warn('设置系统主题监听器失败:', error);
+      }
+    }
+
+    // 加载主题偏好设置
+    function loadThemePreference() {
+      try {
+        const savedTheme = localStorage.getItem('theme-preference');
+        if (savedTheme) {
+          // 应用保存的主题
+          applyTheme(savedTheme);
+          console.log(`已加载用户保存的主题: ${savedTheme}`);
+        } else {
+          // 如果没有保存的主题，跟随系统主题
+          detectAndApplySystemTheme();
+        }
+      } catch (error) {
+        console.warn('加载主题设置失败:', error);
+        detectAndApplySystemTheme(); // 失败时也尝试跟随系统主题
+      }
+    }
+
+    // 检测并应用系统主题
+    function detectAndApplySystemTheme() {
+      try {
+        // 检测系统主题偏好
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const systemTheme = prefersDark ? 'dark' : 'light';
+        
+        applyTheme(systemTheme);
+        console.log(`跟随系统主题: ${systemTheme}`);
+      } catch (error) {
+        console.warn('检测系统主题失败，使用默认浅色主题:', error);
+        applyTheme('light');
+      }
+    }
+
+    // 应用主题
+    function applyTheme(theme) {
+      try {
+        // 设置body类名
+        if (theme === 'dark') {
+          document.body.className = 'dark-theme';
+        } else {
+          document.body.className = '';
+        }
+        
+        // 更新按钮状态
+        updateThemeButtonsState(theme);
+        
+        console.log(`主题已应用: ${theme}`);
+      } catch (error) {
+        console.error('应用主题失败:', error);
+      }
+    }
+
+    // 更新主题按钮状态
+    function updateThemeButtonsState(activeTheme) {
+      try {
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        
+        if (themeButtons.length > 0) {
+          themeButtons.forEach(btn => {
+            const isActive = btn.dataset.theme === activeTheme;
+            btn.classList.toggle('active', isActive);
+          });
+          console.log(`主题按钮状态已更新: ${activeTheme}`);
+        } else {
+          // 如果按钮不存在，延迟重试
+          setTimeout(() => updateThemeButtonsState(activeTheme), 100);
+        }
+      } catch (error) {
+        console.error('更新主题按钮状态失败:', error);
+      }
+    }
+
+    // 切换主题函数
+    function switchTheme(theme) {
+      try {
+        // 应用新主题
+        applyTheme(theme);
+        
+        // 保存用户选择
+        localStorage.setItem('theme-preference', theme);
+        console.log(`主题已切换并保存: ${theme}`);
+      } catch (error) {
+        console.error('切换主题失败:', error);
+      }
+    }
+
+    // 绑定主题按钮事件
+    function bindThemeButtonEvents() {
+      try {
+        const lightBtn = document.getElementById('lightTheme');
+        const darkBtn = document.getElementById('darkTheme');
+        
+        if (lightBtn) {
+          lightBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchTheme('light');
+          });
+          console.log('浅色主题按钮事件已绑定');
+        } else {
+          console.warn('浅色主题按钮未找到');
+        }
+        
+        if (darkBtn) {
+          darkBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            switchTheme('dark');
+          });
+          console.log('深色主题按钮事件已绑定');
+        } else {
+          console.warn('深色主题按钮未找到');
+        }
+      } catch (error) {
+        console.error('绑定主题按钮事件失败:', error);
+      }
+    }
 
     // 极致优化的UI初始化 - 使用事件委托
     function initializeUI() {
@@ -4398,10 +5346,32 @@
       
       // 主题切换
       if (btn.classList.contains('theme-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const theme = btn.dataset.theme;
-        document.body.className = theme === 'dark' ? 'dark-theme' : '';
+        
+        // 移除所有主题按钮的active状态
         document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        
+        // 设置新主题
+        if (theme === 'dark') {
+          document.body.className = 'dark-theme';
+        } else {
+          document.body.className = ''; // 移除所有类名，恢复默认亮色主题
+        }
+        
+        // 设置当前按钮为active状态
         btn.classList.add('active');
+        
+        // 保存主题设置
+        try {
+          localStorage.setItem('theme-preference', theme);
+        } catch (error) {
+          console.warn('无法保存主题设置:', error);
+        }
+        
+        console.log(`主题已切换到: ${theme}`);
         return;
       }
     }

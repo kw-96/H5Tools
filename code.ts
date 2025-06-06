@@ -153,6 +153,7 @@ interface PrizeItem {
 interface PluginMessage {
   type: string;                 // 消息类型
   config?: H5Config;            // 可选的H5配置
+  channel?: string;             // 可选的渠道名称
   [key: string]: unknown;       // 允许添加任意其他属性
 }
 
@@ -499,7 +500,6 @@ class ImageNodeBuilder {
       const isOversized = width > maxSize || height > maxSize;
       
       if (isOversized) {
-        console.log(`图片尺寸过大: ${name} (${width}x${height})，请求分割处理`);
         return await this.handleOversizedImage(uint8Array, width, height, name);
       }
 
@@ -543,8 +543,6 @@ class ImageNodeBuilder {
       const maxSize = 4096;
       const sliceStrategy = this.calculateSliceStrategy(width, height, maxSize);
       
-      console.log(`图片切割策略: ${name}`, sliceStrategy);
-
       // 向UI请求分割处理
       figma.ui.postMessage({
         type: 'slice-large-image',
@@ -563,7 +561,6 @@ class ImageNodeBuilder {
           clearTimeout(timeout);
 
           if (msg.success && msg.slices && msg.slices.length > 0) {
-            console.log(`收到${name}的切片数据，片数: ${msg.slices.length}`);
             try {
               const group = await this.assembleSlicedImage(msg.slices, width, height, name, sliceStrategy);
               resolve(group);
@@ -674,7 +671,6 @@ class ImageNodeBuilder {
             // 不立即添加到页面，先收集所有节点
             sliceNodes.push(sliceNode);
             
-            console.log(`切片 ${i + 1}/${slices.length} 创建成功，位置: (${slice.x}, ${slice.y})`);
           } else {
             console.warn(`切片 ${i + 1} 图片创建失败，跳过此切片`);
           }
@@ -705,7 +701,6 @@ class ImageNodeBuilder {
           group.x = 0;
           group.y = 0;
           
-          console.log(`图片组装完成: ${name}, 切片数: ${sliceNodes.length}, 组尺寸: ${group.width}x${group.height}`);
           figma.notify(`图片组装完成: ${name}`, { timeout: 1000 });
           
           return group;
@@ -894,9 +889,7 @@ class FeatherMaskUtils {
       
       // 7. 设置为剪切蒙版
       featherGroup.isMask = true;
-      
-      console.log(`羽化蒙版创建成功: 模糊半径=${blurRadius.toFixed(1)}px, 蒙版尺寸=${rectWidth.toFixed(1)}x${rectHeight.toFixed(1)}`);
-      
+            
       return featherGroup;
       
     } catch (error) {
@@ -947,9 +940,7 @@ class FeatherMaskUtils {
       node.y = 0;
       featherMask.x = 0;
       featherMask.y = 0;
-      
-      console.log('羽化蒙版已应用到节点，创建了包含组:', containerGroup.name);
-      
+            
       return containerGroup;
       
     } catch (error) {
@@ -1008,9 +999,7 @@ class FeatherMaskUtils {
       
       // 设置为剪切蒙版
       featherGroup.isMask = true;
-      
-      console.log(`自定义羽化蒙版创建成功: 模糊半径=${radius.toFixed(1)}px, 蒙版尺寸=${rectWidth.toFixed(1)}x${rectHeight.toFixed(1)}`);
-      
+            
       return featherGroup;
       
     } catch (error) {
@@ -1054,6 +1043,26 @@ figma.ui.postMessage({
   data: PLUGIN_DATA
 });
 
+// ==================== 渠道图片存储 ====================
+
+interface ChannelImageData {
+  data: number[];
+  width: number;
+  height: number;
+  name: string;
+  type: string;
+}
+
+interface ChannelImages {
+  [channel: string]: {
+    eggBreaking?: ChannelImageData;
+    footerStyle?: ChannelImageData;
+  };
+}
+
+// 全局渠道图片存储
+const channelImages: ChannelImages = {};
+
 // ==================== 消息处理器 ====================
 
 const MessageHandlers = {
@@ -1095,12 +1104,65 @@ const MessageHandlers = {
     } catch (error) {
       throw new Error(`加载配置失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }
+  },
+
+  async handleChannelImageUpload(data: { channel: string; imageType: string; imageData: ChannelImageData }): Promise<void> {
+    try {
+      const { channel, imageType, imageData } = data;
+      
+      // 初始化渠道对象（如果不存在）
+      if (!channelImages[channel]) {
+        channelImages[channel] = {};
+      }
+      
+      // 存储图片数据
+      channelImages[channel][imageType as keyof ChannelImages[string]] = imageData;
+      
+      // 保存到 Figma 客户端存储
+      await figma.clientStorage.setAsync(`channel-images-${channel}`, JSON.stringify(channelImages[channel]));
+      
+      console.log(`${channel} 渠道 ${imageType} 图片已保存:`, {
+        name: imageData.name,
+        size: `${imageData.width}x${imageData.height}`,
+        dataSize: imageData.data.length
+      });
+      
+      figma.ui.postMessage({
+        type: 'channel-image-saved',
+        channel: channel,
+        imageType: imageType,
+        message: '图片已保存'
+      });
+      
+    } catch (error) {
+      console.error('保存渠道图片失败:', error);
+      figma.ui.postMessage({
+        type: 'channel-image-error',
+        message: `保存图片失败: ${error instanceof Error ? error.message : '未知错误'}`
+      });
+    }
+  },
+
+  async loadChannelImages(): Promise<void> {
+    try {
+      const channels = ['oppo', 'vivo', 'huawei', 'xiaomi'];
+      
+      for (const channel of channels) {
+        const stored = await figma.clientStorage.getAsync(`channel-images-${channel}`);
+        if (stored) {
+          channelImages[channel] = JSON.parse(stored);
+          console.log(`已加载 ${channel} 渠道图片数据`);
+        }
+      }
+      
+    } catch (error) {
+      console.error('加载渠道图片失败:', error);
+    }
   }
 };
 
 // 消息处理主函数
 figma.ui.onmessage = async (msg: PluginMessage) => {
-  console.log('收到UI消息:', msg);
   
   try {
     switch (msg.type) {
@@ -1142,9 +1204,7 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
       
       case 'generate':
         try {
-          console.log('开始生成H5原型');
-          await generatePrototype(msg.config);
-          console.log('H5原型生成完成');
+          await MessageHandlers.handleCreatePrototype(msg.config!);
           figma.ui.postMessage({ type: 'generate-complete' });
         } catch (error) {
           console.error('生成失败:', error);
@@ -1157,21 +1217,25 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
       
       case 'generate-channel':
         try {
-          console.log(`开始生成${msg.channel.toUpperCase()}渠道版本`);
-          await generateChannelVersion(msg.channel);
-          console.log(`${msg.channel.toUpperCase()}渠道版本生成完成`);
+          const channel = msg.channel as string;
+          await generateChannelVersion(channel);
           figma.ui.postMessage({ 
             type: 'channel-generate-complete',
-            channel: msg.channel
+            channel: channel
           });
         } catch (error) {
-          console.error(`生成${msg.channel}渠道版本失败:`, error);
+          const channel = msg.channel as string;
+          console.error(`生成${channel}渠道版本失败:`, error);
           figma.ui.postMessage({ 
             type: 'channel-generate-error', 
-            channel: msg.channel,
+            channel: channel,
             error: error instanceof Error ? error.message : '未知错误'
           });
         }
+        break;
+      
+      case 'channel-image-uploaded':
+        await MessageHandlers.handleChannelImageUpload(msg as any);
         break;
       
       default:
@@ -1365,29 +1429,30 @@ class H5PrototypeBuilder {
     
     // 只有当标题文案、标题背景图或活动规则内容任一存在时才创建模块
     if (hasRulesTitle || hasRulesBgImage || hasRulesContent) {
-      console.log('创建活动规则模块，因为存在以下内容：', {
-        hasRulesTitle,
-        hasRulesBgImage,
-        hasRulesContent
-      });
-      
       const module = await createRulesModule(this.config);
       // 移除不支持的 layoutAlign 属性
       return module;
     }
     
-    console.log('跳过活动规则模块创建：没有任何规则相关内容');
     return null;
   }
 
+  /**
+   * 创建底部模块（如果需要）
+   * 如果配置中包含底部logo或背景，则创建底部模块
+   * @returns Promise<FrameNode | null> 返回创建的底部模块或null
+   */
   private async createFooterModuleIfNeeded(): Promise<FrameNode | null> {
+    // 检查是否需要创建底部模块
     if (this.config.footerLogo || this.config.footerBg) {
+      // 异步创建底部模块
       const module = await createFooterModule(this.config);
       if (module) {
-        // 移除不支持的 layoutAlign 属性
+        // 返回创建的模块
         return module;
       }
     }
+    // 如果不需要创建底部模块，返回null
     return null;
   }
 
@@ -1403,7 +1468,6 @@ class H5PrototypeBuilder {
         if (childrenCount > 1) {
           // 使用insertChild将节点移动到最后位置
           this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
-          console.log('H5自适应模块容器已移动到顶层');
         }
       }
     } catch (reorderError) {
@@ -1438,13 +1502,11 @@ async function createHeaderModule(
 ): Promise<FrameNode | null> {
   // 如果只有标题图片没有头图，则跳过头图模块的创建
   if (!headerImage && titleUpload) {
-    console.log('跳过头图模块创建：只有标题图片没有头图');
     return null;
   }
 
   // 如果既没有头图也没有标题图片，也跳过创建
   if (!headerImage && !titleUpload) {
-    console.log('跳过头图模块创建：没有任何图片');
     return null;
   }
 
@@ -1493,9 +1555,7 @@ async function createHeaderModule(
   // 1. 在完成头图模块的创建后，对头图图片节点进行添加羽化蒙版
   if (headerNode) {
     try {
-      console.log('开始为头图图片添加羽化蒙版');
       await addFeatherMaskToHeaderImage(headerNode, frame);
-      console.log('头图图片羽化蒙版添加完成');
     } catch (error) {
       console.error('头图图片添加羽化蒙版失败:', error);
     }
@@ -1539,13 +1599,11 @@ function adjustHeaderFrameHeight(
   // 如果只有头图，没有标题图片
   if (headerNode && !titleNode) {
     // 无论头图高度大于或小于1080px，都将容器高度调整为头图高度
-    console.log(`调整头图容器高度：从1080px调整为${headerNode.height}px`);
     frame.resize(1080, headerNode.height);
   }
   // 如果既有头图又有标题图片
   else if (headerNode && titleNode) {
     // 先将容器高度调整为头图高度
-    console.log(`调整头图容器高度：从1080px调整为${headerNode.height}px（匹配头图高度）`);
     frame.resize(1080, headerNode.height);
     
     // 重新设置标题图片位置：底部对齐调整后的容器
@@ -1564,7 +1622,6 @@ async function addFeatherMaskToHeaderImage(
   frame: FrameNode
 ): Promise<void> {
   try {
-    console.log('开始为头图添加羽化蒙版');
     
     // 检查节点是否仍然存在且有效
     if (!headerNode || !headerNode.parent) {
@@ -1582,7 +1639,6 @@ async function addFeatherMaskToHeaderImage(
     // 1. 复制头图图片节点
     const headerNodeCopy = headerNode.clone();
     headerNodeCopy.name = "头图图片";
-    console.log('头图节点已复制');
     
     // 2. 计算羽化蒙版参数
     const blurRadius = originalWidth * 0.1;
@@ -1669,7 +1725,6 @@ async function addFeatherMaskToHeaderImage(
     try {
       if (headerNode && headerNode.parent) {
         headerNode.remove();
-        console.log('原头图节点已删除');
       }
     } catch (removeError) {
       console.warn('删除原头图节点失败:', removeError);
@@ -1682,14 +1737,9 @@ async function addFeatherMaskToHeaderImage(
       headerNodeCopy.x = 0;
       headerNodeCopy.y = 0;
       headerNodeCopy.constraints = originalConstraints;
-      console.log('复制的头图图片节点已放入头图组');
     } catch (addError) {
       console.error('将复制的头图图片节点添加到头图组失败:', addError);
     }
-
-    console.log('头图组已创建，包含头图和羽化蒙版组');
-    console.log(`头图羽化蒙版创建成功: 模糊半径=${blurRadius.toFixed(1)}px`);
-    console.log(`蒙版尺寸=${rectWidth.toFixed(1)}x${adjustedRectHeight.toFixed(1)}`);
     
   } catch (error) {
     console.error('为头图图片添加羽化蒙版失败:', error);
@@ -2107,7 +2157,6 @@ class ModuleFactory {
 
   // 创建模块的异步方法
   async createModule(module: Module): Promise<FrameNode> {
-    console.log(`创建模块: ${module.type}`, module);
     
     // 获取对应的模块创建器
     const creator = this.moduleCreators[module.type];
@@ -2160,7 +2209,6 @@ async function createErrorModule(module: Module, error: unknown): Promise<FrameN
 
 // 创建九宫格抽奖模块的异步函数
 async function createNineGridModule(content: NineGridContent): Promise<FrameNode> {
-  console.log('开始创建九宫格模块，内容：', content);
   
   // 创建整个九宫格模块容器：1080宽，背景透明，高度按实际创建成功来
   const frame = NodeUtils.createFrame("九宫格抽奖", 1080, 1000);
@@ -2171,9 +2219,7 @@ async function createNineGridModule(content: NineGridContent): Promise<FrameNode
     const builder = new NineGridModuleBuilder(frame, content);
     // 调用构建器的build方法来构建九宫格模块
     await builder.build();
-    
-    console.log('九宫格模块创建完成，最终高度：', frame.height);
-    
+        
     // 返回构建完成的框架
     return frame;
   } catch (error) {
@@ -2205,22 +2251,17 @@ class NineGridModuleBuilder {
 
   // 构建九宫格模块的主要方法
   async build(): Promise<void> {
-    console.log('开始构建九宫格模块');
     
     try {
       // 添加标题
-      console.log('添加标题...');
       await this.addTitle();
       
       // 添加九宫格主体
-      console.log('添加九宫格主体...');
       await this.addNineGrid();
       
       // 调整整个模块的高度
-      console.log('调整模块高度...');
       this.adjustFrameHeight();
       
-      console.log('九宫格模块构建完成');
     } catch (error) {
       console.error('九宫格模块构建过程中出错：', error);
       throw error;
@@ -2233,7 +2274,7 @@ class NineGridModuleBuilder {
     if (!this.content.mainTitle) return;
 
     // 创建标题容器：1080宽，高度120
-    const titleContainer = NodeUtils.createFrame("九宫格标题容器", 1080, 120);
+    const titleContainer = NodeUtils.createFrame("九宫格标题", 1080, 120);
     titleContainer.x = 0;
     titleContainer.y = this.currentY + 90;
     titleContainer.fills = []; // 透明背景
@@ -2277,7 +2318,7 @@ class NineGridModuleBuilder {
     const gridHeight = 3 * this.CELL_SIZE + 4 * this.CELL_SPACING + 180; // 上下各90px边距
     
     // 创建九宫格主体容器：1080宽，高度按创建成功后的高度来
-    const gridContainer = NodeUtils.createFrame("九宫格主体容器", 1080, gridHeight);
+    const gridContainer = NodeUtils.createFrame("九宫格主体", 1080, gridHeight);
     gridContainer.x = 0;
     gridContainer.y = this.currentY + 90;
     gridContainer.fills = []; // 填充为透明
@@ -2331,7 +2372,6 @@ class NineGridModuleBuilder {
   }
 
   private async createDrawButton(x: number, y: number): Promise<FrameNode> {
-    console.log('创建抽奖按钮，有按钮图片：', !!this.content.drawButtonImage);
     
     // 创建抽奖按钮容器（270x270px）
     const buttonFrame = NodeUtils.createFrame("抽奖按钮容器", this.CELL_SIZE, this.CELL_SIZE);
@@ -2394,9 +2434,7 @@ class NineGridModuleBuilder {
     const prizeNumber = (prizeIndex + 1).toString();
     const paddedNumber = prizeNumber.length < 2 ? '0' + prizeNumber : prizeNumber;
     const prizeName = prize?.name || `奖品${paddedNumber}`;
-    
-    console.log(`创建奖品格子 ${prizeIndex}:`, { prizeName, hasImage: !!prize?.image, hasPrizeBg: !!this.content.prizeBgImage });
-    
+        
     // 创建奖品容器（270x270px）
     const prizeBox = NodeUtils.createFrame(prizeName, this.CELL_SIZE, this.CELL_SIZE);
     prizeBox.x = x;
@@ -2783,7 +2821,6 @@ async function createCardItem(content: CollectCardsContent, cardNumber: number):
 // 注意：此模块用于创建活动详细内容，区别于页面底部的活动规则模块
 
 async function createActivityContentModule(content: ActivityContentData): Promise<FrameNode> {
-  console.log('开始创建活动内容模块（非页面底部规则），内容：', content);
   
   // 创建整个活动内容模块容器：1080宽，背景透明
   const frame = NodeUtils.createFrame("活动内容", 1080, 1000);
@@ -2948,11 +2985,11 @@ class ActivityContentBuilder {
     // 直接插入正文文本节点，宽度为950，高度按实际输入内容
     const textNode = await NodeUtils.createText(this.content.text, 40, 'Regular');
     textNode.resize(950, textNode.height);
-    textNode.textAlignHorizontal = "LEFT";
-    textNode.lineHeight = { value: 40, unit: 'PIXELS' }; // 设置行高
-    textNode.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 白色文字（0-1范围）
-    textNode.textAlignHorizontal = "CENTER";
+    textNode.textAlignHorizontal = "CENTER"; // 设置文本水平居中对齐
+    textNode.lineHeight = { unit: 'AUTO' }; // 自动行高
+    textNode.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 设置文字颜色为白色
 
+    // 将文本节点安全地添加到框架中
     NodeUtils.safeAppendChild(this.frame, textNode, '活动内容正文添加');
   }
 
@@ -3300,6 +3337,11 @@ async function generateChannelVersion(channel: string): Promise<void> {
       throw new Error('请先选中名为"H5原型"的容器');
     }
     
+    // 根据H5原型容器中的文本节点加载字体
+    console.log('分析H5原型容器中的文本节点并加载字体...');
+    await loadFontsFromPrototype(selectedPrototype);
+    console.log('字体加载完成');
+    
     // 创建渠道专用的H5原型生成器
     const channelGenerator = new ChannelPrototypeGenerator(channel, selectedPrototype);
     
@@ -3311,6 +3353,73 @@ async function generateChannelVersion(channel: string): Promise<void> {
   } catch (error) {
     console.error(`生成${channel}渠道版本失败:`, error);
     throw error;
+  }
+}
+
+/**
+ * 从H5原型容器中提取所有文本节点使用的字体并加载
+ */
+async function loadFontsFromPrototype(prototypeContainer: FrameNode): Promise<void> {
+  try {
+    console.log('开始分析H5原型容器中的文本节点...');
+    
+    // 收集所有文本节点使用的字体
+    const fontsToLoad = new Set<string>();
+    
+    // 递归遍历所有节点，收集文本节点的字体信息
+    const collectFonts = (node: BaseNode): void => {
+      if (node.type === 'TEXT') {
+        const textNode = node as TextNode;
+        
+        // 处理混合字体样式
+        if (typeof textNode.fontName === 'object' && 'family' in textNode.fontName) {
+          // 单一字体
+          const fontKey = `${textNode.fontName.family}|${textNode.fontName.style}`;
+          fontsToLoad.add(fontKey);
+          console.log(`发现文本节点 "${textNode.name}" 使用字体: ${textNode.fontName.family} ${textNode.fontName.style}`);
+        } else if (textNode.fontName === figma.mixed) {
+          // 混合字体 - 需要遍历每个字符的字体
+          const len = textNode.characters.length;
+          for (let i = 0; i < len; i++) {
+            const font = textNode.getRangeFontName(i, i + 1) as FontName;
+            const fontKey = `${font.family}|${font.style}`;
+            fontsToLoad.add(fontKey);
+          }
+          console.log(`发现文本节点 "${textNode.name}" 使用混合字体`);
+        }
+      }
+      
+      // 递归处理子节点
+      if ('children' in node) {
+        for (const child of node.children) {
+          collectFonts(child);
+        }
+      }
+    };
+    
+    // 开始收集字体
+    collectFonts(prototypeContainer);
+    
+    console.log(`共发现 ${fontsToLoad.size} 种字体需要加载`);
+    
+    // 加载所有发现的字体
+    const loadPromises = Array.from(fontsToLoad).map(async (fontKey) => {
+      const [family, style] = fontKey.split('|');
+      try {
+        await figma.loadFontAsync({ family, style });
+        console.log(`✓ 字体加载成功: ${family} ${style}`);
+      } catch (error) {
+        console.warn(`✗ 字体加载失败: ${family} ${style}`, error);
+        // 字体加载失败不阻断流程
+      }
+    });
+    
+    await Promise.all(loadPromises);
+    console.log('所有字体加载完成');
+    
+  } catch (error) {
+    console.error('从原型容器加载字体时发生错误:', error);
+    // 不抛出错误，让后续流程继续执行
   }
 }
 
@@ -3613,8 +3722,6 @@ class ChannelPrototypeGenerator {
    */
   private async adjustOppoHeaderModule(headerFrame: FrameNode): Promise<void> {
     try {
-      console.log('调整OPPO头图模块');
-      
       // 1. 调整头图容器高度为1300px
       headerFrame.resize(headerFrame.width, 1300);
       
@@ -3625,10 +3732,15 @@ class ChannelPrototypeGenerator {
         const newHeight = maskRect.height - 100;
         maskRect.resize(maskRect.width, newHeight);
         
-        // 下移100px
-        maskRect.y = maskRect.y + 100;
-        
-        console.log(`蒙版矩形调整完成: 新高度=${newHeight}, 新Y位置=${maskRect.y}`);
+        // 下移150px
+        maskRect.y = maskRect.y + 150;
+      }
+      
+      // 3. 查找并调整头图图片节点
+      const headerImageNode = this.findHeaderImageNode(headerFrame);
+      if (headerImageNode) {
+        // 头图图片节点下移100px
+        headerImageNode.y = headerImageNode.y + 100;
       }
       
     } catch (error) {
@@ -3641,12 +3753,9 @@ class ChannelPrototypeGenerator {
    */
   private async adjustOppoNineGridModule(nineGridFrame: FrameNode): Promise<void> {
     try {
-      console.log('调整OPPO九宫格模块');
-      
       // 查找九宫格主体容器
       const mainContainer = this.findNineGridMainContainer(nineGridFrame);
       if (!mainContainer) {
-        console.warn('未找到九宫格主体容器');
         return;
       }
       
@@ -3654,16 +3763,16 @@ class ChannelPrototypeGenerator {
       this.clearContainerContent(mainContainer);
       
       // 3. 插入砸蛋样式图片节点（864*512）
-      await this.insertEggBreakingImage(mainContainer);
-      
+      await this.insertEggBreakingImage(mainContainer, this.channel);
+
       // 4. 创建立即抽奖容器（512*133）
       const drawContainer = await this.createDrawContainer(mainContainer, nineGridFrame);
       
       // 5. 创建我的奖品容器（398*112）
-      const myPrizesContainer = await this.createMyPrizesContainer(mainContainer, drawContainer);
+      const myPrizesContainer = await this.createMyPrizesContainer(mainContainer, drawContainer, nineGridFrame);
       
       // 6. 创建活动规则容器（398*112）
-      await this.createRulesContainer(mainContainer, myPrizesContainer);
+      await this.createRulesContainer(mainContainer, myPrizesContainer, nineGridFrame);
       
     } catch (error) {
       console.error('调整OPPO九宫格模块失败:', error);
@@ -3674,9 +3783,7 @@ class ChannelPrototypeGenerator {
    * 调整OPPO尾版模块
    */
   private async adjustOppoFooterModule(footerFrame: FrameNode): Promise<void> {
-    try {
-      console.log('调整OPPO尾版模块');
-      
+    try {      
       // 7. 调整尾版容器高度为807px
       footerFrame.resize(footerFrame.width, 807);
       
@@ -3684,7 +3791,7 @@ class ChannelPrototypeGenerator {
       this.clearFooterLogo(footerFrame);
       
       // 插入尾版样式图片节点（1080*289）
-      await this.insertFooterStyleImage(footerFrame);
+      await this.insertFooterStyleImage(footerFrame, this.channel);      
       
     } catch (error) {
       console.error('调整OPPO尾版模块失败:', error);
@@ -3710,6 +3817,30 @@ class ChannelPrototypeGenerator {
     };
     
     return findMask(container);
+  }
+
+  /**
+   * 查找头图图片节点
+   */
+  private findHeaderImageNode(container: FrameNode): SceneNode | null {    
+    // 递归查找头图图片节点
+    const findHeaderImage = (node: BaseNode): SceneNode | null => {
+      // 仅查找名称为"头图图片"的节点
+      if (node.name === '头图图片') {
+        return node as SceneNode;
+      }
+      
+      // 递归查找子节点
+      if ('children' in node) {
+        for (const child of node.children) {
+          const result = findHeaderImage(child);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    
+    return findHeaderImage(container);
   }
   
   /**
@@ -3742,18 +3873,33 @@ class ChannelPrototypeGenerator {
   /**
    * 插入砸蛋样式图片
    */
-  private async insertEggBreakingImage(container: FrameNode): Promise<void> {
+  private async insertEggBreakingImage(container: FrameNode, channel: string): Promise<void> {
     try {
-      // TODO: 这里暂时创建占位矩形，后续需要从UI上传图片
-      const eggImage = figma.createRectangle();
-      eggImage.name = '砸蛋样式';
-      eggImage.resize(864, 512);
-      eggImage.x = 108; // 距离左边108px
-      eggImage.y = 150; // 距离上边150px
-      eggImage.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.8, b: 0.7 })]; // 临时颜色
+      // 获取上传的砸蛋样式图片
+      const channelData = channelImages[channel];
+      const eggBreakingData = channelData?.eggBreaking;
       
-      NodeUtils.safeAppendChild(container, eggImage, '砸蛋样式图片添加');
-      console.log('砸蛋样式图片已插入');
+      if (eggBreakingData) {
+        // 使用上传的图片
+        const imageNode = await this.createImageFromData(eggBreakingData, '砸蛋样式');
+        imageNode.resize(864, 512);
+        imageNode.x = 108; // 距离左边108px
+        imageNode.y = 150; // 距离上边150px
+        
+        NodeUtils.safeAppendChild(container, imageNode, '砸蛋样式图片添加');
+        console.log('砸蛋样式图片已插入:', eggBreakingData.name);
+      } else {
+        // 创建占位矩形
+        const eggImage = figma.createRectangle();
+        eggImage.name = '砸蛋样式（占位）';
+        eggImage.resize(864, 512);
+        eggImage.x = 108;
+        eggImage.y = 150;
+        eggImage.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.8, b: 0.7 })];
+        
+        NodeUtils.safeAppendChild(container, eggImage, '砸蛋样式占位图片添加');
+        console.log('砸蛋样式占位图片已插入');
+      }
     } catch (error) {
       console.error('插入砸蛋样式图片失败:', error);
     }
@@ -3783,17 +3929,39 @@ class ChannelPrototypeGenerator {
         NodeUtils.safeAppendChild(drawContainer, buttonImage, '立即抽奖按钮图片添加');
       }
       
+      // 获取下载按钮的文本样式
+      const buttonTextStyle = this.getDownloadButtonTextStyle(nineGridFrame);
+      
       // 添加文本
-      const drawText = await NodeUtils.createText('立即参与', 58, 'Bold');
-      drawText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-      drawText.textAlignHorizontal = 'CENTER';
-      drawText.textAlignVertical = 'CENTER';
+      try {
+        const drawText = figma.createText();
+        drawText.name = '立即抽奖文本';
+        drawText.characters = '立即抽奖';
+        
+        // 应用从下载按钮获取的样式
+        if (buttonTextStyle) {
+          drawText.fontName = buttonTextStyle.fontName;
+          drawText.fills = buttonTextStyle.fills;
+        } else {
+          // 如果无法获取样式，使用默认样式
+          drawText.fontName = { family: "Inter", style: "Bold" };
+          drawText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+        }
+        
+        drawText.fontSize = 58;
+        drawText.textAlignHorizontal = 'CENTER';
+        drawText.textAlignVertical = 'CENTER';
+        
+        // 居中对齐
+        drawText.x = (drawContainer.width - drawText.width) / 2;
+        drawText.y = (drawContainer.height - drawText.height) / 2;
+        
+        NodeUtils.safeAppendChild(drawContainer, drawText, '立即抽奖文本添加');
+      } catch (textError) {
+        console.error('创建文本节点失败:', textError);
+        // 即使文本创建失败，也继续执行后续代码
+      }
       
-      // 居中对齐
-      drawText.x = (drawContainer.width - drawText.width) / 2;
-      drawText.y = (drawContainer.height - drawText.height) / 2;
-      
-      NodeUtils.safeAppendChild(drawContainer, drawText, '立即参与文本添加');
       NodeUtils.safeAppendChild(mainContainer, drawContainer, '立即抽奖容器添加');
       
       return drawContainer;
@@ -3806,7 +3974,7 @@ class ChannelPrototypeGenerator {
   /**
    * 创建我的奖品容器
    */
-  private async createMyPrizesContainer(mainContainer: FrameNode, drawContainer: FrameNode | null): Promise<FrameNode | null> {
+  private async createMyPrizesContainer(mainContainer: FrameNode, drawContainer: FrameNode | null, nineGridFrame: FrameNode): Promise<FrameNode | null> {
     try {
       const myPrizesContainer = NodeUtils.createFrame('我的奖品', 398, 112);
       myPrizesContainer.x = 102; // 距离左102px
@@ -3829,17 +3997,38 @@ class ChannelPrototypeGenerator {
         }
       }
       
+      // 获取下载按钮的文本样式
+      const buttonTextStyle = this.getDownloadButtonTextStyle(nineGridFrame);
+      
       // 添加文本
-      const prizesText = await NodeUtils.createText('我的奖品', 50, 'Bold');
-      prizesText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-      prizesText.textAlignHorizontal = 'CENTER';
-      prizesText.textAlignVertical = 'CENTER';
+      try {
+        const prizesText = figma.createText();
+        prizesText.name = '我的奖品文本';
+        prizesText.characters = '我的奖品';
+        
+        // 应用从下载按钮获取的样式
+        if (buttonTextStyle) {
+          prizesText.fontName = buttonTextStyle.fontName;
+          prizesText.fills = buttonTextStyle.fills;
+        } else {
+          // 如果无法获取样式，使用默认样式
+          prizesText.fontName = { family: "Inter", style: "Bold" };
+          prizesText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+        }
+        
+        prizesText.fontSize = 50;
+        prizesText.textAlignHorizontal = 'CENTER';
+        prizesText.textAlignVertical = 'CENTER';
+        
+        // 居中对齐
+        prizesText.x = (myPrizesContainer.width - prizesText.width) / 2;
+        prizesText.y = (myPrizesContainer.height - prizesText.height) / 2;
+        
+        NodeUtils.safeAppendChild(myPrizesContainer, prizesText, '我的奖品文本添加');
+      } catch (textError) {
+        console.error('创建我的奖品文本失败:', textError);
+      }
       
-      // 居中对齐
-      prizesText.x = (myPrizesContainer.width - prizesText.width) / 2;
-      prizesText.y = (myPrizesContainer.height - prizesText.height) / 2;
-      
-      NodeUtils.safeAppendChild(myPrizesContainer, prizesText, '我的奖品文本添加');
       NodeUtils.safeAppendChild(mainContainer, myPrizesContainer, '我的奖品容器添加');
       
       return myPrizesContainer;
@@ -3852,7 +4041,7 @@ class ChannelPrototypeGenerator {
   /**
    * 创建活动规则容器
    */
-  private async createRulesContainer(mainContainer: FrameNode, myPrizesContainer: FrameNode | null): Promise<void> {
+  private async createRulesContainer(mainContainer: FrameNode, myPrizesContainer: FrameNode | null, nineGridFrame: FrameNode): Promise<void> {
     try {
       const rulesContainer = NodeUtils.createFrame('活动规则', 398, 112);
       rulesContainer.x = 580; // 距离左580px
@@ -3871,17 +4060,38 @@ class ChannelPrototypeGenerator {
         }
       }
       
+      // 获取下载按钮的文本样式
+      const buttonTextStyle = this.getDownloadButtonTextStyle(nineGridFrame);
+      
       // 添加文本
-      const rulesText = await NodeUtils.createText('活动规则', 50, 'Bold');
-      rulesText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-      rulesText.textAlignHorizontal = 'CENTER';
-      rulesText.textAlignVertical = 'CENTER';
+      try {
+        const rulesText = figma.createText();
+        rulesText.name = '活动规则文本';
+        rulesText.characters = '活动规则';
+        
+        // 应用从下载按钮获取的样式
+        if (buttonTextStyle) {
+          rulesText.fontName = buttonTextStyle.fontName;
+          rulesText.fills = buttonTextStyle.fills;
+        } else {
+          // 如果无法获取样式，使用默认样式
+          rulesText.fontName = { family: "Inter", style: "Bold" };
+          rulesText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+        }
+        
+        rulesText.fontSize = 50;
+        rulesText.textAlignHorizontal = 'CENTER';
+        rulesText.textAlignVertical = 'CENTER';
+        
+        // 居中对齐
+        rulesText.x = (rulesContainer.width - rulesText.width) / 2;
+        rulesText.y = (rulesContainer.height - rulesText.height) / 2;
+        
+        NodeUtils.safeAppendChild(rulesContainer, rulesText, '活动规则文本添加');
+      } catch (textError) {
+        console.error('创建活动规则文本失败:', textError);
+      }
       
-      // 居中对齐
-      rulesText.x = (rulesContainer.width - rulesText.width) / 2;
-      rulesText.y = (rulesContainer.height - rulesText.height) / 2;
-      
-      NodeUtils.safeAppendChild(rulesContainer, rulesText, '活动规则文本添加');
       NodeUtils.safeAppendChild(mainContainer, rulesContainer, '活动规则容器添加');
       
     } catch (error) {
@@ -3890,29 +4100,99 @@ class ChannelPrototypeGenerator {
   }
   
   /**
-   * 从游戏信息容器复制按钮图片
+   * 从游戏信息容器复制按钮底图图片
    */
   private async copyButtonImageFromGameInfo(nineGridFrame: FrameNode): Promise<RectangleNode | null> {
     try {
       // 在自适应模块中查找游戏信息容器
       const adaptiveModule = nineGridFrame.parent;
-      if (!adaptiveModule || adaptiveModule.type !== 'FRAME') return null;
+      if (!adaptiveModule || adaptiveModule.type !== 'FRAME') {
+        return null;
+      }
       
       const gameInfoFrame = (adaptiveModule as FrameNode).findOne(node => 
         node.type === 'FRAME' && node.name === '游戏信息'
       ) as FrameNode;
       
-      if (!gameInfoFrame) return null;
+      if (!gameInfoFrame) {
+        return null;
+      }
       
-      // 查找按钮图片节点
-      const buttonImage = this.findButtonImageInGameInfo(gameInfoFrame);
-      if (buttonImage) {
-        return buttonImage.clone() as RectangleNode;
+      // 递归查找按钮底图节点并复制
+      const findAndCloneButtonImage = (node: BaseNode): RectangleNode | null => {
+        // 查找名称为"按钮底图"的节点
+        if (node.name === '按钮底图') {
+          // 确保节点是可克隆的SceneNode类型
+          if ('clone' in node) {
+            const clonedNode = (node as SceneNode).clone() as RectangleNode;
+            return clonedNode;
+          } else {
+            return null;
+          }
+        }
+        
+        if ('children' in node) {
+          for (const child of node.children) {
+            const result = findAndCloneButtonImage(child);
+            if (result) return result;
+          }
+        }
+        return null;
+      };
+      
+      return findAndCloneButtonImage(gameInfoFrame);
+      
+    } catch (error) {
+      console.error('从游戏信息复制按钮底图失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 从游戏信息容器获取下载按钮的文本样式
+   */
+  private getDownloadButtonTextStyle(nineGridFrame: FrameNode): { fontName: FontName, fills: Paint[] } | null {
+    try {
+      // 在自适应模块中查找游戏信息容器
+      const adaptiveModule = nineGridFrame.parent;
+      if (!adaptiveModule || adaptiveModule.type !== 'FRAME') {
+        return null;
+      }
+      
+      const gameInfoFrame = (adaptiveModule as FrameNode).findOne(node => 
+        node.type === 'FRAME' && node.name === '游戏信息'
+      ) as FrameNode;
+      
+      if (!gameInfoFrame) {
+        return null;
+      }
+      
+      // 递归查找下载按钮容器中的文本节点
+      const findDownloadButtonText = (node: BaseNode): TextNode | null => {
+        if (node.type === 'TEXT' && node.parent && 'name' in node.parent && node.parent.name === '下载按钮') {
+          return node as TextNode;
+        }
+        
+        if ('children' in node) {
+          for (const child of node.children) {
+            const result = findDownloadButtonText(child);
+            if (result) return result;
+          }
+        }
+        return null;
+      };
+      
+      const textNode = findDownloadButtonText(gameInfoFrame);
+      if (textNode) {
+        return {
+          fontName: textNode.fontName as FontName,
+          fills: textNode.fills as Paint[]
+        };
       }
       
       return null;
     } catch (error) {
-      console.error('从游戏信息复制按钮图片失败:', error);
+      console.error('获取下载按钮文本样式失败:', error);
       return null;
     }
   }
@@ -3939,27 +4219,6 @@ class ChannelPrototypeGenerator {
   }
   
   /**
-   * 在游戏信息中查找按钮图片
-   */
-  private findButtonImageInGameInfo(gameInfoFrame: FrameNode): RectangleNode | null {
-    // 递归查找按钮图片节点
-    const findButtonImage = (node: BaseNode): RectangleNode | null => {
-      if (node.type === 'RECTANGLE' && node.name.includes('按钮')) {
-        return node as RectangleNode;
-      }
-      if ('children' in node) {
-        for (const child of node.children) {
-          const result = findButtonImage(child);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-    
-    return findButtonImage(gameInfoFrame);
-  }
-  
-  /**
    * 清除尾版LOGO
    */
   private clearFooterLogo(footerFrame: FrameNode): void {
@@ -3981,20 +4240,58 @@ class ChannelPrototypeGenerator {
   /**
    * 插入尾版样式图片
    */
-  private async insertFooterStyleImage(footerFrame: FrameNode): Promise<void> {
+  private async insertFooterStyleImage(footerFrame: FrameNode, channel: string): Promise<void> {
     try {
-      // TODO: 这里暂时创建占位矩形，后续需要从UI上传图片
-      const footerStyleImage = figma.createRectangle();
-      footerStyleImage.name = '尾版样式';
-      footerStyleImage.resize(1080, 289);
-      footerStyleImage.x = (footerFrame.width - 1080) / 2; // 左右居中
-      footerStyleImage.y = 122; // 距离上122px
-      footerStyleImage.fills = [ColorUtils.createSolidFill({ r: 0.8, g: 0.9, b: 0.8 })]; // 临时颜色
+      // 获取上传的尾版样式图片
+      const channelData = channelImages[channel];
+      const footerStyleData = channelData?.footerStyle;
       
-      NodeUtils.safeAppendChild(footerFrame, footerStyleImage, '尾版样式图片添加');
-      console.log('尾版样式图片已插入');
+      if (footerStyleData) {
+        // 使用上传的图片
+        const imageNode = await this.createImageFromData(footerStyleData, '尾版样式');
+        imageNode.resize(1080, 289);
+        imageNode.x = (footerFrame.width - 1080) / 2; // 左右居中
+        imageNode.y = 122; // 距离上122px
+        
+        NodeUtils.safeAppendChild(footerFrame, imageNode, '尾版样式图片添加');
+        console.log('尾版样式图片已插入:', footerStyleData.name);
+      } else {
+        // 创建占位矩形
+        const footerStyleImage = figma.createRectangle();
+        footerStyleImage.name = '尾版样式（占位）';
+        footerStyleImage.resize(1080, 289);
+        footerStyleImage.x = (footerFrame.width - 1080) / 2;
+        footerStyleImage.y = 122;
+        footerStyleImage.fills = [ColorUtils.createSolidFill({ r: 0.8, g: 0.9, b: 0.8 })];
+        
+        NodeUtils.safeAppendChild(footerFrame, footerStyleImage, '尾版样式占位图片添加');
+        console.log('尾版样式占位图片已插入');
+      }
     } catch (error) {
       console.error('插入尾版样式图片失败:', error);
+    }
+  }
+
+  /**
+   * 从图片数据创建图片节点
+   */
+  private async createImageFromData(imageData: ChannelImageData, name: string): Promise<RectangleNode> {
+    try {
+      const uint8Array = new Uint8Array(imageData.data);
+      const imageHash = figma.createImage(uint8Array).hash;
+      
+      const imageNode = figma.createRectangle();
+      imageNode.name = name;
+      imageNode.fills = [{
+        type: 'IMAGE',
+        imageHash: imageHash,
+        scaleMode: 'FILL'
+      }];
+      
+      return imageNode;
+    } catch (error) {
+      console.error(`创建图片节点失败: ${name}`, error);
+      throw error;
     }
   }
   
