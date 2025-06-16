@@ -1045,18 +1045,20 @@ figma.ui.postMessage({
 
 // ==================== 渠道图片存储 ====================
 
+// 定义渠道图片数据接口
 interface ChannelImageData {
-  data: number[];
-  width: number;
-  height: number;
-  name: string;
-  type: string;
+  data: number[];    // 图片数据
+  width: number;     // 图片宽度
+  height: number;    // 图片高度
+  name: string;      // 图片名称
+  type: string;      // 图片类型
 }
 
+// 定义渠道图片集合接口
 interface ChannelImages {
   [channel: string]: {
-    eggBreaking?: ChannelImageData;
-    footerStyle?: ChannelImageData;
+    eggBreaking?: ChannelImageData;  // 砸蛋活动图片
+    footerStyle?: ChannelImageData;  // 页脚样式图片
   };
 }
 
@@ -1103,6 +1105,32 @@ const MessageHandlers = {
       });
     } catch (error) {
       throw new Error(`加载配置失败: ${error instanceof Error ? error.message : '未知错误'}`);
+    }
+  },
+
+  // 新增主题相关处理器  
+  async handleGetTheme(): Promise<void> {
+    try {
+      const theme = await figma.clientStorage.getAsync('ui-theme') || 'light';
+      figma.ui.postMessage({
+        type: 'theme-loaded',
+        theme: theme
+      });
+    } catch (error) {
+      console.error('获取主题失败:', error);
+      figma.ui.postMessage({
+        type: 'theme-loaded',
+        theme: 'light'
+      });
+    }
+  },
+
+  async handleSaveTheme(theme: string): Promise<void> {
+    try {
+      await figma.clientStorage.setAsync('ui-theme', theme);
+      console.log('主题已保存:', theme);
+    } catch (error) {
+      console.error('保存主题失败:', error);
     }
   },
 
@@ -1176,6 +1204,14 @@ figma.ui.onmessage = async (msg: PluginMessage) => {
       
       case 'load-config':
         await MessageHandlers.handleLoadConfig();
+        break;
+      
+      case 'get-theme':
+        await MessageHandlers.handleGetTheme();
+        break;
+      
+      case 'save-theme':
+        await MessageHandlers.handleSaveTheme((msg as any).theme);
         break;
       
       case 'close-plugin':
