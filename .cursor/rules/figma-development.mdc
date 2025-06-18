@@ -1,0 +1,407 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Figma插件开发规范和常用代码片段，包含节点创建、图片处理、颜色处理等API使用指南
+globs: 
+  - "src/plugin/**/*.ts"
+  - "src/core/builders/**/*.ts"
+  - "src/ui/**/*.html"
+alwaysApply: false
+---
+
+# Figma 插件开发规范
+
+## ⚠️ Figma插件沙盒环境限制条件
+
+### 🚫 禁用功能
+1. **localStorage完全禁用**
+   - 错误信息：`Storage is disabled inside 'data:' URLs`
+   - 必须使用`figma.clientStorage`异步API
+   - 所有存储操作必须是异步的
+
+2. **外部资源加载限制**
+   - 不能加载外部CSS文件（`<link rel="stylesheet">`）
+   - 不能加载外部JavaScript文件（`<script src="">`）
+   - 相对路径可能在沙盒环境中失效
+
+3. **Content Security Policy (CSP) 限制**
+   - 禁止内联事件处理器（`onclick`等）
+   - 限制eval()和动态代码执行
+   - 限制外部域名访问
+
+### ✅ 必须遵循的规范
+
+#### 1. 存储适配器模式
+```javascript
+// ❌ 错误：直接使用localStorage
+localStorage.setItem('key', 'value');
+const value = localStorage.getItem('key');
+
+// ✅ 正确：使用存储适配器
+class StorageAdapter {
+  constructor() {
+    this.isFigmaEnvironment = typeof figma !== 'undefined' && !!figma.clientStorage;
+    this.cache = new Map(); // 内存缓存
+  }
+
+  async setItem(key, value) {
+    if (this.isFigmaEnvironment) {
+      await figma.clientStorage.setAsync(key, value);
+      this.cache.set(key, value);
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  async getItem(key) {
+    if (this.isFigmaEnvironment) {
+      if (this.cache.has(key)) {
+        return this.cache.get(key);
+      }
+      const value = await figma.clientStorage.getAsync(key);
+      if (value !== undefined) {
+        this.cache.set(key, value);
+      }
+      return value;
+    } else {
+      return localStorage.getItem(key);
+    }
+  }
+}
+```
+
+#### 2. 完全内联资源模式
+```html
+<!-- ❌ 错误：外部资源引用 -->
+<link rel="stylesheet" href="styles.css">
+<script src="script.js"></script>
+
+<!-- ✅ 正确：内联资源 -->
+<style>
+/* 所有CSS内容直接写在这里 */
+</style>
+<script>
+// 所有JavaScript内容直接写在这里
+</script>
+```
+
+#### 3. 异步存储函数模式
+```javascript
+// ❌ 错误：同步存储函数
+function saveTheme(theme) {
+  localStorage.setItem('theme', theme);
+}
+
+// ✅ 正确：异步存储函数
+async function saveTheme(theme) {
+  await storageAdapter.setItem('theme', theme);
+}
+```
+
+#### 4. 环境检测模式
+```javascript
+// 检测是否在Figma环境中
+const isFigmaEnvironment = typeof figma !== 'undefined' && !!figma.clientStorage;
+
+if (isFigmaEnvironment) {
+  // Figma环境特定代码
+  await figma.clientStorage.setAsync(key, value);
+} else {
+  // 测试/开发环境代码
+  localStorage.setItem(key, value);
+}
+```
+
+#### 5. 🚨 变量声明管理（关键）
+```javascript
+// ❌ 错误：多个文件中重复声明同一变量
+// file1.js
+const storageAdapter = new StorageAdapter();
+
+// file2.js  
+const storageAdapter = window.localStorage ? {...} : null; // 重复声明！
+
+// ✅ 正确：单一声明 + 全局访问模式
+// utility-functions.js（主文件）
+const storageAdapter = new StorageAdapter();
+window.storageAdapter = storageAdapter;
+
+// channel-manager.js（其他文件）
+// 使用全局存储适配器（已在utility-functions.js中声明）
+// 注意：不要重复声明storageAdapter，避免Figma沙盒环境中的重复声明错误
+async function saveChannelSetting(channel, key, value) {
+  await window.storageAdapter.setItem(storageKey, value);
+}
+```
+
+**重要原则**：
+- ✅ 全局变量只在一个文件中声明
+- ✅ 通过`window.variableName`导出和访问
+- ✅ 其他文件通过`window.variableName`引用
+- ❌ 禁止在多个文件中声明同名变量
+- ❌ 禁止重复初始化全局对象
+
+### 🔧 构建配置要求
+
+#### manifest.json配置
+```json
+{
+  "name": "插件名称",
+  "id": "插件ID", 
+  "api": "1.0.0",
+  "main": "dist/plugin/code-standalone.js",
+  "ui": "dist/ui.html",
+  "documentAccess": "dynamic-page",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["必要的域名"]
+  }
+}
+```
+
+**注意事项**：
+- ❌ 不要使用`menu`和`parameters`配置（已废弃）
+- ❌ 不要在根级别使用`parameters`字段
+- ✅ 使用单一入口模式
+
+#### 构建脚本要求
+```javascript
+// 内联CSS处理
+htmlContent = htmlContent.replace(
+  /<link[^>]*rel="stylesheet"[^>]*>/gi,
+  `<style>${cssContent}</style>`
+);
+
+// 内联JavaScript处理
+const inlineScript = `<script>${jsContent}</script>`;
+htmlContent = htmlContent.replace('</body>', `${inlineScript}\n</body>`);
+```
+
+### 📋 开发检查清单
+
+#### 开发阶段
+- [ ] 所有localStorage调用已替换为storageAdapter
+- [ ] 所有存储相关函数已改为异步
+- [ ] 没有外部资源引用（CSS/JS文件）
+- [ ] 没有内联事件处理器（onclick等）
+- [ ] 🚨 检查全局变量无重复声明
+- [ ] 🚨 确保通过window对象访问全局变量
+
+#### 构建阶段  
+- [ ] CSS已完全内联到HTML中
+- [ ] JavaScript已完全内联到HTML中
+- [ ] manifest.json配置正确
+- [ ] 构建产物无外部依赖
+- [ ] 🚨 验证JavaScript文件合并顺序正确
+- [ ] 🚨 检查内联JavaScript无重复声明
+
+#### 测试阶段
+- [ ] 在Figma中测试插件加载
+- [ ] 验证存储功能正常工作
+- [ ] 检查控制台无安全错误
+- [ ] 确认UI界面完整显示
+
+### 🐛 常见错误和解决方案
+
+#### 1. localStorage安全错误
+```
+SecurityError: Failed to read the 'localStorage' property from 'Window': 
+Storage is disabled inside 'data:' URLs.
+```
+**解决方案**：使用存储适配器替代localStorage
+
+#### 2. 外部资源加载失败
+```
+Refused to load the stylesheet because it violates CSP
+```
+**解决方案**：将所有CSS/JS内联到HTML中
+
+#### 3. 异步函数调用错误
+```
+仅允许在异步函数和模块顶级使用 "await" 表达式
+```
+**解决方案**：确保调用async函数的地方也是async
+
+#### 4. 重复声明错误（严重）
+```
+Uncaught SyntaxError: Failed to execute 'write' on 'Document': Identifier 'storageAdapter' has already been declared
+```
+**根本原因**：在构建过程中，多个JavaScript文件被合并，导致变量重复声明
+**解决方案**：
+1. 确保全局变量只在一个文件中声明
+2. 其他文件通过`window.variableName`访问
+3. 检查构建脚本中的文件合并顺序
+
+#### 5. 🚨 模块系统重复代码问题（新增）
+```
+Error: Duplicate class/function declarations found in plugin and core modules
+```
+**问题背景**：架构迁移过程中，插件文件保留了重复的类实现
+**根本原因**：
+- 插件原本是"独立版本"，内联了所有代码
+- 项目重构为模块化架构后，核心库已有完整实现
+- 插件文件仍保留重复实现，导致代码冗余
+
+**解决方案**：
+1. **删除重复实现**：移除插件中的重复类和函数
+2. **模块化改造**：将插件改为使用核心库的模块化架构
+3. **类型修复**：修复插件消息类型定义和属性访问
+
+**实施步骤**：
+```typescript
+// ❌ 错误：插件中重复实现核心类
+// src/plugin/code-standalone.ts
+class H5PrototypeBuilder {
+  // 重复的构建逻辑...（约127行代码）
+}
+
+// ✅ 正确：纯粹使用核心库导入
+import { H5Config, PluginMessage } from '../core/types';
+import { createH5Prototype } from '../core/builders/h5-prototype-builder';
+import { ConfigService, ThemeService } from '../core/services';
+
+// 专注于消息处理逻辑
+class MessageHandler {
+  async handleMessage(msg: PluginMessage) {
+    // 消息处理逻辑...
+  }
+}
+```
+
+#### 6. 🚨 TypeScript编译错误修复（新增）
+```
+Cannot read properties of undefined (reading 'length')
+ESLint: Extra semicolon
+```
+**问题分析**：
+- ESLint语法错误（多余分号）
+- 旧文件干扰（已排除但IDE仍显示错误）
+- 类型检查不一致
+
+**解决方案**：
+1. **自动修复ESLint错误**：
+   ```bash
+   npm run lint:fix  # 自动修复语法错误
+   ```
+
+2. **确保文件正确排除**：
+   ```json
+   // tsconfig.json
+   {
+     "exclude": ["node_modules", "dist", "code.ts"]
+   }
+   
+   // .eslintrc.js
+   {
+     "ignorePatterns": [".eslintrc.js", "code.ts"]
+   }
+   ```
+
+3. **验证构建流程**：
+   ```bash
+   npm run build      # 完整构建验证
+   npm run type-check # TypeScript类型检查
+   ```
+
+### 📋 架构迁移检查清单（新增）
+
+#### 迁移前评估
+- [ ] 识别插件中的重复实现（类、函数、接口）
+- [ ] 确认核心库中对应功能的完整性
+- [ ] 分析插件特有的消息处理逻辑
+
+#### 迁移实施
+- [ ] 删除插件中的重复类和函数实现
+- [ ] 添加核心库模块导入语句
+- [ ] 修复类型定义和属性访问
+- [ ] 移除未使用的导入和变量
+
+#### 迁移验证
+- [ ] TypeScript编译无错误
+- [ ] 构建产物大小合理（插件文件应显著减小）
+- [ ] 功能完整性测试
+- [ ] 性能回归测试
+
+**迁移效果**：
+- ✅ **消除重复**：删除约300行重复代码
+- ✅ **架构统一**：插件完全使用核心库架构
+- ✅ **类型安全**：修复所有TypeScript类型错误
+- ✅ **维护性**：插件专注于消息处理，核心逻辑统一
+
+### 🎯 最佳实践总结（新增）
+
+#### 模块化架构原则
+1. **单一职责**：每个模块专注于特定功能
+2. **清晰边界**：插件负责消息处理，核心库负责业务逻辑
+3. **避免重复**：代码只在一个地方实现和维护
+4. **类型安全**：使用TypeScript确保类型一致性
+
+#### 构建优化策略
+1. **统一构建**：使用`npm run build`一键完成所有构建
+2. **错误修复**：定期运行`npm run lint:fix`自动修复
+3. **类型检查**：每次修改后运行`npm run type-check`
+4. **产物验证**：确认构建产物大小和内容正确
+
+#### 问题预防措施
+1. **代码审查**：重构时仔细检查是否有重复实现
+2. **自动化检测**：使用工具检测重复代码和未使用导入
+3. **分步迁移**：大型重构分阶段进行，每步验证
+4. **文档更新**：及时更新规范文档，记录解决方案
+
+## 常用代码片段
+
+### 创建Figma节点
+```typescript
+// 创建框架
+const frame = figma.createFrame();
+frame.name = 'MyFrame';
+frame.resize(width, height);
+
+// 创建文本
+const text = figma.createText();
+await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+text.characters = 'Hello World';
+text.fontSize = 16;
+```
+
+### 处理图片
+```typescript
+// 插入图片
+const imageNode = await ImageNodeBuilder.insertImage(
+  imageInfo, 
+  "图片名称", 
+  width, 
+  height
+);
+
+// 设置图片填充
+await ImageNodeBuilder.setImageFill(node, imageInfo);
+```
+
+### 颜色处理
+```typescript
+// 十六进制转RGB
+const rgb = ColorUtils.hexToRgb('#ff0000');
+
+// 创建纯色填充
+const fill = ColorUtils.createSolidFill(rgb);
+node.fills = [fill];
+```
+
+## 调试和测试
+
+### 调试技巧
+- **Figma控制台**: 使用`console.log`查看插件日志
+- **UI调试**: 在浏览器中调试UI界面
+- **类型检查**: 使用`npm run type-check`验证类型
+- **构建测试**: 使用`npm run build`验证构建
+
+### 测试策略
+- **单元测试**: 测试工具函数和服务类
+- **集成测试**: 测试模块间交互
+- **端到端测试**: 测试完整的用户流程
+- **类型测试**: 确保TypeScript类型正确
+

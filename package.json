@@ -1,24 +1,65 @@
 {
   "name": "H5Tools",
-  "version": "1.0.0",
-  "description": "Your Figma Plugin",
-  "main": "code.js",
+  "version": "2.0.0",
+  "description": "渠道美术-H5延展工具 - 重构版本",
+  "main": "dist/plugin/code.js",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "build": "tsc -p tsconfig.json",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run build -- --watch"
+    "build": "node build.js",
+    "build:core": "cd src/core && npm run build",
+    "build:plugin": "rollup -c rollup.config.js",
+    "build:plugin:webpack": "webpack --config webpack.config.js",
+    "build:plugin:tsc": "tsc -p tsconfig.json",
+    "build:ui": "node build.js",
+    "build:separate": "npm run build:core && npm run build:plugin",
+    "dev": "rollup -c rollup.config.js --watch",
+    "dev:webpack": "webpack --config webpack.config.js --watch",
+    "dev:tsc": "npm run build:plugin:tsc -- --watch",
+    "dev:core": "cd src/core && npm run dev",
+    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules --ignore-pattern dist .",
+    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --ignore-pattern dist --fix .",
+    "clean": "rimraf dist && cd src/core && rimraf dist",
+    "setup": "npm install && cd src/core && npm install",
+    "test": "jest",
+    "test:core": "cd src/core && npm test"
   },
-  "author": "",
-  "license": "",
+  "keywords": [
+    "figma",
+    "plugin",
+    "h5",
+    "design",
+    "automation",
+    "channel",
+    "prototype"
+  ],
+  "author": "H5Tools Team",
+  "license": "MIT",
   "devDependencies": {
     "@figma/eslint-plugin-figma-plugins": "*",
     "@figma/plugin-typings": "^1.113.0",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/jest": "^29.5.0",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
     "eslint": "^8.54.0",
-    "typescript": "^5.3.2"
+    "jest": "^29.5.0",
+    "rimraf": "^5.0.0",
+    "rollup": "^4.43.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.3.2",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@h5tools/core": "file:./src/core"
+  },
+  "figma-plugin": {
+    "id": "1506134894807361987",
+    "name": "渠道美术-H5延展工具",
+    "main": "dist/plugin/code.js",
+    "ui": "dist/ui.html"
   },
   "eslintConfig": {
     "extends": [
@@ -31,6 +72,10 @@
       "project": "./tsconfig.json"
     },
     "root": true,
+    "ignorePatterns": [
+      "dist/**/*",
+      "node_modules/**/*"
+    ],
     "rules": {
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -39,7 +84,23 @@
           "varsIgnorePattern": "^_",
           "caughtErrorsIgnorePattern": "^_"
         }
-      ]
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-console": "warn"
+    }
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.ts",
+      "**/?(*.)+(spec|test).ts"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
     }
   }
 }

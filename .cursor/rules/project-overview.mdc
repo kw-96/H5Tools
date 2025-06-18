@@ -1,0 +1,79 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: H5Tools项目概述和架构说明，包含项目基本信息、模块化架构、核心模块功能介绍
+alwaysApply: true
+---
+
+# H5Tools - 渠道美术H5延展工具
+
+## 项目概述
+
+H5Tools是一个专业的Figma插件，用于快速生成多渠道H5活动页面原型。项目采用模块化架构，支持8个主流渠道适配，具备完整的TypeScript类型定义和高级功能。
+
+**版本**: 2.0.0  
+**架构**: 模块化 TypeScript + Figma Plugin API  
+**代码质量**: 零错误，100%类型覆盖
+
+## 项目架构
+
+```
+H5Tools/
+├── src/
+│   ├── core/                    # 🎯 核心功能库（3810行，可独立发布）
+│   │   ├── types/index.ts       # TypeScript类型定义 (252行)
+│   │   ├── utils/index.ts       # 工具函数库 (328行)
+│   │   ├── services/index.ts    # 业务服务层 (386行)
+│   │   ├── builders/            # 构建器模块 (2810行)
+│   │   ├── package.json         # 核心库独立配置
+│   │   ├── tsconfig.json        # TypeScript配置
+│   │   ├── README.md            # 核心库API文档
+│   │   └── index.ts             # 核心库统一入口
+│   ├── plugin/                  # 🔧 插件主程序（精简版）
+│   │   └── code-standalone.ts   # 独立版插件 (449行)
+│   └── ui/                      # 🎨 用户界面
+│       └── ui.html              # 完整UI界面 (5481行)
+├── dist/                        # 📦 统一构建输出
+├── manifest.json                # Figma插件配置
+├── package.json                 # 项目主配置
+├── tsconfig.json                # TypeScript主配置
+├── build.js                     # 统一构建脚本
+├── log.md                       # 完整重构日志
+└── README.md                    # 项目说明文档
+```
+
+## 核心模块说明
+
+### 1. 类型定义模块 (`src/core/types/`)
+- **H5Config**: H5页面配置接口
+- **ImageInfo**: 图片信息接口
+- **ModuleType**: 模块类型枚举（8种模块类型）
+- **ChannelType**: 渠道类型枚举（8个主流渠道）
+
+### 2. 工具函数模块 (`src/core/utils/`)
+- **Utils**: 基础工具类（延迟、数据提取、ID生成等）
+- **ImageUtils**: 图片处理工具（尺寸调整、格式转换、压缩等）
+- **ColorUtils**: 颜色处理工具（RGB转换、颜色生成、亮度调整等）
+- **FileUtils**: 文件处理工具（保存、加载、验证等）
+- **ValidationUtils**: 验证工具（数据验证、类型检查等）
+
+### 3. 服务层模块 (`src/core/services/`)
+- **ConfigService**: 配置管理服务
+- **ThemeService**: 主题管理服务
+- **ChannelImageService**: 渠道图片管理服务
+- **ValidationService**: 数据验证服务
+- **ServiceManager**: 服务管理器
+
+### 4. 构建器模块 (`src/core/builders/`)
+- **FigmaUtils**: Figma API封装和工具函数
+- **H5PrototypeBuilder**: H5原型构建器
+- **ModuleBuilders**: 各种模块构建器
+- **FeatherMaskUtils**: 羽化遮罩工具
+- **ChannelAdapter**: 渠道适配系统
+- **AdvancedFeatures**: 高级功能（九宫格、批量处理等）
+
+
+

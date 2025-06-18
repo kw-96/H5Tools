@@ -1045,20 +1045,18 @@ figma.ui.postMessage({
 
 // ==================== 渠道图片存储 ====================
 
-// 定义渠道图片数据接口
 interface ChannelImageData {
-  data: number[];    // 图片数据
-  width: number;     // 图片宽度
-  height: number;    // 图片高度
-  name: string;      // 图片名称
-  type: string;      // 图片类型
+  data: number[];
+  width: number;
+  height: number;
+  name: string;
+  type: string;
 }
 
-// 定义渠道图片集合接口
 interface ChannelImages {
   [channel: string]: {
-    eggBreaking?: ChannelImageData;  // 砸蛋活动图片
-    footerStyle?: ChannelImageData;  // 页脚样式图片
+    eggBreaking?: ChannelImageData;
+    footerStyle?: ChannelImageData;
   };
 }
 

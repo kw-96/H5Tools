@@ -1,0 +1,96 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 开发最佳实践和代码示例，包含新增功能模块、渠道适配、工具函数开发等指南
+globs: 
+  - "src/**/*.ts"
+  - "src/**/*.tsx"
+alwaysApply: false
+---
+
+# 开发最佳实践
+
+## 1. 新增功能模块
+```typescript
+// 1. 在types/index.ts中定义接口
+export interface NewModuleContent {
+  title: string;
+  content: string;
+  config: Record<string, unknown>;
+}
+
+// 2. 在ModuleType枚举中添加类型
+export enum ModuleType {
+  // ... 现有类型
+  NEW_MODULE = 'newModule'
+}
+
+// 3. 在module-builders.ts中实现构建器
+export async function createNewModule(content: NewModuleContent): Promise<FrameNode> {
+  // 实现逻辑
+}
+```
+
+## 2. 新增渠道适配
+```typescript
+// 1. 在ChannelType枚举中添加
+export enum ChannelType {
+  // ... 现有渠道
+  NEW_CHANNEL = 'newChannel'
+}
+
+// 2. 在channel-adapter.ts中添加配置
+const CHANNEL_CONFIGS: Record<ChannelType, ChannelConfig> = {
+  // ... 现有配置
+  [ChannelType.NEW_CHANNEL]: {
+    name: '新渠道',
+    maxWidth: 1080,
+    maxHeight: 1920,
+    // ... 其他配置
+  }
+};
+```
+
+## 3. 工具函数开发
+```typescript
+// 工具函数应该是纯函数，无副作用
+export class NewUtils {
+  static processData(input: InputType): OutputType {
+    // 1. 参数验证
+    if (!input) throw new Error('Input is required');
+    
+    // 2. 核心逻辑
+    const result = /* 处理逻辑 */;
+    
+    // 3. 返回结果
+    return result;
+  }
+}
+```
+
+## 4. 错误处理模式
+```typescript
+export async function riskyOperation(): Promise<Result> {
+  try {
+    // 核心逻辑
+    const result = await someAsyncOperation();
+    return result;
+  } catch (error) {
+    console.error('操作失败:', error);
+    
+    // 通知用户
+    figma.ui.postMessage({
+      type: 'error',
+      message: `操作失败: ${error}`
+    });
+    
+    throw error;
+  }
+}
+```
+
+
+

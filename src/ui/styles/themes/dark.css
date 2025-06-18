@@ -1,0 +1,307 @@
+/* 深色主题样式 */
+body.dark-theme {
+  color: #f5f5f7;
+  background-color: #1d1d1f;
+}
+
+/* 标签页深色主题 */
+body.dark-theme .tab-container {
+  background-color: rgba(30, 30, 32, 0.72);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .tab:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .tab-content {
+  background-color: #1d1d1f;
+}
+
+/* 表单深色主题 */
+body.dark-theme .form-section,
+body.dark-theme .module {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .section-header,
+body.dark-theme .section-title,
+body.dark-theme label,
+body.dark-theme .module-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme input[type="number"],
+body.dark-theme input[type="text"],
+body.dark-theme .text-input,
+body.dark-theme .text-area {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme input:focus,
+body.dark-theme .text-input:focus,
+body.dark-theme .text-area:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .section-dropdown {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .section-dropdown:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .section-dropdown:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 上传组件深色主题 */
+body.dark-theme .upload-btn,
+body.dark-theme .grid-btn,
+body.dark-theme .img-preview-container,
+body.dark-theme .add-btn,
+body.dark-theme .theme-btn:not(.active),
+body.dark-theme button#cancel {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .upload-btn:hover,
+body.dark-theme .grid-btn:hover,
+body.dark-theme .img-preview-container:hover,
+body.dark-theme .theme-btn:hover:not(.active),
+body.dark-theme button#cancel:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .upload-btn .img-preview-inline {
+  background-color: #1c1c1e;
+}
+
+body.dark-theme .upload-btn .img-preview-inline .upload-icon-inline {
+  color: #a1a1a6;
+}
+
+/* 控件深色主题 */
+body.dark-theme .control-btn {
+  border-color: #3a3a3c;
+  color: #a1a1a6;
+}
+
+body.dark-theme .control-btn:hover {
+  background-color: #2c2c2e;
+}
+
+body.dark-theme .add-btn:hover {
+  background-color: rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+  color: #0071e3;
+}
+
+body.dark-theme .add-btn[onclick*="removeModule"]:hover {
+  background-color: rgba(255, 69, 58, 0.1);
+  border-color: #ff453a;
+  color: #ff453a;
+}
+
+body.dark-theme button#reset {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme button#reset:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 模块管理深色主题 */
+body.dark-theme .module {
+  background-color: #1d1d1f;
+  border-color: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .module-header {
+  background-color: #2c2c2e;
+  border-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .module-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme .empty-modules-message {
+  border-color: rgba(255,255,255,0.1);
+  color: #a1a1a6;
+}
+
+/* 布局深色主题 */
+body.dark-theme .page-footer {
+  background-color: rgba(30, 30, 32, 0.72);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .theme-switcher {
+  background-color: #2c2c2e;
+}
+
+body.dark-theme .theme-switcher label {
+  color: #f5f5f7;
+}
+
+body.dark-theme .theme-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .theme-btn:hover {
+  background-color: rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+}
+
+body.dark-theme .theme-btn.active {
+  background-color: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+
+/* 渠道深色主题 */
+body.dark-theme .channel-section {
+  background-color: #1d1d1f;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme .channel-settings-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #a1a1a6;
+}
+
+body.dark-theme .channel-settings-btn:hover {
+  background-color: #2c2c2e;
+  border-color: #0071e3;
+  color: #0071e3;
+  transform: scale(1.05);
+}
+
+body.dark-theme .channel-preview-area {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-preview-area:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .channel-preview-placeholder {
+  color: #a1a1a6;
+}
+
+body.dark-theme .channel-preview-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .channel-preview-btn:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .channel-generate-btn:disabled {
+  background-color: #48484a;
+  color: #a1a1a6;
+}
+
+/* 渠道设置深色主题 */
+body.dark-theme .settings-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .back-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .settings-title,
+body.dark-theme .setting-group-title,
+body.dark-theme .setting-label {
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-group-title {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .setting-input {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-input:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .setting-upload-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-upload-btn:hover {
+  background-color: #3a3a3c;
+}
+
+body.dark-theme .setting-preview {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .setting-description {
+  color: #a1a1a6;
+}
+
+/* 空状态深色主题 */
+body.dark-theme .empty-state {
+  color: #a1a1a6;
+}
+
+body.dark-theme .empty-state h3 {
+  color: #f5f5f7;
+}
+
+body.dark-theme .gray-text {
+  color: #86868b;
+}
+
+/* 其他元素深色主题 */
+body.dark-theme .prize-label,
+body.dark-theme .upload-icon,
+body.dark-theme .upload-icon-text,
+body.dark-theme .upload-icon-inline {
+  color: #a1a1a6;
+} 

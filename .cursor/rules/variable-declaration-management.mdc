@@ -1,0 +1,161 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 🚨 变量声明管理规范
+
+## 核心原则
+
+### ✅ 单一声明原则
+- **每个全局变量只能在一个文件中声明**
+- **通过window对象导出和访问全局变量**
+- **禁止在多个文件中声明同名变量**
+
+### ❌ 严禁的做法
+```javascript
+// file1.js
+const storageAdapter = new StorageAdapter();
+
+// file2.js - 这会导致重复声明错误！
+const storageAdapter = window.localStorage ? {...} : null;
+```
+
+### ✅ 正确的做法
+```javascript
+// utility-functions.js（主声明文件）
+class StorageAdapter {
+  // 类定义...
+}
+const storageAdapter = new StorageAdapter();
+window.storageAdapter = storageAdapter; // 导出到全局
+
+// channel-manager.js（使用文件）
+// 使用全局存储适配器（已在utility-functions.js中声明）
+// 注意：不要重复声明storageAdapter
+async function saveChannelSetting(channel, key, value) {
+  await window.storageAdapter.setItem(storageKey, value);
+}
+```
+
+## 实际案例分析
+
+### 问题场景
+H5Tools项目中遇到的实际错误：
+```
+Uncaught SyntaxError: Failed to execute 'write' on 'Document': 
+Identifier 'storageAdapter' has already been declared
+```
+
+### 错误原因
+1. `utility-functions.js`中声明：`const storageAdapter = new StorageAdapter()`
+2. `channel-manager.js`中重复声明：`const storageAdapter = window.localStorage ? {...} : null`
+3. 构建时两个文件合并，导致重复声明
+
+### 修复方案
+1. **移除重复声明**：删除`channel-manager.js`中的声明
+2. **统一访问方式**：所有地方使用`window.storageAdapter`
+3. **注释说明**：添加注释避免未来重复错误
+
+## 开发规范
+
+### 文件组织原则
+```
+src/ui/scripts/
+├── utility-functions.js     # 🎯 全局变量声明文件
+├── plugin-communicator.js   # 使用 window.pluginComm
+├── notification-system.js   # 使用 window.notificationSystem  
+├── theme-manager.js         # 使用 window.themeManager
+└── channel-manager.js       # 使用 window.storageAdapter
+```
+
+### 命名约定
+```javascript
+// 声明文件（utility-functions.js）
+const storageAdapter = new StorageAdapter();
+const pluginComm = new PluginCommunicator();
+const notificationSystem = new NotificationSystem();
+
+// 导出到全局
+window.storageAdapter = storageAdapter;
+window.pluginComm = pluginComm;
+window.notificationSystem = notificationSystem;
+
+// 使用文件
+// 通过window对象访问，避免重复声明
+window.storageAdapter.setItem(key, value);
+window.pluginComm.postMessage(type, data);
+```
+
+## 构建时检查
+
+### 自动检查脚本
+```javascript
+// 在build.js中添加检查
+function checkDuplicateDeclarations(jsContent) {
+  const declarations = [];
+  const regex = /(?:const|let|var)\s+(\w+)\s*=/g;
+  let match;
+  
+  while ((match = regex.exec(jsContent)) !== null) {
+    const varName = match[1];
+    if (declarations.includes(varName)) {
+      throw new Error(`重复声明检测到: ${varName}`);
+    }
+    declarations.push(varName);
+  }
+}
+```
+
+### 手动验证命令
+```bash
+# Windows环境
+findstr /n "const storageAdapter" dist\\ui.html
+findstr /n "let storageAdapter" dist\\ui.html
+findstr /n "var storageAdapter" dist\\ui.html
+
+# 预期结果：只应该有一行声明
+```
+
+## 紧急修复指南
+
+### 快速诊断
+1. **查看Figma控制台错误**
+2. **检查变量声明位置**：`findstr /n "const variableName" dist\\ui.html`
+3. **确认重复声明数量**
+
+### 修复步骤
+1. **定位重复声明的文件**
+2. **保留主声明文件中的声明**
+3. **移除其他文件中的重复声明**
+4. **改为通过window对象访问**
+5. **重新构建验证**
+
+### 验证修复
+```bash
+npm run build
+findstr /n "const storageAdapter" dist\\ui.html
+# 应该只有一行结果
+```
+
+## 最佳实践总结
+
+### ✅ 推荐做法
+- 使用单一全局声明文件（如utility-functions.js）
+- 通过window对象导出全局变量
+- 其他文件通过window.variableName访问
+- 添加注释说明变量来源
+- 构建时自动检查重复声明
+
+### ❌ 避免的做法
+- 在多个文件中声明同名变量
+- 直接访问可能未声明的变量
+- 忽略构建时的重复声明警告
+- 在沙盒环境中使用eval或动态声明
+
+### 🔧 工具支持
+- ESLint规则：no-redeclare
+- 构建脚本：自动重复声明检查
+- TypeScript：严格模式类型检查
+- 手动验证：findstr/grep命令检查
+

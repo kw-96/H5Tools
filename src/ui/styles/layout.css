@@ -1,0 +1,37 @@
+/* 布局样式 */
+.page-footer {
+  width: 100%;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.version-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: #86868b;
+  font-size: 13px;
+}
+
+/* 主题切换器 */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.theme-buttons {
+  display: flex;
+  gap: 8px;
+} 

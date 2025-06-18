@@ -1,0 +1,225 @@
+/* 模块管理相关样式 */
+.module-management {
+  margin-bottom: 20px;
+}
+
+/* 模块列表头部样式 */
+.module-list-header {
+  display: flex;                                /* 使用弹性布局 */
+  justify-content: space-between;                /* 两端对齐 */
+  align-items: center;                           /* 垂直居中对齐 */
+  margin: 24px 0 12px 0;                         /* 设置上下外边距 */
+  padding-bottom: 8px;                           /* 底部内边距 */
+  font-weight: 600;                              /* 字体加粗 */
+}
+
+.module-count {
+  font-size: 14px;
+  color: #86868b;
+  font-weight: normal;
+}
+
+.module-action-row {
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.empty-modules-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #86868b;
+  border: 2px dashed rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.empty-modules-message svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-modules-message p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.empty-modules-message .hint-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* 模块相关样式 */
+.module {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: #f5f5f7;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.module-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-right: 4px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.module-content {
+  padding: 16px;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.module-collapsed .module-content {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.module-collapsed .collapse-btn i {
+  transform: rotate(180deg);
+}
+
+.module-collapsed .collapse-btn svg,
+.module-collapsed .collapse-btn .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.option-controls {
+  display: flex;
+  align-items: center;
+}
+
+/* 折叠内容区域 */
+.version-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  padding-left: 24px;
+}
+
+.version-content.active {
+  max-height: 800px;
+  opacity: 1;
+  padding-bottom: 15px;
+}
+
+.collapsible-content {
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* 奖品网格 */
+.prize-grid {
+  display: flex;          /* 使用弹性布局 */
+  flex-wrap: wrap;        /* 允许项目换行 */
+  justify-content: space-between; /* 项目之间平均分配空间 */
+  gap: 8px;               /* 设置网格项之间的间隙 */
+  margin-top: 10px;       /* 顶部外边距 */
+}
+
+/* 自定义奖品网格布局 */
+.prize-grid-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.prize-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.prize-row.top-row {
+  /* 第一行：3个奖品，均匀分布 */
+  justify-content: space-between;
+}
+
+.prize-row.middle-row {
+  /* 第二行：2个奖品，左右对齐 */
+  justify-content: space-between;
+}
+
+.prize-row.bottom-row {
+  /* 第三行：3个项目，均匀分布 */
+  justify-content: space-between;
+}
+
+/* 网格项样式 */
+.grid-item {
+  flex: 0 0 calc(33.333% - 6px); /* 设置网格项宽度为33.333%（减去间隙），不允许伸缩 */
+}
+
+/* 自定义布局下的网格项 */
+.prize-grid-custom .grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 第一行和第三行的项目：每个占33.33%宽度 */
+.prize-row.top-row .grid-item,
+.prize-row.bottom-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+/* 第二行的项目：每个也占33.33%宽度，但只有两个 */
+.prize-row.middle-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+.prize-label {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #86868b;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}

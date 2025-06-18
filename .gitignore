@@ -3,6 +3,12 @@
 *.log.*
 node_modules
 
+# Build outputs
 out/
 dist/
 code.js
+
+# Compiled TypeScript files in src (should not be committed)
+src/**/*.js
+src/**/*.js.map
+!src/ui/scripts/*.js

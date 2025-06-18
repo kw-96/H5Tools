@@ -1,0 +1,161 @@
+/* 表单控件 */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-section {
+  width: 100%;
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.section-title {
+  color: inherit;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.row-layout label {
+  flex: 0 0 auto;
+  margin: 0 16px 0 0;
+  min-width: 70px;
+  width: 25%;
+  max-width: 90px;
+}
+
+.non-interactive-label {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* 输入控件 */
+input[type="number"], 
+input[type="color"], 
+input[type="text"], 
+.text-input, 
+.text-area {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.text-area {
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+input:focus, .text-input:focus, .text-area:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+/* 颜色选择器 */
+.color-input-group {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  flex: 1;
+}
+
+input[type="color"] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input.color-value {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #666;
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+/* 下拉选择器 */
+.dropdown-selector {
+  position: relative;
+  min-width: 120px;
+  max-width: 140px;
+  z-index: 10;
+}
+
+.dropdown-selector-wide {
+  position: relative;
+  min-width: 180px;
+  max-width: 200px;
+  z-index: 10;
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.dropdown-selector-wide .section-dropdown {
+  width: 100%;
+}
+
+.section-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.section-dropdown:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+.section-dropdown:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+} 

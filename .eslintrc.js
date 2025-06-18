@@ -39,5 +39,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: [".eslintrc.js"], // 忽略ESLint配置文件本身
+  ignorePatterns: [".eslintrc.js", "code.ts"], // 忽略ESLint配置文件本身和旧代码文件
 };

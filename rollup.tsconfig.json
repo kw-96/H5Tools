@@ -1,33 +1,23 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["ES2017", "DOM"],
-    "module": "CommonJS",
+    "lib": ["ES2017"],
+    "module": "ESNext",
     "moduleResolution": "node",
     "declaration": false,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "exactOptionalPropertyTypes": false,
-    "baseUrl": "./",
-    "paths": {
-      "@core/*": ["src/core/*"],
-      "@plugin/*": ["src/plugin/*"],
-      "@ui/*": ["src/ui/*"]
-    }
+    "types": ["@figma/plugin-typings"]
   },
   "include": [
     "src/**/*.ts"
@@ -36,7 +26,6 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts",
-    "code.ts"
+    "**/*.spec.ts"
   ]
-}
+} 

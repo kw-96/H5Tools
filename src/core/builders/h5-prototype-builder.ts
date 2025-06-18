@@ -1,0 +1,257 @@
+// H5原型构建器
+// 负责构建完整的H5原型
+
+/// <reference types="@figma/plugin-typings" />
+
+import { H5Config, CONSTANTS } from '../types';
+import { Utils } from '../utils';
+import { FontManager, NodeUtils, ColorUtils, ImageNodeBuilder } from './figma-utils';
+import { 
+  createHeaderModule, 
+  createGameInfoModule, 
+  createCustomModule, 
+  createRulesModule, 
+  createFooterModule 
+} from './module-builders';
+
+/**
+ * H5原型构建器
+ * 负责根据配置创建完整的H5原型
+ */
+export class H5PrototypeBuilder {
+  // H5配置对象
+  private config: H5Config;
+  // 外层画板，用于包含整个H5内容
+  private outerFrame!: FrameNode;
+  // H5主画板，用于放置所有H5模块
+  private h5Frame!: FrameNode;
+
+  /**
+   * 构造函数
+   * @param config H5配置对象
+   */
+  constructor(config: H5Config) {
+    this.config = config;
+  }
+
+  /**
+   * 构建H5原型
+   * 这个方法执行整个H5原型的创建过程
+   * @returns Promise<FrameNode> 返回创建完成的外层画板
+   */
+  async build(): Promise<FrameNode> {
+    try {
+      console.log('开始构建H5原型...');
+      
+      // 加载所有必要的字体
+      await FontManager.loadAll();
+      
+      // 创建基础画板结构
+      this.createBaseFrames();
+      // 设置背景（可能是图片或颜色）
+      await this.setupBackground();
+      // 添加所有模块到H5画板中
+      await this.addModules();
+      // 完成布局的最终调整
+      this.finalizeLayout();
+      
+      console.log('H5原型构建完成');
+      return this.outerFrame;
+    } catch (error) {
+      console.error('H5原型构建失败:', error);
+      throw error;
+    }
+  }
+
+  private createBaseFrames(): void {
+    // 1. H5原型容器不需要应用自动布局，只是一个画板，并设置内容裁剪
+    this.outerFrame = NodeUtils.createFrame('H5原型', CONSTANTS.H5_WIDTH + 200, 2000);
+    this.outerFrame.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+    
+    // 2. 创建自适应模块容器，但先不添加到H5原型容器中
+    this.h5Frame = NodeUtils.createFrame('H5画板', CONSTANTS.H5_WIDTH, 1920);
+    this.h5Frame.x = 100;
+    this.h5Frame.y = 100;
+    
+    // 设置H5画板背景色
+    const bgColor = ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF');
+    this.h5Frame.fills = [ColorUtils.createSolidFill(bgColor)];
+    
+    // 设置自动布局
+    NodeUtils.setupAutoLayout(this.h5Frame, 'VERTICAL', 0, 0);
+    this.h5Frame.clipsContent = true; // 设置内容裁剪
+    this.h5Frame.layoutWrap = "NO_WRAP"; // 设置布局不换行，确保所有子元素在一列中垂直排列
+    
+    this.outerFrame.appendChild(this.h5Frame);
+  }
+
+  /**
+   * 设置背景
+   * 根据配置设置页面背景，可以是图片或颜色
+   */
+  private async setupBackground(): Promise<void> {
+    // 3. 设置背景时的判定逻辑
+    const isDefaultWhite = this.config.pageBgColor === "#FFFFFF" || this.config.pageBgColor === "#ffffff";
+    
+    // 当pageBgColor不为白色时，设置H5原型容器填充颜色为pageBgColor，否则填充为透明
+    if (!isDefaultWhite) {
+      const colorFill = ColorUtils.createSolidFill(ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF'));
+      this.outerFrame.fills = [colorFill];
+    } else {
+      // 白色时设置为透明
+      this.outerFrame.fills = [];
+    }
+    
+    // 当bgImageData存在时，兼容pageBgColor的设置判定
+    if (this.config.pageBgImage) {
+      const bgImageData = Utils.extractUint8Array(this.config.pageBgImage);
+      if (bgImageData) {
+        // 直接将bgImageData图片节点插入H5原型容器中
+        const bgImageNode = await ImageNodeBuilder.insertImage(
+          this.config.pageBgImage,
+          "页面背景图片"
+        );
+        
+        if (bgImageNode) {
+          // 水平居中容器，顶部对齐容器顶部
+          bgImageNode.x = (this.outerFrame.width - bgImageNode.width) / 2;
+          bgImageNode.y = 0;
+          
+          // 设置约束：水平居中，顶部对齐
+          // 类型检查：只有 RectangleNode 有 constraints 属性
+          if ('constraints' in bgImageNode) {
+            bgImageNode.constraints = {
+              horizontal: "CENTER",
+              vertical: "MIN"
+            };
+          }
+          
+          // 先插入背景图片节点
+          NodeUtils.safeAppendChild(this.outerFrame, bgImageNode, '页面背景图片添加');
+        }
+      }
+    }
+    
+    // 设置完背景之后，将自适应模块容器添加为H5原型容器的子元素
+    NodeUtils.safeAppendChild(this.outerFrame, this.h5Frame, 'H5自适应模块容器添加');
+  }
+
+  /**
+   * 添加模块
+   * 创建所有模块并将它们添加到H5画板中
+   */
+  private async addModules(): Promise<void> {
+    // 创建所有模块
+    const modules = await this.createAllModules();
+    
+    // 批量安全添加模块到H5画板中
+    NodeUtils.safeBatchAppendChildren(this.h5Frame, modules, 'H5模块批量添加');
+  }
+
+  /**
+   * 创建所有模块
+   * 异步方法，用于创建所有需要的模块
+   * @returns Promise，解析为一个包含所有创建的模块（FrameNode或null）的数组
+   */
+  private async createAllModules(): Promise<(FrameNode | null)[]> {
+    return Promise.all([
+      this.createHeaderModuleIfNeeded(),     // 创建头部模块（如果需要）
+      this.createGameInfoModuleIfNeeded(),   // 创建游戏信息模块（如果需要）
+      ...this.createCustomModules(),         // 创建自定义模块（展开数组）
+      this.createRulesModuleIfNeeded(),      // 创建规则模块（如果需要）
+      this.createFooterModuleIfNeeded()      // 创建底部模块
+    ]);
+  }
+
+  private async createHeaderModuleIfNeeded(): Promise<FrameNode | null> {
+    if (this.config.headerImage || this.config.titleUpload) {
+      const module = await createHeaderModule(this.config.headerImage, this.config.titleUpload);
+      if (module) {
+        return module;
+      }
+    }
+    return null;
+  }
+
+  private async createGameInfoModuleIfNeeded(): Promise<FrameNode | null> {
+    if (this.config.gameName || this.config.gameDesc || this.config.gameIcon) {
+      const module = await createGameInfoModule(this.config);
+      return module;
+    }
+    return null;
+  }
+
+  private createCustomModules(): Promise<FrameNode>[] {
+    return this.config.modules?.map(async module => {
+      const moduleFrame = await createCustomModule(module);
+      return moduleFrame;
+    }) || [];
+  }
+
+  private async createRulesModuleIfNeeded(): Promise<FrameNode | null> {
+    // 检查是否有任何活动规则相关内容
+    const hasRulesTitle = this.config.rulesTitle && this.config.rulesTitle.trim() !== '';
+    const hasRulesBgImage = this.config.rulesBgImage !== null && this.config.rulesBgImage !== undefined;
+    const hasRulesContent = this.config.rulesContent && this.config.rulesContent.trim() !== '';
+    
+    // 只有当标题文案、标题背景图或活动规则内容任一存在时才创建模块
+    if (hasRulesTitle || hasRulesBgImage || hasRulesContent) {
+      const module = await createRulesModule(this.config);
+      return module;
+    }
+    
+    return null;
+  }
+
+  /**
+   * 创建底部模块（如果需要）
+   * 如果配置中包含底部logo或背景，则创建底部模块
+   * @returns Promise<FrameNode | null> 返回创建的底部模块或null
+   */
+  private async createFooterModuleIfNeeded(): Promise<FrameNode | null> {
+    // 检查是否需要创建底部模块
+    if (this.config.footerLogo || this.config.footerBg) {
+      // 异步创建底部模块
+      const module = await createFooterModule(this.config);
+      if (module) {
+        // 返回创建的模块
+        return module;
+      }
+    }
+    // 如果不需要创建底部模块，返回null
+    return null;
+  }
+
+  private finalizeLayout(): void {
+    // 2. 调整H5原型容器高度为自适应模块容器高度
+    this.outerFrame.resize(CONSTANTS.H5_WIDTH + 200, this.h5Frame.height + 200);
+    
+    // 确保自适应模块容器在最上层显示（使用insertChild方法而不是remove+appendChild）
+    try {
+      if (this.h5Frame && this.h5Frame.parent === this.outerFrame) {
+        // 获取当前子节点数量，将h5Frame移动到最后位置（最上层）
+        const childrenCount = this.outerFrame.children.length;
+        if (childrenCount > 1) {
+          // 使用insertChild将节点移动到最后位置
+          this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
+        }
+      }
+    } catch (reorderError) {
+      console.error('重新排列H5模块容器失败:', reorderError);
+    }
+    
+    // 添加到当前页面并居中显示
+    NodeUtils.safeAppendChild(figma.currentPage, this.outerFrame, 'H5原型添加到当前页面');
+    figma.viewport.scrollAndZoomIntoView([this.outerFrame]);
+  }
+}
+
+/**
+ * 创建H5原型的便捷函数
+ * @param config H5配置对象
+ * @returns Promise<FrameNode> 返回创建完成的H5原型
+ */
+export async function createH5Prototype(config: H5Config): Promise<FrameNode> {
+  const builder = new H5PrototypeBuilder(config);
+  return builder.build();
+} 
