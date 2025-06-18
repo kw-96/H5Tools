@@ -47,8 +47,8 @@ class FigmaFile {
 class FigmaFileReader {
   result: string | ArrayBuffer | null = null;
   error: Error | null = null;
-  onload: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
+  onload: ((event: { target: { result: string | ArrayBuffer | null } }) => void) | null = null;
+  onerror: ((event: { target: { error: Error | null } }) => void) | null = null;
 
   readAsDataURL(file: FigmaFile) {
     try {
@@ -83,9 +83,10 @@ class FigmaFileReader {
 }
 
 // 提供URL兼容层
-const createURL = (data: Uint8Array, type: string = 'application/octet-stream') => {
+const createURL = (data: Uint8Array, mimeType: string = 'application/octet-stream') => {
   // 在Figma环境中，我们不能创建真正的URL，但可以返回一个标识符
-  return `figma-blob:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  // 包含类型信息以便调试
+  return `figma-blob:${mimeType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 // 提供atob兼容层

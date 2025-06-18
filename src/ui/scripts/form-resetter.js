@@ -136,14 +136,15 @@ class FormResetter {
       
       // 延迟清理模块数据，避免阻塞UI
       setTimeout(() => {
-        if (imageManager.moduleData) {
-          imageManager.moduleData = {};
+        if (window.imageManager && window.imageManager.moduleData) {
+          window.imageManager.moduleData = {};
         }
       }, 50);
       
       // 立即更新模块计数
-      const moduleManager = new ModuleManager();
-      moduleManager.updateModuleCount();
+      if (window.moduleManager) {
+        window.moduleManager.updateModuleCount();
+      }
     }
   }
   

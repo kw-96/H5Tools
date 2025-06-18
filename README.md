@@ -1,16 +1,15 @@
-<!-- filepath: e:\匡振威\Git\H5Tools\README.md -->
+# H5Tools - 渠道美术H5延展工具
+
 <p align="center">
   <img src="image/logo.png" alt="渠道美术-H5延展工具 Logo" width="120"/>
 </p>
 
-# H5Tools - 渠道美术H5延展工具
-
 > 🎨 专为渠道美术设计的Figma插件，快速生成多渠道H5原型
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-green.svg)]()
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](https://github.com)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com)
 
 ## 📋 项目概述
 
@@ -30,7 +29,7 @@ H5Tools是一个专业的Figma插件，帮助设计师快速创建H5活动页面
 
 ### 重构后架构（v2.0）
 
-```
+```text
 H5Tools/
 ├── src/
 │   ├── core/                    # 🎯 核心功能库（3810行，可独立发布）
@@ -131,17 +130,20 @@ H5Tools/
 ### 安装步骤
 
 1. **克隆项目**
+
    ```bash
    git clone <repository-url>
    cd H5Tools
    ```
 
 2. **安装依赖**
+
    ```bash
    npm install
    ```
 
 3. **构建项目**
+
    ```bash
    # 🚀 统一构建（推荐）- 一键完成所有构建
    npm run build
@@ -237,6 +239,7 @@ src/ui/styles/
 ```
 
 **使用方式**：
+
 ```html
 <!-- 推荐：使用模块化版本 -->
 <link rel="stylesheet" href="styles/app-new.css">
@@ -289,6 +292,7 @@ const prototype = await builder.build();
 #### 添加新组件样式
 
 1. **创建组件样式文件**
+
    ```css
    /* src/ui/styles/components/new-component.css */
    .new-component {
@@ -312,6 +316,7 @@ const prototype = await builder.build();
    ```
 
 2. **在app-new.css中引用**
+
    ```css
    /* src/ui/styles/app-new.css */
    @import './components/new-component.css';
@@ -342,6 +347,7 @@ body.custom-theme .component {
 ### 添加新模块
 
 1. **定义模块类型**
+
    ```typescript
    // src/core/types/index.ts
    export interface CustomModuleContent {
@@ -357,6 +363,7 @@ body.custom-theme .component {
    ```
 
 2. **创建模块构建器**
+
    ```typescript
    // src/core/builders/module-builders.ts
    export async function createCustomModule(content: CustomModuleContent): Promise<FrameNode> {
