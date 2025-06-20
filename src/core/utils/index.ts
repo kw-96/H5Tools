@@ -181,18 +181,61 @@ export class ImageUtils {
     return width > maxSize || height > maxSize;
   }
 
-  // 计算切片策略（用于超大图片）
+  // 计算切片策略（用于超大图片）- 智能切片策略
   static calculateSliceStrategy(width: number, height: number, maxSize: number = 4096) {
-    const cols = Math.ceil(width / maxSize);
-    const rows = Math.ceil(height / maxSize);
-    
-    return {
-      cols,
-      rows,
-      sliceWidth: Math.ceil(width / cols),
-      sliceHeight: Math.ceil(height / rows),
-      totalSlices: cols * rows
+    const strategy = {
+      direction: 'none' as 'horizontal' | 'vertical' | 'both' | 'none',
+      sliceWidth: width,
+      sliceHeight: height,
+      slicesCount: 1,
+      description: '',
+      cols: 1,
+      rows: 1,
+      totalSlices: 1
     };
+
+    const widthExceeds = width > maxSize;
+    const heightExceeds = height > maxSize;
+
+    if (!widthExceeds && !heightExceeds) {
+      // 不需要切割
+      strategy.description = '图片尺寸正常，无需切割';
+      return strategy;
+    }
+
+    if (widthExceeds && !heightExceeds) {
+      // 只有宽度超限：垂直切割（保持高度）
+      strategy.direction = 'vertical';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.sliceHeight = height;
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = 1;
+      strategy.slicesCount = strategy.cols;
+      strategy.totalSlices = strategy.cols;
+      strategy.description = `宽度超限，垂直切割为${strategy.slicesCount}片，每片${strategy.sliceWidth}×${height}`;
+    } else if (!widthExceeds && heightExceeds) {
+      // 只有高度超限：水平切割（保持宽度）
+      strategy.direction = 'horizontal';
+      strategy.sliceWidth = width;
+      strategy.sliceHeight = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.cols = 1;
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.rows;
+      strategy.totalSlices = strategy.rows;
+      strategy.description = `高度超限，水平切割为${strategy.slicesCount}片，每片${width}×${strategy.sliceHeight}`;
+    } else {
+      // 宽度和高度都超限：网格切割
+      strategy.direction = 'both';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9);
+      strategy.sliceHeight = Math.floor(maxSize * 0.9);
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.cols * strategy.rows;
+      strategy.totalSlices = strategy.cols * strategy.rows;
+      strategy.description = `宽高都超限，网格切割为${strategy.cols}×${strategy.rows}=${strategy.slicesCount}片`;
+    }
+
+    return strategy;
   }
 }
 

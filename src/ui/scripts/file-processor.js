@@ -171,11 +171,63 @@ class FileProcessor {
     });
   }
   
-  // 切片大图方法
-  async sliceLargeImage(imageData, sliceWidth = 750, sliceHeight = 1334) {
+  // 切片大图方法 - 使用智能切片策略
+  async sliceLargeImage(imageData, sliceWidth = null, sliceHeight = null) {
     try {
       console.log(`开始切片图片: ${imageData.name || '未知图片'}`);
-      console.log(`目标切片尺寸: ${sliceWidth}x${sliceHeight}`);
+      
+      // 🚨 修复：使用传入的切片策略，如果没有则使用智能策略
+      let finalSliceWidth = sliceWidth;
+      let finalSliceHeight = sliceHeight;
+      
+      // 如果没有指定切片尺寸，使用智能策略计算
+      if (!sliceWidth || !sliceHeight) {
+        const tempImg = new Image();
+        const tempBlob = new Blob([new Uint8Array(imageData.bytes || imageData.data)], { type: imageData.type });
+        const tempUrl = URL.createObjectURL(tempBlob);
+        
+        await new Promise((resolve, reject) => {
+          tempImg.onload = resolve;
+          tempImg.onerror = reject;
+          tempImg.src = tempUrl;
+        });
+        
+        // 使用智能策略计算切片尺寸
+        const strategy = this.calculateSliceStrategy(tempImg.width, tempImg.height, 4096);
+        finalSliceWidth = strategy.sliceWidth;
+        finalSliceHeight = strategy.sliceHeight;
+        
+        console.log(`智能策略: ${strategy.description}`);
+        console.log(`计算得出切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
+        
+        URL.revokeObjectURL(tempUrl);
+      }
+      
+      console.log(`目标切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
+      
+      // 🚨 修复：确保图片数据格式正确
+      let uint8ArrayData;
+      if (imageData.bytes && Array.isArray(imageData.bytes)) {
+        // 从插件传来的是Array格式，需要转换为Uint8Array
+        console.log('检测到Array格式的图片数据，正在转换为Uint8Array...');
+        uint8ArrayData = new Uint8Array(imageData.bytes);
+      } else if (imageData.data instanceof Uint8Array) {
+        // 已经是Uint8Array格式
+        uint8ArrayData = imageData.data;
+      } else if (imageData.data && Array.isArray(imageData.data)) {
+        // data字段是Array格式
+        console.log('检测到data字段为Array格式，正在转换为Uint8Array...');
+        uint8ArrayData = new Uint8Array(imageData.data);
+      } else {
+        throw new Error('图片数据格式不正确，无法处理');
+      }
+      
+      // 验证数据完整性
+      if (!uint8ArrayData || uint8ArrayData.length === 0) {
+        throw new Error('图片数据为空或损坏');
+      }
+      
+      console.log(`图片数据大小: ${uint8ArrayData.length} bytes`);
       
       // 创建画布来处理图片
       const canvas = document.createElement('canvas');
@@ -186,9 +238,12 @@ class FileProcessor {
       }
       
       // 从 Uint8Array 创建图片
-      const blob = new Blob([imageData.data], { type: imageData.type || 'image/png' });
+      const blob = new Blob([uint8ArrayData], { type: imageData.type || 'image/png' });
       const img = new Image();
       const imgUrl = URL.createObjectURL(blob);
+      
+      console.log(`创建图片URL: ${imgUrl}`);
+      console.log(`图片类型: ${imageData.type || 'image/png'}`);
       
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
@@ -197,6 +252,7 @@ class FileProcessor {
         }, 30000); // 30秒超时
         
         img.onload = () => {
+          console.log('图片加载成功');
           clearTimeout(timeoutId);
           
           try {
@@ -204,11 +260,11 @@ class FileProcessor {
             const originalHeight = img.height;
             
             console.log(`原图尺寸: ${originalWidth}x${originalHeight}`);
-            console.log(`切片尺寸: ${sliceWidth}x${sliceHeight}`);
+            console.log(`切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
             
             // 计算需要切片的数量
-            const cols = Math.ceil(originalWidth / sliceWidth);
-            const rows = Math.ceil(originalHeight / sliceHeight);
+            const cols = Math.ceil(originalWidth / finalSliceWidth);
+            const rows = Math.ceil(originalHeight / finalSliceHeight);
             const totalSlices = cols * rows;
             
             console.log(`切片数量: ${cols}列 x ${rows}行 = ${totalSlices}片`);
@@ -232,22 +288,22 @@ class FileProcessor {
                   slices: slices,
                   originalWidth: originalWidth,
                   originalHeight: originalHeight,
-                  sliceWidth: sliceWidth,
-                  sliceHeight: sliceHeight,
+                  sliceWidth: finalSliceWidth,
+                  sliceHeight: finalSliceHeight,
                   cols: cols,
                   rows: rows
                 });
               }
             };
             
-            // 生成每个切片
-            for (let row = 0; row < rows; row++) {
-              for (let col = 0; col < cols; col++) {
-                // 计算当前切片的位置和尺寸
-                const x = col * sliceWidth;
-                const y = row * sliceHeight;
-                const currentSliceWidth = Math.min(sliceWidth, originalWidth - x);
-                const currentSliceHeight = Math.min(sliceHeight, originalHeight - y);
+                          // 生成每个切片
+              for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                  // 计算当前切片的位置和尺寸
+                  const x = col * finalSliceWidth;
+                  const y = row * finalSliceHeight;
+                  const currentSliceWidth = Math.min(finalSliceWidth, originalWidth - x);
+                  const currentSliceHeight = Math.min(finalSliceHeight, originalHeight - y);
                 
                 // 设置画布尺寸
                 canvas.width = currentSliceWidth;
@@ -317,7 +373,11 @@ class FileProcessor {
           }
         };
         
-        img.onerror = () => {
+        img.onerror = (errorEvent) => {
+          console.error('图片加载失败事件:', errorEvent);
+          console.error('图片URL:', imgUrl);
+          console.error('图片类型:', imageData.type);
+          console.error('Blob大小:', blob.size);
           clearTimeout(timeoutId);
           URL.revokeObjectURL(imgUrl);
           reject(new Error('图片加载失败'));
@@ -329,6 +389,63 @@ class FileProcessor {
       console.error('图片切片失败:', error);
       throw error;
     }
+  }
+
+  // 🚨 新增：智能切片策略计算方法（与核心库保持一致）
+  calculateSliceStrategy(width, height, maxSize = 4096) {
+    const strategy = {
+      direction: 'none',
+      sliceWidth: width,
+      sliceHeight: height,
+      slicesCount: 1,
+      description: '',
+      cols: 1,
+      rows: 1,
+      totalSlices: 1
+    };
+
+    const widthExceeds = width > maxSize;
+    const heightExceeds = height > maxSize;
+
+    if (!widthExceeds && !heightExceeds) {
+      // 不需要切割
+      strategy.description = '图片尺寸正常，无需切割';
+      return strategy;
+    }
+
+    if (widthExceeds && !heightExceeds) {
+      // 只有宽度超限：垂直切割（保持高度）
+      strategy.direction = 'vertical';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.sliceHeight = height;
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = 1;
+      strategy.slicesCount = strategy.cols;
+      strategy.totalSlices = strategy.cols;
+      strategy.description = `宽度超限，垂直切割为${strategy.slicesCount}片，每片${strategy.sliceWidth}×${height}`;
+    } else if (!widthExceeds && heightExceeds) {
+      // 只有高度超限：水平切割（保持宽度）
+      strategy.direction = 'horizontal';
+      strategy.sliceWidth = width;
+      strategy.sliceHeight = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.cols = 1;
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.rows;
+      strategy.totalSlices = strategy.rows;
+      strategy.description = `高度超限，水平切割为${strategy.slicesCount}片，每片${width}×${strategy.sliceHeight}`;
+    } else {
+      // 宽度和高度都超限：网格切割
+      strategy.direction = 'both';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9);
+      strategy.sliceHeight = Math.floor(maxSize * 0.9);
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.cols * strategy.rows;
+      strategy.totalSlices = strategy.cols * strategy.rows;
+      strategy.description = `宽高都超限，网格切割为${strategy.cols}×${strategy.rows}=${strategy.slicesCount}片`;
+    }
+
+    return strategy;
   }
 }
 

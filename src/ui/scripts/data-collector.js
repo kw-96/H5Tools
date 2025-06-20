@@ -15,9 +15,9 @@ class DataCollector {
       buttonVersion: document.getElementById('buttonVersionSelect')?.value || 'imageButton',
       
       // 游戏信息 - 带icon版
-      gameNameInput: document.getElementById('gameNameInput')?.value || '',
-      gameCopyInput: document.getElementById('gameCopyInput')?.value || '',
-      gameCopyTextColor: document.getElementById('gameCopyTextColor')?.value || '#FFFFFF',
+      gameName: document.getElementById('gameNameInput')?.value || '',
+      gameDesc: document.getElementById('gameCopyInput')?.value || '',
+      gameTextColor: document.getElementById('gameCopyTextColor')?.value || '#FFFFFF',
       iconButtonText: document.getElementById('iconButtonText')?.value || '立即下载',
       iconButtonTextColor: document.getElementById('iconButtonTextColor')?.value || '#FFFFFF',
       iconButtonBg: window.imageManager.get('iconButtonBg'),

@@ -225,24 +225,28 @@ async function addFeatherMaskToHeaderImage(
       return;
     }
     
-    // 9. 调整位置：蒙版矩形，羽化蒙版组，头图节点，头图组
+    // 9. 调整位置：基于Figma官方文档的Container Parent概念
     
-    // 蒙版矩形在羽化蒙版组内的位置
-    maskRect.x = 0;
-    maskRect.y = 0;
+    // 🎯 关键理解：
+    // 1. 组内元素的坐标相对于"容器父级"（frame），不是相对于组本身
+    // 2. 组会自动调整位置和大小以适应其内容
+    // 3. 我们应该设置元素的绝对位置，让组自动调整
     
-    // 羽化蒙版组在头图组内的位置
-    featherMaskGroup.x = -(rectWidth - originalWidth) / 2; // 水平居中
-    featherMaskGroup.y = -blurRadius; // 羽化效果不影响顶部
+    // 蒙版矩形：在羽化蒙版组内，相对于frame的绝对位置
+    const centerOffsetX = (originalWidth - rectWidth) / 2;
+    maskRect.x = originalX + centerOffsetX; // 相对于frame的居中位置
+    maskRect.y = 0; // 相对于frame，向上扩展模糊半径
     
-    // 头图节点在头图组内的位置（相对于组）
-    headerNode.x = 0;
-    headerNode.y = 0;
+    // 羽化蒙版组会自动调整以包围蒙版矩形，我们不需要手动设置其位置
+    // featherMaskGroup.x 和 featherMaskGroup.y 会自动计算
+    
+    // 头图节点：保持原始位置（相对于frame）
+    headerNode.x = originalX;
+    headerNode.y = originalY;
     headerNode.constraints = originalConstraints;
     
-    // 头图组的位置
-    headerGroup.x = originalX;
-    headerGroup.y = originalY;
+    // 头图组也会自动调整以包围其所有子元素
+    // headerGroup.x 和 headerGroup.y 会自动计算
     
     // 10. 删除原来的头图图片节点，将复制的头图图片节点放入头图组中
     try {
@@ -253,12 +257,14 @@ async function addFeatherMaskToHeaderImage(
       console.warn('删除原头图节点失败:', removeError);
     }
     
-    // 将复制的头图图片节点放入头图组中
+    // 将复制的头图图片节点添加到头图组中
     try {
       NodeUtils.safeAppendChild(headerGroup, headerNodeCopy, '复制的头图图片节点添加到头图组');
-      // 设置复制节点在组内的位置和约束
-      headerNodeCopy.x = 0;
-      headerNodeCopy.y = 0;
+      
+      // 🎯 关键：复制节点的位置也是相对于frame（容器父级）
+      // 由于Container Parent概念，组内元素坐标相对于frame，不是相对于组
+      headerNodeCopy.x = originalX; // 相对于frame的原始位置
+      headerNodeCopy.y = originalY; // 相对于frame的原始位置
       headerNodeCopy.constraints = originalConstraints;
     } catch (addError) {
       console.error('将复制的头图图片节点添加到头图组失败:', addError);
@@ -276,7 +282,7 @@ export async function createGameInfoModule(config: H5Config): Promise<FrameNode>
   // 根据按钮版本调整框架高度
   let frameHeight = 210;
   if (config.buttonVersion === 'doubleButton') {
-    frameHeight = 250; // 双按钮版需要更多空间
+    frameHeight = 250; // 双按钮版需要更多空间    
   }
   
   // 创建游戏信息框架
@@ -736,68 +742,299 @@ class ModuleFactory {
 
 // ==================== 规则模块 ====================
 
+// 活动规则内容接口
+interface ActivityRulesContent {
+  rulesTitle: string;               // 规则标题
+  rulesBgImage: ImageInfo | null;   // 规则标题背景图片
+  rulesContent: string;             // 规则内容文本
+}
+
+// 页面底部活动规则模块创建器
 export async function createRulesModule(config: H5Config): Promise<FrameNode> {
-  const frame = NodeUtils.createFrame('活动规则模块', CONSTANTS.H5_WIDTH, 100);
-  frame.fills = [];
-  
-  NodeUtils.setupAutoLayout(frame, 'VERTICAL', 20, 40);
+  console.log('开始创建活动规则模块，内容：', {
+    rulesTitle: config.rulesTitle,
+    rulesBgImage: !!config.rulesBgImage,
+    rulesContent: config.rulesContent
+  });
+
+  // 创建活动规则模块容器：1080宽，背景透明，高度按实际创建内容来调整
+  const frame = NodeUtils.createFrame("活动规则", 1080, 1000);
+  frame.fills = []; // 背景填充为透明
+
+  try {
+    // 构建活动规则内容数据
+    const rulesData: ActivityRulesContent = {
+      rulesTitle: config.rulesTitle || '',
+      rulesBgImage: config.rulesBgImage,
+      rulesContent: config.rulesContent || ''
+    };
+
+    // 实例化活动规则模块构建器
+    const builder = new ActivityRulesModuleBuilder(frame, rulesData);
+    // 调用构建器的build方法来构建活动规则模块
+    await builder.build();
+
+    console.log('活动规则模块创建完成，最终高度：', frame.height);
+
+    // 返回构建完成的框架
+    return frame;
+  } catch (error) {
+    console.error('活动规则模块创建失败：', error);
+    // 创建一个错误信息显示框
+    const errorText = await NodeUtils.createText(`活动规则模块创建失败: ${error instanceof Error ? error.message : '未知错误'}`, 16);
+    errorText.x = 20;
+    errorText.y = 20;
+    errorText.fills = [ColorUtils.createSolidFill({ r: 1, g: 0, b: 0 })];
+    NodeUtils.safeAppendChild(frame, errorText, '活动规则模块错误文本添加');
+    frame.resize(1080, 100);
+    return frame;
+  }
+}
+
+// 活动规则模块构建器类
+class ActivityRulesModuleBuilder {
+  private frame: FrameNode; // 存储活动规则模块的框架节点
+  private content: ActivityRulesContent; // 存储活动规则模块的内容
+  private currentY = 0; // 当前Y位置
+
+  // 构造函数，初始化活动规则模块构建器
+  constructor(frame: FrameNode, content: ActivityRulesContent) {
+    this.frame = frame; // 设置框架节点
+    this.content = content; // 设置内容
+  }
+
+  // 构建活动规则模块的主要方法
+  async build(): Promise<void> {
+    console.log('开始构建活动规则模块');
+
+    try {
+      // 检查是否有任何内容需要构建
+      const hasRulesTitle = this.content.rulesTitle && this.content.rulesTitle.trim() !== '';
+      const hasRulesBgImage = this.content.rulesBgImage !== null && this.content.rulesBgImage !== undefined;
+      const hasRulesContent = this.content.rulesContent && this.content.rulesContent.trim() !== '';
+
+      // 如果没有任何内容，直接返回
+      if (!hasRulesTitle && !hasRulesBgImage && !hasRulesContent) {
+        console.log('活动规则模块：没有任何内容需要构建，跳过');
+        this.frame.resize(1080, 0); // 设置高度为0
+        return;
+      }
+
+      // 添加标题（如果有标题文案或标题背景）
+      if (hasRulesTitle || hasRulesBgImage) {
+        console.log('添加活动规则标题...');
+        await this.addTitle();
+      }
+
+      // 添加规则内容（如果有）
+      if (hasRulesContent) {
+        console.log('添加活动规则内容...');
+        await this.addRulesContent();
+      }
+
+      // 调整整个模块的高度
+      console.log('调整模块高度...');
+      this.adjustFrameHeight();
+
+      console.log('活动规则模块构建完成');
+    } catch (error) {
+      console.error('活动规则模块构建过程中出错：', error);
+      throw error;
+    }
+  }
 
   // 添加标题
-  if (config.rulesTitle) {
+  private async addTitle(): Promise<void> {
+    const hasRulesTitle = this.content.rulesTitle && this.content.rulesTitle.trim() !== '';
+    const hasRulesBgImage = this.content.rulesBgImage !== null && this.content.rulesBgImage !== undefined;
+    
+    // 如果既没有标题文案也没有标题背景，直接返回
+    if (!hasRulesTitle && !hasRulesBgImage) return;
+
+    // 添加上边距
+    this.currentY += 90;
+
+    // 使用统一的标题容器创建函数
+    // 如果没有标题文案，使用空字符串，但仍然可以显示背景图片
+    const titleText = hasRulesTitle ? this.content.rulesTitle : '';
+    
     const titleContainer = await createTitleContainer(
-      config.rulesTitle,
-      config.rulesBgImage,
-      CONSTANTS.H5_WIDTH - 80,
-      60,
-      22,
+      titleText,
+      this.content.rulesBgImage,
+      1080,
+      120,
+      48, // 48px字体大小
       'Bold'
     );
-    NodeUtils.safeAppendChild(frame, titleContainer, '规则标题添加');
+    
+    titleContainer.x = 0;
+    titleContainer.y = this.currentY;
+    
+    NodeUtils.safeAppendChild(this.frame, titleContainer, '活动规则标题容器添加');
+    this.currentY += 120;
   }
 
   // 添加规则内容
-  if (config.rulesContent) {
-    const contentText = await NodeUtils.createText(config.rulesContent, 16, 'Regular');
-    contentText.fills = [ColorUtils.createSolidFill({ r: 0.3, g: 0.3, b: 0.3 })];
-    contentText.textAlignHorizontal = 'LEFT';
+  private async addRulesContent(): Promise<void> {
+    // 如果没有规则内容，直接返回
+    if (!this.content.rulesContent) return;
+
+    console.log('添加规则内容...');
+
+    // 添加上边距
+    this.currentY += 90;
+
+    // 创建规则内容文本节点，直接插入到活动规则容器中（与活动详情模块的正文文本节点实现方式一致）
+    const contentText = await NodeUtils.createText(this.content.rulesContent, 28, 'Regular');
     
-    // 设置文本宽度
-    contentText.resize(CONSTANTS.H5_WIDTH - 80, contentText.height);
+    // 设置文本样式（与活动详情模块的正文文本完全一致）
+    contentText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })]; // 黑色文字
+    contentText.lineHeight = { value: 40, unit: 'PIXELS' }; // 设置行高40px（与活动详情模块一致）
+    contentText.resize(950, contentText.height); // 设置宽度为950px（与活动详情模块一致）
+    contentText.textAlignHorizontal = "LEFT"; // 左对齐（与活动详情模块一致）
     
-    NodeUtils.safeAppendChild(frame, contentText, '规则内容添加');
+    // 设置文本位置：水平居中，垂直按当前Y位置放置
+    contentText.x = (1080 - 950) / 2; // 水平居中（左右各留65px边距）
+    contentText.y = this.currentY;
+
+    // 直接将文本节点添加到活动规则容器中
+    NodeUtils.safeAppendChild(this.frame, contentText, '活动规则内容文本添加');
+    
+    // 更新当前Y位置
+    this.currentY += contentText.height;
   }
 
-  return frame;
+  // 调整整个模块的高度
+  private adjustFrameHeight(): void {
+    // 添加下边距
+    this.currentY += 90;
+    // 调整框架高度
+    this.frame.resize(1080, this.currentY);
+  }
 }
 
 // ==================== 底部模块 ====================
 
 export async function createFooterModule(config: H5Config): Promise<FrameNode | null> {
+  // 当同时没有LOGO图片和尾版背景图片时，直接跳过创建尾版模块
   if (!config.footerLogo && !config.footerBg) {
+    console.log('跳过尾版模块创建：没有LOGO图片和尾版背景图片');
     return null;
   }
 
-  const frame = NodeUtils.createFrame('底部模块', CONSTANTS.H5_WIDTH, 100);
+  // 创建尾版框架
+  const frame = NodeUtils.createFrame("尾版", CONSTANTS.H5_WIDTH, 480);
   
-  // 设置背景
-  if (config.footerBg) {
-    await ImageNodeBuilder.setImageFill(frame, config.footerBg);
-  } else {
-    frame.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+  // 创建FooterBuilder实例并构建尾版内容
+  const builder = new FooterBuilder(frame, config);
+  await builder.build();
+  
+  // 返回创建的尾版框架
+  return frame;
+}
+
+// 尾版构建
+class FooterBuilder {
+  private frame: FrameNode;
+  private config: H5Config;
+
+  // 构造函数，初始化尾版框架和配置
+  constructor(frame: FrameNode, config: H5Config) {
+    this.frame = frame;
+    this.config = config;
   }
 
-  // 添加logo
-  if (config.footerLogo) {
-    const logoNode = await ImageNodeBuilder.insertImage(config.footerLogo, "底部Logo", 100, 40);
-    if (logoNode) {
-      // 居中定位
-      logoNode.x = (CONSTANTS.H5_WIDTH - logoNode.width) / 2;
-      logoNode.y = (100 - logoNode.height) / 2;
-      NodeUtils.safeAppendChild(frame, logoNode, '底部Logo添加');
+  // 构建尾版内容
+  async build(): Promise<void> {
+    await this.setupBackground();
+    await this.addContent();
+  }
+
+  // 设置尾版背景
+  private async setupBackground(): Promise<void> {
+    if (this.config.footerBg) {
+      // 如果配置中有尾版背景图，则使用该图片
+      await ImageNodeBuilder.setImageFill(this.frame, this.config.footerBg);
+    } else {
+      // 如果没有背景图，则使用透明背景
+      this.frame.fills = [];
     }
   }
 
-  return frame;
+  // 添加尾版内容
+  private async addContent(): Promise<void> {
+    if (this.config.footerLogo) {
+      await this.addLogo();
+    }
+  }
+
+  // 添加Logo
+  private async addLogo(): Promise<void> {
+    // 检查是否有Logo图片数据
+    if (!this.config.footerLogo) {
+      console.log('跳过Logo创建：没有上传Logo图片');
+      return;
+    }
+
+    console.log('开始创建Logo，使用ImageNodeBuilder');
+
+    try {
+      // 使用ImageNodeBuilder直接插入Logo图片节点
+      const logoImage = await ImageNodeBuilder.insertImage(
+        this.config.footerLogo, 
+        "LOGO"
+      );
+      
+      if (!logoImage) {
+        console.log('Logo图片节点创建失败');
+        return;
+      }
+
+      // 获取原始图片尺寸
+      const originalWidth = logoImage.width;
+      const originalHeight = logoImage.height;
+      const aspectRatio = originalWidth / originalHeight;
+      
+      console.log(`Logo原始尺寸: ${originalWidth}x${originalHeight}, 宽高比: ${aspectRatio.toFixed(2)}`);
+      
+      let finalWidth: number;
+      let finalHeight: number;
+      
+      // 按照要求计算最终尺寸
+      // 1. 首先按宽度340px计算高度
+      finalWidth = 340;
+      finalHeight = finalWidth / aspectRatio;
+      
+      // 2. 如果高度超过250px，则改为按高度250px计算宽度
+      if (finalHeight > 250) {
+        finalHeight = 250;
+        finalWidth = finalHeight * aspectRatio;
+      }
+      
+      // 设置Logo图片尺寸
+      logoImage.resize(finalWidth, finalHeight);
+      
+      // 设置位置：水平和垂直居中
+      logoImage.x = (CONSTANTS.H5_WIDTH - finalWidth) / 2;
+      logoImage.y = (this.frame.height - finalHeight) / 2;
+      
+      // 设置自动约束为缩放
+      if ('constraints' in logoImage) {
+        logoImage.constraints = {
+          horizontal: "SCALE",
+          vertical: "SCALE"
+        };
+      }
+      
+      // 将Logo图片节点直接添加到尾版框架中
+      NodeUtils.safeAppendChild(this.frame, logoImage, '尾版Logo图片添加');
+      
+      console.log(`Logo创建成功: 最终尺寸=${finalWidth.toFixed(1)}x${finalHeight.toFixed(1)}, 位置=(${logoImage.x.toFixed(1)}, ${logoImage.y.toFixed(1)})`);
+      
+    } catch (error) {
+      console.error('Logo创建失败:', error);
+    }
+  }
 }
 
 // ==================== 九宫格模块构建器 ====================

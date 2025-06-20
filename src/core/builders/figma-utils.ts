@@ -386,11 +386,11 @@ export class ImageNodeBuilder {
       
       // 构建符合SliceStrategy接口的对象
       const sliceStrategy: SliceStrategy = {
-        direction: width > height ? 'horizontal' : height > width ? 'vertical' : 'both',
+        direction: sliceInfo.direction,
         sliceWidth: sliceInfo.sliceWidth,
         sliceHeight: sliceInfo.sliceHeight,
-        slicesCount: sliceInfo.totalSlices,
-        description: `${sliceInfo.cols}x${sliceInfo.rows}切片策略`
+        slicesCount: sliceInfo.slicesCount,
+        description: sliceInfo.description
       };
       
       // 向UI请求分割处理
@@ -401,8 +401,11 @@ export class ImageNodeBuilder {
           width,
           height,
           name,
-          sliceStrategy
-        }
+          type: 'image/png'  // 默认类型
+        },
+        sliceWidth: sliceStrategy.sliceWidth,
+        sliceHeight: sliceStrategy.sliceHeight,
+        sliceStrategy
       });
 
       // 监听分割结果

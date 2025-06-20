@@ -63,26 +63,53 @@ export class H5PrototypeBuilder {
     }
   }
 
+  /**
+   * 检查是否有任何模块内容需要创建
+   * @returns boolean 如果有任何模块内容返回true，否则返回false
+   */
+  private hasAnyModuleContent(): boolean {
+    // 检查头部模块内容
+    const hasHeaderContent = !!(this.config.headerImage || this.config.titleUpload);
+    
+    // 检查游戏信息模块内容
+    const hasGameInfoContent = !!(this.config.gameName || this.config.gameDesc || this.config.gameIcon);
+    
+    // 检查自定义模块内容
+    const hasCustomModules = !!(this.config.modules && this.config.modules.length > 0);
+    
+    // 检查规则模块内容
+    const hasRulesTitle = this.config.rulesTitle && this.config.rulesTitle.trim() !== '';
+    const hasRulesBgImage = this.config.rulesBgImage !== null && this.config.rulesBgImage !== undefined;
+    const hasRulesContent = this.config.rulesContent && this.config.rulesContent.trim() !== '';
+    const hasRulesContent_any = hasRulesTitle || hasRulesBgImage || hasRulesContent;
+    
+    // 检查底部模块内容
+    const hasFooterContent = !!(this.config.footerLogo || this.config.footerBg);
+    
+    // 如果有任何模块内容，返回true
+    return hasHeaderContent || hasGameInfoContent || hasCustomModules || hasRulesContent_any || hasFooterContent;
+  }
+
   private createBaseFrames(): void {
     // 1. H5原型容器不需要应用自动布局，只是一个画板，并设置内容裁剪
-    this.outerFrame = NodeUtils.createFrame('H5原型', CONSTANTS.H5_WIDTH + 200, 2000);
-    this.outerFrame.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+    this.outerFrame = NodeUtils.createFrame('H5原型', CONSTANTS.H5_WIDTH, 100);
+    this.outerFrame.layoutMode = "NONE"; // 不使用自动布局
+    this.outerFrame.clipsContent = true; // 设置内容裁剪
     
-    // 2. 创建自适应模块容器，但先不添加到H5原型容器中
-    this.h5Frame = NodeUtils.createFrame('H5画板', CONSTANTS.H5_WIDTH, 1920);
-    this.h5Frame.x = 100;
-    this.h5Frame.y = 100;
-    
-    // 设置H5画板背景色
-    const bgColor = ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF');
-    this.h5Frame.fills = [ColorUtils.createSolidFill(bgColor)];
-    
-    // 设置自动布局
-    NodeUtils.setupAutoLayout(this.h5Frame, 'VERTICAL', 0, 0);
-    this.h5Frame.clipsContent = true; // 设置内容裁剪
-    this.h5Frame.layoutWrap = "NO_WRAP"; // 设置布局不换行，确保所有子元素在一列中垂直排列
-    
-    this.outerFrame.appendChild(this.h5Frame);
+    // 2. 只有当有模块内容时才创建自适应模块容器
+    if (this.hasAnyModuleContent()) {
+      this.h5Frame = NodeUtils.createFrame('自适应模块', CONSTANTS.H5_WIDTH, 100);
+      this.h5Frame.fills = [];
+      
+      // 设置自适应模块容器的自动布局
+      NodeUtils.setupAutoLayout(this.h5Frame, 'VERTICAL', 0, 0);
+      this.h5Frame.clipsContent = true; // 设置内容裁剪
+      this.h5Frame.layoutWrap = "NO_WRAP"; // 设置布局不换行，确保所有子元素在一列中垂直排列
+      
+      console.log('检测到模块内容，已创建自适应模块容器');
+    } else {
+      console.log('未检测到模块内容，跳过自适应模块容器创建');
+    }
   }
 
   /**
@@ -93,13 +120,21 @@ export class H5PrototypeBuilder {
     // 3. 设置背景时的判定逻辑
     const isDefaultWhite = this.config.pageBgColor === "#FFFFFF" || this.config.pageBgColor === "#ffffff";
     
-    // 当pageBgColor不为白色时，设置H5原型容器填充颜色为pageBgColor，否则填充为透明
+    // 自适应模块容器始终设置为透明填充
+    if (this.h5Frame) {
+      this.h5Frame.fills = []; // 始终透明
+      console.log('自适应模块容器设置为透明填充');
+    }
+    
+    // 背景颜色始终应用到外框（H5原型容器）
     if (!isDefaultWhite) {
       const colorFill = ColorUtils.createSolidFill(ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF'));
       this.outerFrame.fills = [colorFill];
+      console.log(`H5原型容器背景色设置为: ${this.config.pageBgColor}`);
     } else {
       // 白色时设置为透明
       this.outerFrame.fills = [];
+      console.log('H5原型容器背景设置为透明（白色）');
     }
     
     // 当bgImageData存在时，兼容pageBgColor的设置判定
@@ -132,8 +167,10 @@ export class H5PrototypeBuilder {
       }
     }
     
-    // 设置完背景之后，将自适应模块容器添加为H5原型容器的子元素
-    NodeUtils.safeAppendChild(this.outerFrame, this.h5Frame, 'H5自适应模块容器添加');
+    // 设置完背景之后，如果存在自适应模块容器，将其添加为H5原型容器的子元素
+    if (this.h5Frame) {
+      NodeUtils.safeAppendChild(this.outerFrame, this.h5Frame, 'H5自适应模块容器添加');
+    }
   }
 
   /**
@@ -141,6 +178,12 @@ export class H5PrototypeBuilder {
    * 创建所有模块并将它们添加到H5画板中
    */
   private async addModules(): Promise<void> {
+    // 如果没有自适应模块容器，说明没有模块内容，直接返回
+    if (!this.h5Frame) {
+      console.log('没有自适应模块容器，跳过模块添加');
+      return;
+    }
+    
     // 创建所有模块
     const modules = await this.createAllModules();
     
@@ -223,21 +266,39 @@ export class H5PrototypeBuilder {
   }
 
   private finalizeLayout(): void {
-    // 2. 调整H5原型容器高度为自适应模块容器高度
-    this.outerFrame.resize(CONSTANTS.H5_WIDTH + 200, this.h5Frame.height + 200);
-    
-    // 确保自适应模块容器在最上层显示（使用insertChild方法而不是remove+appendChild）
-    try {
-      if (this.h5Frame && this.h5Frame.parent === this.outerFrame) {
-        // 获取当前子节点数量，将h5Frame移动到最后位置（最上层）
-        const childrenCount = this.outerFrame.children.length;
-        if (childrenCount > 1) {
-          // 使用insertChild将节点移动到最后位置
-          this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
+    // 2. 调整H5原型容器高度
+    if (this.h5Frame) {
+      // 如果有自适应模块容器，调整为自适应模块容器高度
+      this.outerFrame.resize(CONSTANTS.H5_WIDTH, this.h5Frame.height);
+      
+      // 确保自适应模块容器在最上层显示（使用insertChild方法而不是remove+appendChild）
+      try {
+        if (this.h5Frame.parent === this.outerFrame) {
+          // 获取当前子节点数量，将h5Frame移动到最后位置（最上层）
+          const childrenCount = this.outerFrame.children.length;
+          if (childrenCount > 1) {
+            // 使用insertChild将节点移动到最后位置
+            this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
+          }
+        }
+      } catch (reorderError) {
+        console.error('重新排列H5模块容器失败:', reorderError);
+      }
+    } else {
+      // 如果没有自适应模块容器，设置一个最小高度或根据背景图片调整
+      let finalHeight = 100; // 默认最小高度
+      
+      // 如果有背景图片，根据背景图片高度调整
+      if (this.config.pageBgImage) {
+        // 查找背景图片节点
+        const bgImageNode = this.outerFrame.findOne(node => node.name === '页面背景图片');
+        if (bgImageNode && 'height' in bgImageNode) {
+          finalHeight = Math.max(finalHeight, bgImageNode.height);
         }
       }
-    } catch (reorderError) {
-      console.error('重新排列H5模块容器失败:', reorderError);
+      
+      this.outerFrame.resize(CONSTANTS.H5_WIDTH, finalHeight);
+      console.log(`没有模块内容，H5原型设置为最小高度: ${finalHeight}px`);
     }
     
     // 添加到当前页面并居中显示
