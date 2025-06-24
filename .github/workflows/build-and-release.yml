@@ -1,0 +1,88 @@
+name: Build and Release H5Tools
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd src/core && npm ci
+        
+    - name: Run type check
+      run: npm run type-check
+      
+    - name: Run linting
+      run: npm run lint
+      
+    - name: Build project
+      run: npm run build
+      
+    - name: Verify build output
+      run: |
+        echo "Checking build artifacts..."
+        ls -la dist/
+        echo "Plugin file size:"
+        ls -lh dist/plugin/code-standalone.js
+        echo "UI file size:"
+        ls -lh dist/ui.html
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: figma-plugin-build
+        path: |
+          dist/
+          manifest.json
+        retention-days: 30
+        
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: figma-plugin-build
+        
+    - name: Create plugin package
+      run: |
+        mkdir -p figma-plugin-release
+        cp -r dist/* figma-plugin-release/
+        cp manifest.json figma-plugin-release/
+        cp README.md figma-plugin-release/
+        cd figma-plugin-release
+        zip -r ../H5Tools-${{ github.ref_name }}.zip .
+        
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          H5Tools-${{ github.ref_name }}.zip
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
