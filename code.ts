@@ -4073,7 +4073,7 @@ class ChannelPrototypeGenerator {
   }
   
   /**
-   * 创建活动规则容器
+   * 创建活动规则按钮
    */
   private async createRulesContainer(mainContainer: FrameNode, myPrizesContainer: FrameNode | null, nineGridFrame: FrameNode): Promise<void> {
     try {
@@ -4126,10 +4126,10 @@ class ChannelPrototypeGenerator {
         console.error('创建活动规则文本失败:', textError);
       }
       
-      NodeUtils.safeAppendChild(mainContainer, rulesContainer, '活动规则容器添加');
+      NodeUtils.safeAppendChild(mainContainer, rulesContainer, '活动规则按钮添加');
       
     } catch (error) {
-      console.error('创建活动规则容器失败:', error);
+      console.error('创建活动规则按钮失败:', error);
     }
   }
   

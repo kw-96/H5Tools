@@ -296,10 +296,10 @@ class FileProcessor {
               }
             };
             
-                          // 生成每个切片
-              for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                  // 计算当前切片的位置和尺寸
+            // 生成每个切片
+            for (let row = 0; row < rows; row++) {
+              for (let col = 0; col < cols; col++) {
+                // 计算当前切片的位置和尺寸
                   const x = col * finalSliceWidth;
                   const y = row * finalSliceHeight;
                   const currentSliceWidth = Math.min(finalSliceWidth, originalWidth - x);

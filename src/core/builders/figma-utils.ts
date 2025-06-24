@@ -405,7 +405,7 @@ export class ImageNodeBuilder {
         },
         sliceWidth: sliceStrategy.sliceWidth,
         sliceHeight: sliceStrategy.sliceHeight,
-        sliceStrategy
+          sliceStrategy
       });
 
       // 监听分割结果

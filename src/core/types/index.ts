@@ -158,7 +158,9 @@ export type PluginMessageType =
   | 'slice-image-response'
   | 'generate'
   | 'channel-generate'
-  | 'channel-image-upload';
+  | 'channel-image-upload'
+  | 'storage-set'
+  | 'storage-delete';
 
 // 插件消息基础接口
 export interface BasePluginMessage {
@@ -197,6 +199,12 @@ export interface SimpleMessage extends BasePluginMessage {
   type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
 }
 
+export interface StorageMessage extends BasePluginMessage {
+  type: 'storage-set' | 'storage-delete';
+  key?: string;
+  value?: string;
+}
+
 // 联合类型
 export type PluginMessage = 
   | CreatePrototypeMessage 
@@ -204,7 +212,8 @@ export type PluginMessage =
   | ThemeMessage 
   | ChannelImageMessage 
   | ChannelGenerateMessage 
-  | SimpleMessage;
+  | SimpleMessage
+  | StorageMessage;
 
 // ==================== H5配置接口 ====================
 

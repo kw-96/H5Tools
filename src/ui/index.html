@@ -57,16 +57,16 @@
         <div class="form-group row-layout">
           <label class="non-interactive-label">页面底色</label>
           <div class="color-input-group">
-            <input type="color" id="pageColor" value="#FFFFFF">
-            <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+            <input type="color" id="pageColor" value="#FFFFFF" title="选择页面底色" aria-label="页面底色选择器">
+            <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="页面底色十六进制值" aria-label="页面底色色值输入框" placeholder="#FFFFFF">
           </div>
         </div>
         
         <div class="form-group row-layout">
           <label class="non-interactive-label">页面背景</label>
           <div class="file-upload-btn">
-            <input type="file" id="pageBackground" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
-            <button class="upload-btn" onclick="document.getElementById('pageBackground').click()">
+            <input type="file" id="pageBackground" accept="image/*" class="hidden-file-input" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))" title="选择页面背景图片" aria-label="页面背景图片上传">
+            <button class="upload-btn" onclick="document.getElementById('pageBackground').click()" title="上传页面背景图片" aria-label="上传页面背景图片">
               <div class="img-preview-inline">
                 <span class="upload-icon-inline">+</span>
               </div>
@@ -81,8 +81,8 @@
         <div class="form-group row-layout">
           <label class="non-interactive-label">头图</label>
           <div class="file-upload-btn">
-            <input type="file" id="headerImage" accept="image/*" style="display:none">
-            <button class="upload-btn" onclick="document.getElementById('headerImage').click()">
+            <input type="file" id="headerImage" accept="image/*" class="hidden-file-input" title="选择头图" aria-label="头图上传">
+            <button class="upload-btn" onclick="document.getElementById('headerImage').click()" title="上传头图" aria-label="上传头图">
               <div class="img-preview-inline">
                 <span class="upload-icon-inline">+</span>
               </div>
@@ -94,8 +94,8 @@
         <div class="form-group row-layout">
           <label class="non-interactive-label">标题</label>
           <div class="file-upload-btn">
-            <input type="file" id="titleUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
-            <button class="upload-btn" onclick="document.getElementById('titleUpload').click()">
+            <input type="file" id="titleUpload" accept="image/*" class="hidden-file-input" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))" title="选择标题图片" aria-label="标题图片上传">
+            <button class="upload-btn" onclick="document.getElementById('titleUpload').click()" title="上传标题图片" aria-label="上传标题图片">
               <div class="img-preview-inline">
                 <span class="upload-icon-inline">+</span>
               </div>
@@ -109,14 +109,14 @@
         <!-- 游戏信息板块标题 -->
         <div class="section-header">
           <div class="dropdown-selector">
-            <select id="buttonVersionSelect" class="section-dropdown">
+            <select id="buttonVersionSelect" class="section-dropdown" title="选择游戏信息版本" aria-label="游戏信息版本选择器">
               <option value="imageButton">游戏信息-带icon版</option>
               <option value="singleButton">游戏信息-单按钮版</option>
               <option value="doubleButton">游戏信息-双按钮版</option>
             </select>
           </div>
           <div class="option-controls">
-            <button class="control-btn collapse-btn" data-target="buttonVersionContent">
+            <button class="control-btn collapse-btn" data-target="buttonVersionContent" title="折叠/展开游戏信息板块" aria-label="折叠/展开游戏信息板块">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -131,7 +131,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">游戏icon</label>
               <div class="img-upload-wrapper">
-                <input type="file" id="gameIconUpload" accept="image/*" class="game-icon-upload" style="display:none">
+                <input type="file" id="gameIconUpload" accept="image/*" class="game-icon-upload hidden-file-input" title="选择游戏icon" aria-label="游戏icon上传">
                 <div class="img-preview-btn" onclick="document.getElementById('gameIconUpload').click()">
                   <div class="img-preview-container" id="gameIconPreview">
                     <span class="upload-icon-text">+</span>
@@ -153,8 +153,8 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">文案颜色</label>
               <div class="color-input-group">
-                <input type="color" id="gameCopyTextColor" value="#FFFFFF">
-                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+                <input type="color" id="gameCopyTextColor" value="#FFFFFF" title="选择游戏文案颜色" aria-label="游戏文案颜色选择器">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="游戏文案颜色十六进制值" aria-label="游戏文案颜色色值输入框" placeholder="#FFFFFF">
               </div>
             </div>
 
@@ -166,16 +166,16 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">文本颜色</label>
               <div class="color-input-group">
-                <input type="color" id="iconButtonTextColor" value="#FFFFFF">
-                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+                <input type="color" id="iconButtonTextColor" value="#FFFFFF" title="选择按钮文本颜色" aria-label="按钮文本颜色选择器">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="按钮文本颜色十六进制值" aria-label="按钮文本颜色色值输入框" placeholder="#FFFFFF">
               </div>
             </div>
 
             <div class="form-group row-layout">
               <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="iconButtonBgUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
-                <button class="upload-btn" onclick="document.getElementById('iconButtonBgUpload').click()">
+                <input type="file" id="iconButtonBgUpload" accept="image/*" class="hidden-file-input" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))" title="选择按钮背景图片" aria-label="按钮背景图片上传">
+                <button class="upload-btn" onclick="document.getElementById('iconButtonBgUpload').click()" title="上传按钮背景图片" aria-label="上传按钮背景图片">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -196,16 +196,16 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">文本颜色</label>
               <div class="color-input-group">
-                <input type="color" id="singleButtonTextColor" value="#FFFFFF">
-                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+                <input type="color" id="singleButtonTextColor" value="#FFFFFF" title="选择单按钮文本颜色" aria-label="单按钮文本颜色选择器">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="单按钮文本颜色十六进制值" aria-label="单按钮文本颜色色值输入框" placeholder="#FFFFFF">
               </div>
             </div>
 
             <div class="form-group row-layout">
               <label class="non-interactive-label">按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="singleButtonBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('singleButtonBgUpload').click()">
+                <input type="file" id="singleButtonBgUpload" accept="image/*" class="hidden-file-input" title="选择单按钮背景图片" aria-label="单按钮背景图片上传">
+                <button class="upload-btn" onclick="document.getElementById('singleButtonBgUpload').click()" title="上传单按钮背景图片" aria-label="上传单按钮背景图片">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -225,16 +225,16 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">文本颜色</label>
               <div class="color-input-group">
-                <input type="color" id="leftButtonTextColor" value="#FFFFFF">
-                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+                <input type="color" id="leftButtonTextColor" value="#FFFFFF" title="选择左侧按钮文本颜色" aria-label="左侧按钮文本颜色选择器">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="左侧按钮文本颜色十六进制值" aria-label="左侧按钮文本颜色色值输入框" placeholder="#FFFFFF">
               </div>
             </div>
 
             <div class="form-group row-layout">
               <label class="non-interactive-label">左侧按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="leftButtonBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('leftButtonBgUpload').click()">
+                <input type="file" id="leftButtonBgUpload" accept="image/*" class="hidden-file-input" title="选择左侧按钮背景图片" aria-label="左侧按钮背景图片上传">
+                <button class="upload-btn" onclick="document.getElementById('leftButtonBgUpload').click()" title="上传左侧按钮背景图片" aria-label="上传左侧按钮背景图片">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -250,16 +250,16 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">文本颜色</label>
               <div class="color-input-group">
-                <input type="color" id="rightButtonTextColor" value="#FFFFFF">
-                <input type="text" class="color-value" value="#FFFFFF" maxlength="7">
+                <input type="color" id="rightButtonTextColor" value="#FFFFFF" title="选择右侧按钮文本颜色" aria-label="右侧按钮文本颜色选择器">
+                <input type="text" class="color-value" value="#FFFFFF" maxlength="7" title="右侧按钮文本颜色十六进制值" aria-label="右侧按钮文本颜色色值输入框" placeholder="#FFFFFF">
               </div>
             </div>
             
             <div class="form-group row-layout">
               <label class="non-interactive-label">右侧按钮底</label>
               <div class="file-upload-btn">
-                <input type="file" id="rightButtonBgUpload" accept="image/*" style="display:none">
-                <button class="upload-btn" onclick="document.getElementById('rightButtonBgUpload').click()">
+                <input type="file" id="rightButtonBgUpload" accept="image/*" class="hidden-file-input" title="选择右侧按钮背景图片" aria-label="右侧按钮背景图片上传">
+                <button class="upload-btn" onclick="document.getElementById('rightButtonBgUpload').click()" title="上传右侧按钮背景图片" aria-label="上传右侧按钮背景图片">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -311,7 +311,7 @@
         <div id="modulesContainer">
           <!-- 模块将动态添加到此处 -->
           <div class="empty-modules-message" id="emptyModulesMessage">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 16px; opacity: 0.5;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="empty-icon">
               <path d="M7.752.066a.5.5 0 0 1 .496 0l3.75 2.143a.5.5 0 0 1 .252.434v3.995l3.498 2A.5.5 0 0 1 16 9.07v4.286a.5.5 0 0 1-.252.434l-3.75 2.143a.5.5 0 0 1-.496 0l-3.502-2-3.502 2a.5.5 0 0 1-.496 0l-3.75-2.143A.5.5 0 0 1 0 13.357V9.071a.5.5 0 0 1 .252-.434L3.75 6.638V2.643a.5.5 0 0 1 .252-.434L7.752.066ZM4.25 7.504 1.508 9.071l2.742 1.567 2.742-1.567L4.25 7.504ZM7.5 9.933l-2.75 1.571v3.134l2.75-1.571V9.933Zm1 3.134 2.75 1.571v-3.134L8.5 9.933v3.134Zm.508-3.996 2.742 1.567 2.742-1.567-2.742-1.567-2.742 1.567Zm2.242-2.433V3.504L8.5 5.076V8.21l2.75-1.572ZM7.5 8.21V5.076L4.75 3.504v3.134L7.5 8.21ZM5.258 2.643 8 4.21l2.742-1.567L8 1.076 5.258 2.643ZM15 9.933l-2.75 1.571v3.134L15 13.067V9.933ZM3.75 14.638v-3.134L1 9.933v3.134l2.75 1.571Z"/>
             </svg>
             <p>尚未添加任何模块</p>
@@ -321,7 +321,7 @@
       </div>
 
       <!-- 模块模板库 (隐藏) -->
-      <div id="moduleTemplates" style="display: none;">
+      <div id="moduleTemplates" class="visually-hidden">
         <!-- 固定模块-九宫格抽奖模板 -->
         <div class="module-template" id="lotteryModuleTemplate">
           <div class="module-header">
@@ -353,16 +353,16 @@
           <div class="module-content">
             <!-- 大标题 -->
             <div class="form-group row-layout">
-              <label class="non-interactive-label">大标题</label>
-              <input type="text" class="text-input big-title-input" placeholder="请输入大标题文本">
+              <label for="bigTitleInput">大标题</label>
+              <input type="text" id="bigTitleInput" class="text-input big-title-input" placeholder="请输入大标题文本">
             </div>
             
             <!-- 标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="derived-item-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
-                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="derived-item-upload hidden-file-input" accept="image/*" title="选择大标题背景图片" aria-label="大标题背景图片上传">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()" title="上传大标题背景图片" aria-label="上传大标题背景图片">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -374,7 +374,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">九宫格背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="nine-grid-bg" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="nine-grid-bg hidden-file-input" accept="image/*" title="选择九宫格背景图片" aria-label="九宫格背景图片上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -387,7 +387,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">抽奖按钮</label>
               <div class="file-upload-btn">
-                <input type="file" class="draw-btn" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="draw-btn hidden-file-input" accept="image/*" title="选择抽奖按钮图片" aria-label="抽奖按钮图片上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -400,7 +400,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">奖品背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="prize-bg" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="prize-bg hidden-file-input" accept="image/*" title="选择奖品背景图片" aria-label="奖品背景图片上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -417,7 +417,7 @@
                 <div class="prize-row top-row">
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品01图片" aria-label="奖品01图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -427,7 +427,7 @@
                   </div>
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品02图片" aria-label="奖品02图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -437,7 +437,7 @@
                   </div>
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品03图片" aria-label="奖品03图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -451,7 +451,7 @@
                 <div class="prize-row middle-row">
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品04图片" aria-label="奖品04图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -461,7 +461,7 @@
                   </div>
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品05图片" aria-label="奖品05图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -475,7 +475,7 @@
                 <div class="prize-row bottom-row">
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品06图片" aria-label="奖品06图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -485,7 +485,7 @@
                   </div>
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择奖品07图片" aria-label="奖品07图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -495,7 +495,7 @@
                   </div>
                   <div class="grid-item">
                     <div class="img-upload-container">
-                      <input type="file" accept="image/*" class="prize-upload" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
+                      <input type="file" accept="image/*" class="prize-upload hidden-file-input" title="选择谢谢参与图片" aria-label="谢谢参与图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.preview-container'))">
                       <button class="grid-btn" onclick="this.previousElementSibling.click()">
                         <div class="preview-container"></div>
                         <span class="upload-icon">+</span>
@@ -542,7 +542,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">标题图片</label>
               <div class="file-upload-btn">
-                <input type="file" class="sign-in-title-upload" accept="image/*" style="display:none">
+                <input type="file" class="sign-in-title-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -555,7 +555,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
-                <input type="file" class="sign-in-bg-upload" accept="image/*" style="display:none">
+                <input type="file" class="sign-in-bg-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -566,15 +566,15 @@
             
             <!-- 签到天数 -->
             <div class="form-group row-layout">
-              <label>签到天数</label>
-              <input type="number" class="days-count" value="7" min="3" max="31" class="number-input">
+              <label for="signInDaysCount">签到天数</label>
+              <input type="number" id="signInDaysCount" class="days-count number-input" value="7" min="3" max="31" title="设置签到活动天数" aria-label="签到天数输入框">
             </div>
             
             <!-- 日期图标 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">日期图标</label>
               <div class="file-upload-btn">
-                <input type="file" class="day-icon-upload" accept="image/*" style="display:none">
+                <input type="file" class="day-icon-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -587,7 +587,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">签到按钮</label>
               <div class="file-upload-btn">
-                <input type="file" class="sign-in-btn-upload" accept="image/*" style="display:none">
+                <input type="file" class="sign-in-btn-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -631,7 +631,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">集卡标题</label>
               <div class="file-upload-btn">
-                <input type="file" class="collect-title-upload" accept="image/*" style="display:none">
+                <input type="file" class="collect-title-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -644,7 +644,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">背景图片</label>
               <div class="file-upload-btn">
-                <input type="file" class="collect-bg-upload" accept="image/*" style="display:none">
+                <input type="file" class="collect-bg-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -655,8 +655,8 @@
             
             <!-- 卡片数量 -->
             <div class="form-group row-layout">
-              <label>卡片数量</label>
-              <input type="number" class="cards-count" value="5" min="3" max="12" class="number-input">
+              <label for="collectCardsCount">卡片数量</label>
+              <input type="number" id="collectCardsCount" class="cards-count number-input" value="5" min="3" max="12" title="设置集卡活动卡片数量" aria-label="卡片数量输入框">
             </div>
             
             <!-- 卡片样式 -->
@@ -664,16 +664,16 @@
               <label class="non-interactive-label">卡片样式</label>
               <div class="radio-group row-layout">
                 <div class="radio-item">
-                  <input type="radio" name="cardStyle" value="style1" checked>
-                  <label>方形</label>
+                  <input type="radio" id="cardStyle1" name="cardStyle" value="style1" checked title="选择方形卡片样式" aria-label="方形卡片样式">
+                  <label for="cardStyle1">方形</label>
                 </div>
                 <div class="radio-item">
-                  <input type="radio" name="cardStyle" value="style2">
-                  <label>圆角</label>
+                  <input type="radio" id="cardStyle2" name="cardStyle" value="style2" title="选择圆角卡片样式" aria-label="圆角卡片样式">
+                  <label for="cardStyle2">圆角</label>
                 </div>
                 <div class="radio-item">
-                  <input type="radio" name="cardStyle" value="style3">
-                  <label>自定义</label>
+                  <input type="radio" id="cardStyle3" name="cardStyle" value="style3" title="选择自定义卡片样式" aria-label="自定义卡片样式">
+                  <label for="cardStyle3">自定义</label>
                 </div>
               </div>
             </div>
@@ -682,7 +682,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">卡片背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="card-bg-upload" accept="image/*" style="display:none">
+                <input type="file" class="card-bg-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -695,7 +695,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">合成按钮</label>
               <div class="file-upload-btn">
-                <input type="file" class="combine-button-upload" accept="image/*" style="display:none">
+                <input type="file" class="combine-button-upload" accept="image/*" title="选择图片文件" aria-label="图片文件上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -745,7 +745,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">大标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="activity-content-main-title-bg-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="activity-content-main-title-bg-upload hidden-file-input" accept="image/*" title="选择大标题背景图片" aria-label="大标题背景图片上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -764,7 +764,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">小标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="activity-content-sub-title-bg-upload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+                <input type="file" class="activity-content-sub-title-bg-upload hidden-file-input" accept="image/*" title="选择小标题背景图片" aria-label="小标题背景图片上传">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -783,7 +783,7 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">插图</label>
               <div class="file-upload-btn">
-                <input type="file" class="activity-content-image-upload" accept="image/*" style="display:none">
+                <input type="file" class="activity-content-image-upload hidden-file-input" accept="image/*" title="选择插图图片" aria-label="插图图片上传">
                 <button class="upload-btn activity-content-image-upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -802,7 +802,7 @@
         <div class="section-header">
           <span class="section-title">活动规则</span>
           <div class="option-controls">
-            <button class="control-btn collapse-btn" data-target="rulesContent">
+            <button class="control-btn collapse-btn" data-target="rulesContent" title="折叠/展开活动规则板块" aria-label="折叠/展开活动规则板块">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -823,7 +823,7 @@
           <div class="form-group row-layout">
             <label class="non-interactive-label">标题背景</label>
             <div class="file-upload-btn">
-              <input type="file" id="rulesBgUpload" accept="image/*" style="display:none">
+              <input type="file" id="rulesBgUpload" accept="image/*" class="hidden-file-input" title="选择活动规则标题背景图片" aria-label="活动规则标题背景图片上传">
               <button class="upload-btn" onclick="document.getElementById('rulesBgUpload').click()">
                 <div class="img-preview-inline">
                   <span class="upload-icon-inline">+</span>
@@ -834,8 +834,8 @@
           
           <!-- 活动规则内容 -->
           <div class="form-group row-layout">
-            <label class="non-interactive-label">活动规则</label>
-            <textarea id="rulesContent" class="text-area" placeholder="请输入活动规则内容"></textarea>
+            <label for="rulesTextarea">活动规则</label>
+            <textarea id="rulesTextarea" class="text-area" placeholder="请输入活动规则内容" title="输入活动规则内容" aria-label="活动规则内容输入框"></textarea>
           </div>
           
         </div>
@@ -847,7 +847,7 @@
         <div class="section-header">
           <span class="section-title">尾版</span>
           <div class="option-controls">
-            <button class="control-btn collapse-btn" data-target="footerAreaContent">
+            <button class="control-btn collapse-btn" data-target="footerAreaContent" title="折叠/展开尾版板块" aria-label="折叠/展开尾版板块">
               <svg width="12" height="7" viewBox="0 0 16 11" class="chevron-icon">
                 <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
               </svg>
@@ -861,7 +861,7 @@
           <div class="form-group row-layout">
             <label class="non-interactive-label">LOGO</label>
             <div class="file-upload-btn">
-              <input type="file" id="footerLogoUpload" accept="image/*" style="display:none" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
+              <input type="file" id="footerLogoUpload" accept="image/*" class="hidden-file-input" title="选择尾版LOGO图片" aria-label="尾版LOGO图片上传" onchange="previewImage(this, this.nextElementSibling.querySelector('.img-preview-inline'))">
               <button class="upload-btn" onclick="document.getElementById('footerLogoUpload').click()">
                 <div class="img-preview-inline">
                   <span class="upload-icon-inline">+</span>
@@ -874,7 +874,7 @@
           <div class="form-group row-layout">
             <label class="non-interactive-label">尾版背景</label>
             <div class="file-upload-btn">
-              <input type="file" id="footerBgUpload" accept="image/*" style="display:none">
+              <input type="file" id="footerBgUpload" accept="image/*" class="hidden-file-input" title="选择尾版背景图片" aria-label="尾版背景图片上传">
               <button class="upload-btn" onclick="document.getElementById('footerBgUpload').click()">
                 <div class="img-preview-inline">
                   <span class="upload-icon-inline">+</span>
@@ -985,16 +985,16 @@
       </div>
 
       <!-- 渠道设置视图 -->
-      <div class="channel-settings-view" id="channelSettingsView" style="display: none;">
+      <div class="channel-settings-view hidden" id="channelSettingsView">
         <!-- 设置页头部 -->
         <div class="settings-header">
-          <button class="back-btn" onclick="backToChannelsList()">
+          <button class="back-btn" onclick="backToChannelsList()" title="返回渠道列表" aria-label="返回渠道列表">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M10 12l-4-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
           <h2 class="settings-title" id="settingsTitle">渠道设置</h2>
-          <div style="width: 40px;"></div> <!-- 占位元素保持居中平衡 -->
+          <div></div> <!-- 占位元素保持居中平衡 -->
         </div>
 
         <!-- 设置内容区域 -->

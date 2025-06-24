@@ -95,6 +95,8 @@ export class H5PrototypeBuilder {
     this.outerFrame = NodeUtils.createFrame('H5原型', CONSTANTS.H5_WIDTH, 100);
     this.outerFrame.layoutMode = "NONE"; // 不使用自动布局
     this.outerFrame.clipsContent = true; // 设置内容裁剪
+    // 🚨 重要：初始化时设置为透明填充，避免默认白色背景
+    this.outerFrame.fills = [];
     
     // 2. 只有当有模块内容时才创建自适应模块容器
     if (this.hasAnyModuleContent()) {
@@ -117,30 +119,50 @@ export class H5PrototypeBuilder {
    * 根据配置设置页面背景，可以是图片或颜色
    */
   private async setupBackground(): Promise<void> {
-    // 3. 设置背景时的判定逻辑
-    const isDefaultWhite = this.config.pageBgColor === "#FFFFFF" || this.config.pageBgColor === "#ffffff";
+    // 🚨 调试：显示传入的颜色配置
+    console.log('🎨 [背景设置调试] 开始设置背景，配置信息:');
+    console.log('   - pageBgColor:', this.config.pageBgColor);
+    console.log('   - pageBgImage:', !!this.config.pageBgImage);
+    
+    // 🚨 修复：检测白色背景的逻辑更加严格
+    const isDefaultWhite = !this.config.pageBgColor || 
+                          this.config.pageBgColor === "#FFFFFF" || 
+                          this.config.pageBgColor === "#ffffff" ||
+                          this.config.pageBgColor.toLowerCase() === "#ffffff";
+    
+    console.log('   - 是否为默认白色:', isDefaultWhite);
     
     // 自适应模块容器始终设置为透明填充
     if (this.h5Frame) {
       this.h5Frame.fills = []; // 始终透明
-      console.log('自适应模块容器设置为透明填充');
+      console.log('✅ 自适应模块容器设置为透明填充');
     }
     
-    // 背景颜色始终应用到外框（H5原型容器）
+    // 🚨 修复：背景颜色设置逻辑
     if (!isDefaultWhite) {
-      const colorFill = ColorUtils.createSolidFill(ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF'));
+      // 非白色时，设置指定颜色填充
+      console.log('🎯 [颜色转换] 开始转换颜色:', this.config.pageBgColor);
+      const rgbColor = ColorUtils.hexToRgb(this.config.pageBgColor || '#FFFFFF');
+      console.log('   - RGB转换结果:', rgbColor);
+      
+      const colorFill = ColorUtils.createSolidFill(rgbColor);
+      console.log('   - 创建的填充对象:', colorFill);
+      
       this.outerFrame.fills = [colorFill];
-      console.log(`H5原型容器背景色设置为: ${this.config.pageBgColor}`);
+      console.log(`✅ H5原型容器背景色设置为: ${this.config.pageBgColor}`);
+      console.log('   - 最终Frame填充:', this.outerFrame.fills);
     } else {
-      // 白色时设置为透明
+      // 🚨 关键修复：白色或未设置时，确保透明填充（不是默认的白色填充）
       this.outerFrame.fills = [];
-      console.log('H5原型容器背景设置为透明（白色）');
+      console.log('✅ H5原型容器背景设置为透明（默认白色，代表用户未修改）');
+      console.log('   - 最终Frame填充:', this.outerFrame.fills);
     }
     
     // 当bgImageData存在时，兼容pageBgColor的设置判定
     if (this.config.pageBgImage) {
       const bgImageData = Utils.extractUint8Array(this.config.pageBgImage);
       if (bgImageData) {
+        console.log('🖼️  开始添加背景图片');
         // 直接将bgImageData图片节点插入H5原型容器中
         const bgImageNode = await ImageNodeBuilder.insertImage(
           this.config.pageBgImage,
@@ -163,6 +185,7 @@ export class H5PrototypeBuilder {
           
           // 先插入背景图片节点
           NodeUtils.safeAppendChild(this.outerFrame, bgImageNode, '页面背景图片添加');
+          console.log('✅ 背景图片添加完成');
         }
       }
     }
@@ -171,6 +194,8 @@ export class H5PrototypeBuilder {
     if (this.h5Frame) {
       NodeUtils.safeAppendChild(this.outerFrame, this.h5Frame, 'H5自适应模块容器添加');
     }
+    
+    console.log('🎨 [背景设置调试] 背景设置完成');
   }
 
   /**

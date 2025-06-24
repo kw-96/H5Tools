@@ -5,7 +5,7 @@ class DataCollector {
   collectFormData() {
     const config = {
       // 页面基础设置
-      pageColor: document.getElementById('pageColor')?.value || '#FFFFFF',
+      pageBgColor: document.getElementById('pageColor')?.value || '#FFFFFF',
       pageBgImage: window.imageManager.get('pageBackground'),
       headerImage: window.imageManager.get('headerImage'),
       titleUpload: window.imageManager.get('titleUpload'),
@@ -63,28 +63,53 @@ class DataCollector {
       if (moduleType && moduleId) {
         const moduleContent = this.collectModuleContent(moduleEl, moduleType, moduleId);
         if (moduleContent) {
+          // 获取模块标题
+          const moduleTitle = this.getModuleTitle(moduleType);
+          
           moduleData.push({
             id: moduleId,
-            type: moduleType,
+            type: moduleType,  // 保持字符串格式，在后端处理类型转换
+            title: moduleTitle, // 添加标题字段
             content: moduleContent
+          });
+          
+          console.log('📊 [模块数据收集]', {
+            moduleId,
+            moduleType,
+            moduleTitle,
+            收集内容: moduleContent
           });
         }
       }
     });
     
+    console.log('🎯 [所有模块数据收集完成]', moduleData);
     return moduleData;
+  }
+  
+  // 获取模块标题
+  getModuleTitle(moduleType) {
+    const titleMap = {
+      'nineGrid': '九宫格抽奖',
+      'signIn': '每日签到',
+      'collectCards': '集卡活动',
+      'activityContent': '活动详情'
+    };
+    return titleMap[moduleType] || '未知模块';
   }
   
   // 收集模块内容
   collectModuleContent(container, moduleType, moduleId) {
     switch (moduleType) {
+      case 'nineGrid':
+        return this.collectLotteryData(container, moduleId);
       case 'lotteryModule':
         return this.collectLotteryData(container, moduleId);
       case 'signInModule':
         return this.collectSignInData(container, moduleId);
       case 'collectModule':
         return this.collectCardsData(container, moduleId);
-      case 'activityContentModule':
+      case 'activityContent':
         return this.collectActivityContentData(container, moduleId);
       default:
         console.warn(`未知的模块类型: ${moduleType}`);
@@ -92,26 +117,17 @@ class DataCollector {
     }
   }
   
-  // 收集九宫格抽奖数据
+    // 收集九宫格抽奖数据
   collectLotteryData(container, moduleId) {
     const data = {
-      bigTitle: container.querySelector('.big-title-input')?.value || '',
+      mainTitle: container.querySelector('.big-title-input')?.value || "抽奖活动",
       titleBgImage: window.imageManager.getModule(`${moduleId}-titlebg`),
       gridBgImage: window.imageManager.getModule(`${moduleId}-gridbg`),
       drawButtonImage: window.imageManager.getModule(`${moduleId}-drawbtn`),
       prizeBgImage: window.imageManager.getModule(`${moduleId}-prizebg`),
-      prizes: []
+      prizes: this.collectNineGridPrizes(container, moduleId)
     };
-    
-    // 收集奖品信息
-    const prizeInputs = container.querySelectorAll('.prize-upload');
-    prizeInputs.forEach((input, index) => {
-      data.prizes.push({
-        position: this.getPrizePosition(index),
-        image: window.imageManager.getModule(`${moduleId}-prize-${index}`),
-      });
-    });
-    
+
     return data;
   }
   
@@ -149,39 +165,72 @@ class DataCollector {
       mainTitleBg: window.imageManager.getModule(`${moduleId}-main-title-bg`),
       subTitle: container.querySelector('.activity-content-sub-title-input')?.value || '',
       subTitleBg: window.imageManager.getModule(`${moduleId}-sub-title-bg`),
-      content: container.querySelector('.activity-content-text-input')?.value || '',
+      text: container.querySelector('.activity-content-text-input')?.value || '',
       image: window.imageManager.getModule(`${moduleId}-image`)
     };
+    
+    console.log('🔍 [活动内容数据收集]', {
+      moduleId,
+      data,
+      主标题: data.mainTitle,
+      副标题: data.subTitle,
+      正文: data.text,
+      图片: !!data.image
+    });
     
     return data;
   }
   
   // 获取奖品位置
   getPrizePosition(index) {
-    // 九宫格位置映射
+    // 九宫格位置映射 (3x3网格)
     const positions = [
-      { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 },
-      { row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 },
-      { row: 2, col: 0 }, { row: 2, col: 1 }, { row: 2, col: 2 }
+      { row: 0, col: 0 }, // 位置0: 左上
+      { row: 0, col: 1 }, // 位置1: 上中
+      { row: 0, col: 2 }, // 位置2: 右上
+      { row: 1, col: 2 }, // 位置3: 右中
+      { row: 2, col: 2 }, // 位置4: 右下
+      { row: 2, col: 1 }, // 位置5: 下中
+      { row: 2, col: 0 }, // 位置6: 左下
+      { row: 1, col: 0 }, // 位置7: 左中
+      { row: 1, col: 1 }  // 位置8: 中心(抽奖按钮位置)
     ];
     
     return positions[index] || { row: 0, col: 0 };
   }
   
-  // 收集九宫格奖品数据
+  // 收集九宫格奖品数据（专门处理3-2-3布局）
   collectNineGridPrizes(container, moduleId) {
     const prizes = [];
-    const prizeInputs = container.querySelectorAll('.prize-upload');
+    const prizeElements = container.querySelectorAll('.prize-grid-custom .grid-item, .prize-upload');
     
-    prizeInputs.forEach((input, index) => {
-      const prize = {
-        position: this.getPrizePosition(index),
+    prizeElements.forEach((prizeEl, index) => {
+      const prizeLabel = prizeEl.querySelector('.prize-label')?.textContent || `奖品${String(index + 1).padStart(2, '0')}`;
+      prizes.push({
         image: window.imageManager.getModule(`${moduleId}-prize-${index}`),
-      };
-      prizes.push(prize);
+        name: prizeLabel,
+        position: this.getNineGridPosition(index) // 添加位置信息
+      });
     });
     
     return prizes;
+  }
+
+  // 获取九宫格位置（3-2-3布局转换为标准3x3位置）
+  getNineGridPosition(index) {
+    // 3-2-3布局对应的九宫格位置映射
+    const positionMap = {
+      0: 0, // 第一行第一个 -> 位置0
+      1: 1, // 第一行第二个 -> 位置1  
+      2: 2, // 第一行第三个 -> 位置2
+      3: 3, // 第二行第一个 -> 位置3
+      4: 5, // 第二行第二个 -> 位置5（跳过中间的抽奖按钮位置4）
+      5: 6, // 第三行第一个 -> 位置6
+      6: 7, // 第三行第二个 -> 位置7
+      7: 8  // 第三行第三个 -> 位置8
+    };
+    
+    return positionMap[index] || index;
   }
   
   // 收集奖品数据（备用方法）
@@ -205,7 +254,7 @@ class DataCollector {
     const errors = [];
     
     // 基础验证
-    if (!config.pageColor) {
+    if (!config.pageBgColor) {
       errors.push('页面颜色不能为空');
     }
     

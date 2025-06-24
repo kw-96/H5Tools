@@ -9,7 +9,6 @@ import {
   Module, 
   ModuleData, 
   ModuleType, 
-  ModuleContent, 
   NineGridContent,
   ActivityContentData,
   SignInContent,
@@ -664,40 +663,87 @@ class ModuleFactory {
     try {
       let moduleFrame: FrameNode;
       
-      switch (module.type) {
+      // 🚨 关键修复：正确处理字符串类型的模块类型
+      const moduleType = typeof module.type === 'string' ? module.type : module.type;
+      
+      console.log('🏭 [模块工厂] 开始创建模块:', {
+        模块ID: module.id,
+        模块类型: moduleType,
+        模块标题: module.title,
+        内容键: Object.keys(module.content || {})
+      });
+      
+      switch (moduleType) {
+        case 'activityContent':
         case ModuleType.ACTIVITY_CONTENT:
           moduleFrame = await this.createActivityContentModule(module.content as ActivityContentData);
           break;
+        case 'signIn':
         case ModuleType.SIGN_IN:
           moduleFrame = await this.createSignInModule(module.content as SignInContent);
           break;
+        case 'collectCards':
         case ModuleType.COLLECT_CARDS:
           moduleFrame = await this.createCollectCardsModule(module.content as CollectCardsContent);
           break;
+        case 'nineGrid':
         case ModuleType.NINE_GRID:
           moduleFrame = await this.createNineGridModule(module.content as NineGridContent);
           break;
         default:
-          console.warn(`未知的模块类型: ${module.type}`);
-          return this.createErrorModule(module, `未知的模块类型: ${module.type}`);
+          console.warn(`未知的模块类型: ${moduleType}`);
+          return this.createErrorModule(module, `未知的模块类型: ${moduleType}`);
       }
       
-      moduleFrame.name = module.title || `${module.type}模块`;
+      moduleFrame.name = module.title || `${moduleType}模块`;
+      
+      console.log('✅ [模块工厂] 模块创建成功:', {
+        模块名称: moduleFrame.name,
+        模块大小: `${moduleFrame.width}x${moduleFrame.height}`
+      });
+      
       return moduleFrame;
     } catch (error) {
-      console.error(`创建模块失败: ${module.type}`, error);
+      console.error(`❌ [模块工厂] 创建模块失败: ${module.type}`, error);
       return this.createErrorModule(module, error);
     }
   }
 
   private async createActivityContentModule(content: ActivityContentData): Promise<FrameNode> {
-    const frame = NodeUtils.createFrame('活动内容模块', CONSTANTS.H5_WIDTH, 100);
-    frame.fills = [];
+    console.log('🎭 [活动内容模块] 开始创建:', {
+      主标题: content.mainTitle,
+      副标题: content.subTitle,
+      正文内容: content.text,
+      主标题背景: !!content.mainTitleBg,
+      副标题背景: !!content.subTitleBg,
+      插图: !!content.image
+    });
     
-    const builder = new ActivityContentBuilder(frame, content);
-    await builder.build();
+    // 创建整个活动内容模块容器：1080宽，背景透明
+    const frame = NodeUtils.createFrame('活动内容模块', CONSTANTS.H5_WIDTH, 1000);
+    frame.fills = []; // 背景填充为透明
     
-    return frame;
+    try {
+      // 实例化活动内容模块构建器
+      const builder = new ActivityContentBuilder(frame, content);
+      // 调用构建器的build方法来构建活动内容模块
+      await builder.build();
+      
+      console.log('✅ [活动内容模块] 创建完成，最终高度：', frame.height);
+      
+      // 返回构建完成的框架
+      return frame;
+    } catch (error) {
+      console.error('❌ [活动内容模块] 创建失败：', error);
+      // 创建一个错误信息显示框
+      const errorText = await NodeUtils.createText(`活动内容模块创建失败: ${error instanceof Error ? error.message : '未知错误'}`, 16);
+      errorText.x = 20;
+      errorText.y = 20;
+      errorText.fills = [ColorUtils.createSolidFill({ r: 1, g: 0, b: 0 })];
+      NodeUtils.safeAppendChild(frame, errorText, '活动内容模块错误文本添加');
+      frame.resize(1080, 100);
+      return frame;
+    }
   }
 
   private async createSignInModule(content: SignInContent): Promise<FrameNode> {
@@ -718,8 +764,8 @@ class ModuleFactory {
     return frame;
   }
 
-  private async createNineGridModule(content: ModuleContent): Promise<FrameNode> {
-    const builder = new NineGridModuleBuilder(content as NineGridContent);
+  private async createNineGridModule(content: NineGridContent): Promise<FrameNode> {
+    const builder = new NineGridModuleBuilder(content);
     return builder.build();
   }
 
@@ -889,7 +935,7 @@ class ActivityRulesModuleBuilder {
     
     // 设置文本样式（与活动详情模块的正文文本完全一致）
     contentText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })]; // 黑色文字
-    contentText.lineHeight = { value: 40, unit: 'PIXELS' }; // 设置行高40px（与活动详情模块一致）
+    contentText.lineHeight = { unit: 'AUTO' }; // 设置行高40px（与活动详情模块一致）
     contentText.resize(950, contentText.height); // 设置宽度为950px（与活动详情模块一致）
     contentText.textAlignHorizontal = "LEFT"; // 左对齐（与活动详情模块一致）
     
@@ -1037,7 +1083,7 @@ class FooterBuilder {
   }
 }
 
-// ==================== 九宫格模块构建器 ====================
+// ==================== 九宫格抽奖模块构建器 ====================
 
 export class NineGridModuleBuilder {
   private frame: FrameNode;
@@ -1048,93 +1094,170 @@ export class NineGridModuleBuilder {
 
   constructor(content: NineGridContent) {
     this.content = content;
-    this.frame = NodeUtils.createFrame('九宫格模块', CONSTANTS.MODULE_WIDTH, 100);
+    this.frame = NodeUtils.createFrame('九宫格抽奖', CONSTANTS.H5_WIDTH, 1000);
+    this.frame.fills = []; // 背景填充为透明
   }
 
   async build(): Promise<FrameNode> {
     try {
-      // 设置背景
-      await this.setupBackground();
-      
       // 添加标题
       await this.addTitle();
       
-      // 添加九宫格
+      // 添加九宫格主体
       await this.addNineGrid();
       
-      // 调整框架高度
+      // 调整整个模块的高度
       this.adjustFrameHeight();
       
       return this.frame;
     } catch (error) {
-      console.error('九宫格模块构建失败:', error);
+      console.error('九宫格模块构建过程中出错：', error);
       throw error;
     }
   }
 
-  private async setupBackground(): Promise<void> {
-    if (this.content.gridBgImage) {
-      await ImageNodeBuilder.setImageFill(this.frame, this.content.gridBgImage);
-    } else {
-      this.frame.fills = [ColorUtils.createSolidFill({ r: 0.98, g: 0.98, b: 1 })];
-    }
-  }
-
+  // 添加标题
   private async addTitle(): Promise<void> {
-    if (this.content.mainTitle) {
-      const titleHeight = 80;
-      const titleContainer = await createTitleContainer(
-        this.content.mainTitle,
-        this.content.titleBgImage,
-        CONSTANTS.MODULE_WIDTH - 40,
-        titleHeight,
-        20,
-        'Bold'
-      );
+    // 如果没有主标题，直接返回
+    if (!this.content.mainTitle) return;
+
+    // 创建标题容器：1080宽，高度120
+    const titleContainer = NodeUtils.createFrame("九宫格标题", CONSTANTS.H5_WIDTH, 120);
+    titleContainer.x = 0;
+    titleContainer.y = this.currentY + 90;
+    titleContainer.fills = []; // 透明背景
+
+    // 添加标题背景图片节点（如果有）
+    if (this.content.titleBgImage) {
+      try {
+        const titleBgImage = await ImageNodeBuilder.insertImage(
+          this.content.titleBgImage,
+          "标题背景图片",
+          CONSTANTS.H5_WIDTH,
+          120
+        );
       
-      titleContainer.x = 20;
-      titleContainer.y = this.currentY + 20;
-      this.frame.appendChild(titleContainer);
-      this.currentY += titleHeight + 40;
-    }
-  }
-
-  private async addNineGrid(): Promise<void> {
-    const gridSize = this.CELL_SIZE * 3 + this.CELL_SPACING * 2;
-    const startX = (CONSTANTS.MODULE_WIDTH - gridSize) / 2;
-    const startY = this.currentY + 20;
-
-    // 创建3x3网格
-    for (let row = 0; row < 3; row++) {
-      for (let col = 0; col < 3; col++) {
-        const x = startX + col * (this.CELL_SIZE + this.CELL_SPACING);
-        const y = startY + row * (this.CELL_SIZE + this.CELL_SPACING);
-        
-        if (row === 1 && col === 1) {
-          // 中心位置：抽奖按钮
-          const drawButton = await this.createDrawButton(x, y);
-          this.frame.appendChild(drawButton);
-        } else {
-          // 外围位置：奖品格子
-          const index = this.getPrizeIndex(row, col);
-          const prizeCell = await this.createPrizeCell(x, y, index);
-          this.frame.appendChild(prizeCell);
+        if (titleBgImage) {
+          titleBgImage.x = 0;
+          titleBgImage.y = 0;
+          NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
         }
+      } catch (error) {
+        console.error('标题背景图片创建失败:', error);
       }
     }
 
-    this.currentY = startY + this.CELL_SIZE * 3 + this.CELL_SPACING * 2 + 20;
+    // 添加标题文本节点
+    const titleText = await NodeUtils.createText(this.content.mainTitle, 48, 'Bold');
+    titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+    titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
+    titleText.textAlignHorizontal = "CENTER";
+    titleText.x = 0;
+    titleText.y = (120 - titleText.height) / 2; // 垂直居中
+
+    NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
+    NodeUtils.safeAppendChild(this.frame, titleContainer, '标题容器添加');
+    this.currentY += 120;
+  }
+
+  // 添加九宫格主体
+  private async addNineGrid(): Promise<void> {
+    // 计算九宫格主体容器高度：3行格子 + 间距 + 上下边距
+    const gridHeight = 3 * this.CELL_SIZE + 4 * this.CELL_SPACING + 180; // 上下各90px边距
+    
+    // 创建九宫格主体容器：1080宽，高度按创建成功后的高度来
+    const gridContainer = NodeUtils.createFrame("九宫格主体", CONSTANTS.H5_WIDTH, gridHeight);
+    gridContainer.x = 0;
+    gridContainer.y = this.currentY + 90;
+    gridContainer.fills = []; // 填充为透明
+
+    // 添加九宫格背景图片节点（930x930px，上下左右居中对齐）
+    if (this.content.gridBgImage) {
+      try {
+        const backgroundNode = await ImageNodeBuilder.insertImage(
+          this.content.gridBgImage,
+          "九宫格背景",
+          930,
+          930
+        );
+        
+        if (backgroundNode) {
+          backgroundNode.x = (CONSTANTS.H5_WIDTH - 930) / 2; // 水平居中
+          backgroundNode.y = (gridHeight - 930) / 2; // 垂直居中
+          NodeUtils.safeAppendChild(gridContainer, backgroundNode, '九宫格背景图片添加');
+        }
+      } catch (error) {
+        console.error('九宫格背景图片创建失败:', error);
+      }
+    }
+
+    // 创建九个格子容器
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 3; col++) {
+        const index = row * 3 + col;
+        const cell = await this.createGridCell(row, col, index);
+        NodeUtils.safeAppendChild(gridContainer, cell, `九宫格单元格${index + 1}添加`);
+      }
+    }
+
+    NodeUtils.safeAppendChild(this.frame, gridContainer, '九宫格容器添加');
+    this.currentY += gridHeight;
+  }
+
+  private async createGridCell(row: number, col: number, index: number): Promise<FrameNode> {
+    // 计算九宫格总宽度：3个格子 + 2个间距
+    const gridTotalWidth = 3 * this.CELL_SIZE + 2 * this.CELL_SPACING;
+    
+    // 计算格子位置：在H5_WIDTH容器中居中，加上90px上边距
+    const startX = (CONSTANTS.H5_WIDTH - gridTotalWidth) / 2; // 在1080px容器中居中
+    const x = startX + col * (this.CELL_SIZE + this.CELL_SPACING);
+    const y = 90 + this.CELL_SPACING + row * (this.CELL_SIZE + this.CELL_SPACING); // 添加90px上边距
+
+    // 中间位置创建抽奖按钮
+    if (index === 4) {
+      return this.createDrawButton(x, y);
+    }
+
+    // 其他位置创建奖品格子
+    return this.createPrizeCell(x, y, index);
   }
 
   private async createDrawButton(x: number, y: number): Promise<FrameNode> {
-    const buttonFrame = NodeUtils.createFrame('抽奖按钮', this.CELL_SIZE, this.CELL_SIZE);
+    // 创建抽奖按钮容器（270x270px）
+    const buttonFrame = NodeUtils.createFrame("抽奖按钮容器", this.CELL_SIZE, this.CELL_SIZE);
     buttonFrame.x = x;
     buttonFrame.y = y;
+    buttonFrame.fills = []; // 容器填充为透明
 
-    // 设置按钮背景
-    if (this.content.drawButtonImage) {
-      await ImageNodeBuilder.setImageFill(buttonFrame, this.content.drawButtonImage);
-    } else {
+    try {
+      // 直接插入抽奖按钮图片节点
+      if (this.content.drawButtonImage) {
+        try {
+          const buttonImage = await ImageNodeBuilder.insertImage(
+            this.content.drawButtonImage,
+            "抽奖按钮图片",
+            this.CELL_SIZE,
+            this.CELL_SIZE
+          );
+          
+          if (buttonImage) {
+            buttonImage.x = 0;
+            buttonImage.y = 0;
+            NodeUtils.safeAppendChild(buttonFrame, buttonImage, '抽奖按钮图片添加');
+          } else {
+            console.warn('抽奖按钮图片插入失败，使用默认样式');
+            await this.addDefaultButtonStyle(buttonFrame);
+          }
+        } catch (error) {
+          console.error('抽奖按钮图片创建失败：', error);
+          await this.addDefaultButtonStyle(buttonFrame);
+        }
+      } else {
+        // 默认按钮样式
+        await this.addDefaultButtonStyle(buttonFrame);
+      }
+    } catch (error) {
+      console.error('创建抽奖按钮失败：', error);
       await this.addDefaultButtonStyle(buttonFrame);
     }
 
@@ -1143,86 +1266,114 @@ export class NineGridModuleBuilder {
 
   private async addDefaultButtonStyle(buttonFrame: FrameNode): Promise<void> {
     // 默认按钮样式
-    buttonFrame.fills = [ColorUtils.createSolidFill({ r: 1, g: 0.6, b: 0 })];
-    buttonFrame.cornerRadius = 20;
-    
-    // 添加"抽奖"文字
-    const buttonText = await NodeUtils.createText('抽奖', 24, 'Bold');
+    buttonFrame.fills = [ColorUtils.createSolidFill({ r: 1, g: 0.3, b: 0.3 })];
+    buttonFrame.cornerRadius = 10;
+
+    const buttonText = await NodeUtils.createText("抽奖", 24, 'Bold');
     buttonText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-    buttonText.textAlignHorizontal = 'CENTER';
-    buttonText.textAlignVertical = 'CENTER';
-    buttonText.x = (this.CELL_SIZE - buttonText.width) / 2;
+    buttonText.resize(this.CELL_SIZE, buttonText.height);
+    buttonText.textAlignHorizontal = "CENTER";
     buttonText.y = (this.CELL_SIZE - buttonText.height) / 2;
-    buttonFrame.appendChild(buttonText);
+    NodeUtils.safeAppendChild(buttonFrame, buttonText, '抽奖按钮默认文本添加');
   }
 
   private async createPrizeCell(x: number, y: number, index: number): Promise<FrameNode> {
-    const cellFrame = NodeUtils.createFrame(`奖品${index + 1}`, this.CELL_SIZE, this.CELL_SIZE);
-    cellFrame.x = x;
-    cellFrame.y = y;
+    // 获取奖品索引（跳过中间的抽奖按钮）
+    const prizeIndex = this.getPrizeIndex(Math.floor(index / 3), index % 3);
+    const prize = this.content.prizes?.[prizeIndex];
+    const prizeNumber = (prizeIndex + 1).toString();
+    const paddedNumber = prizeNumber.length < 2 ? '0' + prizeNumber : prizeNumber;
+    const prizeName = prize?.name || `奖品${paddedNumber}`;
+        
+    // 创建奖品容器（270x270px）
+    const prizeBox = NodeUtils.createFrame(prizeName, this.CELL_SIZE, this.CELL_SIZE);
+    prizeBox.x = x;
+    prizeBox.y = y;
+    prizeBox.fills = []; // 容器填充为透明
 
-    // 设置奖品背景
-    if (this.content.prizeBgImage) {
-      await ImageNodeBuilder.setImageFill(cellFrame, this.content.prizeBgImage);
-    } else {
-      cellFrame.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
-      cellFrame.cornerRadius = 15;
-    }
-
-    // 添加奖品内容
-    const prizes = this.content.prizes || [];
-    const prize = prizes[index];
-    if (prize) {
-      let contentY = 20;
-
-      // 奖品图片
-      if (prize.image) {
-        const prizeImage = await ImageNodeBuilder.insertImage(
-          prize.image, 
-          `奖品图片${index + 1}`, 
-          this.CELL_SIZE - 40, 
-          this.CELL_SIZE - 80
-        );
-        if (prizeImage) {
-          prizeImage.x = (this.CELL_SIZE - prizeImage.width) / 2;
-          prizeImage.y = contentY;
-          cellFrame.appendChild(prizeImage);
-          contentY += prizeImage.height + 10;
+    try {
+      // 直接插入奖品背景图片节点（270x270px）
+      if (this.content.prizeBgImage) {
+        try {
+          const prizeBgImage = await ImageNodeBuilder.insertImage(
+            this.content.prizeBgImage,
+            "奖品背景图片",
+            this.CELL_SIZE,
+            this.CELL_SIZE
+          );
+          
+          if (prizeBgImage) {
+            prizeBgImage.x = 0;
+            prizeBgImage.y = 0;
+            NodeUtils.safeAppendChild(prizeBox, prizeBgImage, '奖品背景图片添加');
+          }
+        } catch (error) {
+          console.error('奖品背景图片创建失败:', error);
         }
       }
 
-      // 奖品名称
-      if (prize.name) {
-        const prizeText = await NodeUtils.createText(prize.name, 14, 'Medium');
-        prizeText.fills = [ColorUtils.createSolidFill({ r: 0.2, g: 0.2, b: 0.2 })];
-        prizeText.textAlignHorizontal = 'CENTER';
-        prizeText.x = (this.CELL_SIZE - prizeText.width) / 2;
-        prizeText.y = contentY;
-        cellFrame.appendChild(prizeText);
+      // 插入奖品图图片节点（180x180px，坐标为x45px，y11px）
+      if (prize?.image) {
+        try {
+          const prizeImage = await ImageNodeBuilder.insertImage(
+            prize.image,
+            "奖品图片",
+            180,
+            180
+          );
+          
+          if (prizeImage) {
+            prizeImage.x = 45;
+            prizeImage.y = 11;
+            NodeUtils.safeAppendChild(prizeBox, prizeImage, '奖品图片添加');
+          }
+        } catch (error) {
+          console.error('奖品图片创建失败:', error);
+          // 如果奖品图片创建失败，添加占位符
+          const placeholder = NodeUtils.createFrame("占位符", 180, 180);
+          placeholder.x = 45;
+          placeholder.y = 11;
+          placeholder.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 })];
+          placeholder.cornerRadius = 10;
+          NodeUtils.safeAppendChild(prizeBox, placeholder, '奖品占位符添加');
+        }
+      } else {
+        // 如果没有奖品图片，添加占位符
+        const placeholder = NodeUtils.createFrame("占位符", 180, 180);
+        placeholder.x = 45;
+        placeholder.y = 11;
+        placeholder.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 })];
+        placeholder.cornerRadius = 10;
+        NodeUtils.safeAppendChild(prizeBox, placeholder, '奖品默认占位符添加');
       }
+
+      // 插入文本节点（大小26，Medium，居中对齐，距离容器顶部190px）
+      const displayName = prize?.name || prizeName;
+      if (displayName) {
+        const prizeText = await NodeUtils.createText(displayName, 26, 'Medium');
+        prizeText.resize(this.CELL_SIZE, prizeText.height);
+        prizeText.textAlignHorizontal = "CENTER";
+        prizeText.x = 0;
+        prizeText.y = 190;
+        prizeText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })]; // 设置黑色文字
+        NodeUtils.safeAppendChild(prizeBox, prizeText, '奖品名称文本添加');
+      }
+    } catch (error) {
+      console.error(`创建奖品格子失败 ${prizeIndex}:`, error);
     }
 
-    return cellFrame;
+    return prizeBox;
   }
 
+  // 获取奖品在九宫格中的索引（跳过中间的抽奖按钮）
   private getPrizeIndex(row: number, col: number): number {
-    // 九宫格位置映射：0-7对应外围8个位置
-    const positions = [
-      { row: 0, col: 0 }, // 左上
-      { row: 0, col: 1 }, // 上中
-      { row: 0, col: 2 }, // 右上
-      { row: 1, col: 2 }, // 右中
-      { row: 2, col: 2 }, // 右下
-      { row: 2, col: 1 }, // 下中
-      { row: 2, col: 0 }, // 左下
-      { row: 1, col: 0 }  // 左中
-    ];
-    
-    return positions.findIndex(pos => pos.row === row && pos.col === col);
+    const cellIndex = row * 3 + col;
+    if (cellIndex < 4) return cellIndex;
+    return cellIndex - 1; // 跳过中间的抽奖按钮位置
   }
 
   private adjustFrameHeight(): void {
-    this.frame.resize(CONSTANTS.MODULE_WIDTH, this.currentY + 20);
+    this.frame.resize(CONSTANTS.H5_WIDTH, this.currentY + 90);
   }
 }
 
@@ -1238,6 +1389,8 @@ export class ActivityContentBuilder {
   }
 
   async build(): Promise<void> {
+    console.log('开始构建活动内容模块（非页面底部规则模块）');
+    
     try {
       // 设置自动布局
       this.setupAutoLayout();
@@ -1254,67 +1407,135 @@ export class ActivityContentBuilder {
       // 添加插图
       await this.addImage();
       
+      // 调整整个模块的高度
+      this.adjustFrameHeight();
+      
+      console.log('活动内容模块（非规则）构建完成');
     } catch (error) {
-      console.error('活动内容模块构建过程中出错：', error);
+      console.error('活动内容模块（非规则）构建过程中出错：', error);
       throw error;
     }
   }
 
+  // 设置自动布局
   private setupAutoLayout(): void {
-    NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 60, 90);
+    NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 60, 90); // 垂直布局，间距60px，上下边距90px
   }
 
+  // 添加大标题
   private async addMainTitle(): Promise<void> {
+    // 如果没有大标题背景，则不创建大标题容器
     if (!this.content.mainTitleBg || !this.content.mainTitle) return;
 
-    const titleContainer = await createTitleContainer(
-      this.content.mainTitle,
-      this.content.mainTitleBg,
-      CONSTANTS.H5_WIDTH,
-      120,
-      48,
-      'Bold'
-    );
+    console.log('添加大标题...');
+
+    // 创建大标题容器：1080宽，高度120
+    const titleContainer = NodeUtils.createFrame("活动内容大标题容器", 1080, 120);
+    titleContainer.fills = []; // 透明背景
+
+    // 添加大标题背景图片节点
+    try {
+      const titleBgImage = await ImageNodeBuilder.insertImage(
+        this.content.mainTitleBg,
+        "大标题背景图片",
+        1080,
+        120
+      );
     
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '活动内容大标题容器添加');
+      if (titleBgImage) {
+        titleBgImage.x = 0;
+        titleBgImage.y = 0;
+        NodeUtils.safeAppendChild(titleContainer, titleBgImage, '活动内容标题背景图片添加');
+      }
+    } catch (error) {
+      console.error('大标题背景图片创建失败:', error);
+    }
+
+    // 添加大标题文本节点
+    const titleText = await NodeUtils.createText(this.content.mainTitle, 48, 'Bold');
+    titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+    titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
+    titleText.textAlignHorizontal = "CENTER";
+    titleText.x = 0;
+    titleText.y = (120 - titleText.height) / 2; // 垂直居中
+
+    NodeUtils.safeAppendChild(titleContainer, titleText, '活动内容标题文本添加');
+    NodeUtils.safeAppendChild(this.frame, titleContainer, '活动内容标题容器添加');
   }
 
+  // 添加小标题
   private async addSubTitle(): Promise<void> {
+    // 如果没有小标题背景，则不创建小标题容器
     if (!this.content.subTitleBg || !this.content.subTitle) return;
 
-    const subTitleContainer = await createTitleContainer(
-      this.content.subTitle,
-      this.content.subTitleBg,
-      CONSTANTS.H5_WIDTH,
-      100,
-      44,
-      'Medium'
-    );
+    console.log('添加小标题...');
+
+    // 创建小标题容器：1080宽，高度100
+    const subTitleContainer = NodeUtils.createFrame("活动内容小标题容器", 1080, 100);
+    subTitleContainer.fills = []; // 透明背景
+
+    // 添加小标题背景图片节点
+    try {
+      const subTitleBgImage = await ImageNodeBuilder.insertImage(
+        this.content.subTitleBg,
+        "小标题背景图片",
+        1080,
+        100
+      );
     
-    NodeUtils.safeAppendChild(this.frame, subTitleContainer, '活动内容小标题容器添加');
+      if (subTitleBgImage) {
+        subTitleBgImage.x = 0;
+        subTitleBgImage.y = 0;
+        NodeUtils.safeAppendChild(subTitleContainer, subTitleBgImage, '小标题背景图片添加');
+      }
+    } catch (error) {
+      console.error('小标题背景图片创建失败:', error);
+    }
+
+    // 添加小标题文本节点 - 44大小，Medium
+    const subTitleText = await NodeUtils.createText(this.content.subTitle, 44, 'Medium');
+    subTitleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+    subTitleText.resize(CONSTANTS.H5_WIDTH, subTitleText.height);
+    subTitleText.textAlignHorizontal = "CENTER"; // 设置小标题文本水平居中对齐
+    subTitleText.x = 0;
+    subTitleText.y = (100 - subTitleText.height) / 2; // 垂直居中
+
+    NodeUtils.safeAppendChild(subTitleContainer, subTitleText, '小标题文本添加');
+    NodeUtils.safeAppendChild(this.frame, subTitleContainer, '小标题容器添加');
   }
 
+  // 添加正文
   private async addTextContent(): Promise<void> {
+    // 如果没有输入内容，则不创建
     if (!this.content.text) return;
 
+    console.log('添加正文...');
+
+    // 直接插入正文文本节点，宽度为950，高度按实际输入内容
     const textNode = await NodeUtils.createText(this.content.text, 40, 'Regular');
     textNode.resize(950, textNode.height);
-    textNode.textAlignHorizontal = "CENTER";
-    textNode.lineHeight = { unit: 'AUTO' };
-    textNode.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+    textNode.textAlignHorizontal = "CENTER"; // 设置文本水平居中对齐
+    textNode.lineHeight = { unit: 'AUTO' }; // 自动行高
+    textNode.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 设置文字颜色为白色
 
+    // 将文本节点安全地添加到框架中
     NodeUtils.safeAppendChild(this.frame, textNode, '活动内容正文添加');
   }
 
+  // 添加插图
   private async addImage(): Promise<void> {
+    // 如果没有上传图片，则不插入图片节点
     if (!this.content.image) return;
 
+    console.log('添加插图...');
+
     try {
+      // 直接插入插图图片节点至活动内容模块容器，宽度为950
       const imageNode = await ImageNodeBuilder.insertImage(
         this.content.image,
         "活动内容插图",
         950,
-        600
+        600 // 默认高度，会根据实际图片调整
       );
       
       if (imageNode) {
@@ -1323,6 +1544,12 @@ export class ActivityContentBuilder {
     } catch (error) {
       console.error('插图创建失败:', error);
     }
+  }
+
+  // 调整整个模块的高度
+  private adjustFrameHeight(): void {
+    // 自动布局会自动调整高度，无需手动设置
+    // 框架会根据内容自动调整到合适的高度
   }
 }
 

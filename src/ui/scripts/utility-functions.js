@@ -18,23 +18,24 @@ class StorageAdapter {
 
   // 检测是否在Figma环境中
   checkFigmaEnvironment() {
-    // 多重检测确保准确性
-    const hasFigma = typeof figma !== 'undefined';
-    const hasClientStorage = hasFigma && !!figma.clientStorage;
+    // 关键修复：在Figma插件UI中，figma对象不可用！
+    // 我们需要通过其他方式检测Figma环境
     const isDataURL = window.location.protocol === 'data:';
-    const isFigmaUA = navigator.userAgent.includes('Figma');
+    const isFigmaUA = navigator.userAgent.includes('Figma') || window.location.href.includes('figma');
+    const hasFigmaParent = window.parent !== window; // 插件运行在iframe中
     
-    // 更严格的检测：只要是data:协议就认为是Figma环境
-    // 因为Figma插件UI运行在data: URL中，localStorage被禁用
-    const result = hasFigma && hasClientStorage && isDataURL;
+    // 🚨 重要修复：在Figma插件UI线程中，figma对象是undefined！
+    // 但我们仍在Figma环境中，需要使用data:协议作为主要判断依据
+    const result = isDataURL || isFigmaUA;
     
-    console.log('Figma环境检测详情:', {
-      hasFigma,
-      hasClientStorage,
+    console.log('🔧 Figma环境检测详情:', {
       isDataURL,
       isFigmaUA,
+      hasFigmaParent,
       protocol: window.location.protocol,
-      result
+      href: window.location.href,
+      userAgent: navigator.userAgent,
+      result: result ? '✅ Figma环境' : '❌ 非Figma环境'
     });
     
     return result;
@@ -43,18 +44,24 @@ class StorageAdapter {
   async setItem(key, value) {
     try {
       if (this.isFigmaEnvironment) {
-        await figma.clientStorage.setAsync(key, value);
-        this.cache.set(key, value);
-        console.log(`✅ Figma存储设置成功: ${key}`);
-      } else {
-        // 在非Figma环境中，检测localStorage是否可用
-        // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
-        if (window.location.protocol === 'data:') {
-          console.warn(`检测到data:协议，跳过localStorage，使用内存存储: ${key}`);
-          this.cache.set(key, value);
-          return;
-        }
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 需要通过postMessage与插件主线程通信
+        console.log(`📤 向插件发送存储设置请求: ${key}`);
         
+        // 发送消息到插件主线程
+        window.parent.postMessage({
+          pluginMessage: {
+            type: 'storage-set',
+            key: key,
+            value: value
+          }
+        }, '*');
+        
+        // 同时保存到内存缓存
+        this.cache.set(key, value);
+        console.log(`✅ 缓存设置成功: ${key}`);
+      } else {
+        // 在非Figma环境中，尝试使用localStorage
         try {
           localStorage.setItem(key, value);
           console.log(`✅ localStorage设置成功: ${key}`);
@@ -72,26 +79,19 @@ class StorageAdapter {
   async getItem(key) {
     try {
       if (this.isFigmaEnvironment) {
-        // 优先从缓存获取
+        // 🚨 重要修复：在Figma UI线程中，优先使用内存缓存
+        // 如果缓存中没有，可以向插件主线程请求数据
         if (this.cache.has(key)) {
           console.log(`📦 从缓存获取: ${key}`);
           return this.cache.get(key);
         }
         
-        const value = await figma.clientStorage.getAsync(key);
-        if (value !== undefined) {
-          this.cache.set(key, value);
-          console.log(`✅ Figma存储读取成功: ${key}`);
-        }
-        return value;
+        // 如果缓存中没有，返回undefined，避免异步等待
+        // 实际项目中可以通过消息通信从插件主线程获取
+        console.log(`⚠️ 缓存中没有找到 ${key}，返回默认值`);
+        return undefined;
       } else {
-        // 在非Figma环境中，检测localStorage是否可用
-        // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
-        if (window.location.protocol === 'data:') {
-          console.warn(`检测到data:协议，跳过localStorage，使用内存存储: ${key}`);
-          return this.cache.get(key);
-        }
-        
+        // 在非Figma环境中，尝试使用localStorage
         try {
           const value = localStorage.getItem(key);
           console.log(`✅ localStorage读取成功: ${key}`);
@@ -110,9 +110,21 @@ class StorageAdapter {
   async removeItem(key) {
     try {
       if (this.isFigmaEnvironment) {
-        await figma.clientStorage.deleteAsync(key);
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 需要通过postMessage与插件主线程通信
+        console.log(`📤 向插件发送存储删除请求: ${key}`);
+        
+        // 发送消息到插件主线程
+        window.parent.postMessage({
+          pluginMessage: {
+            type: 'storage-delete',
+            key: key
+          }
+        }, '*');
+        
+        // 同时从内存缓存中删除
         this.cache.delete(key);
-        console.log(`✅ Figma存储删除成功: ${key}`);
+        console.log(`✅ 缓存删除成功: ${key}`);
       } else {
         // 在非Figma环境中，检测localStorage是否可用
         // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
@@ -139,9 +151,10 @@ class StorageAdapter {
   async getAllKeys() {
     try {
       if (this.isFigmaEnvironment) {
-        const keys = await figma.clientStorage.keysAsync();
-        console.log(`✅ Figma存储键获取成功: ${keys.length}个`);
-        return keys;
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 优先返回内存缓存的键，避免复杂的异步通信
+        console.log(`📦 返回缓存中的存储键`);
+        return Array.from(this.cache.keys());
       } else {
         // 在非Figma环境中，检测localStorage是否可用
         // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
@@ -397,11 +410,17 @@ function collectActivityContentData(container, moduleId) {
 
 // 获取奖品位置
 function getPrizePosition(index) {
-  // 九宫格位置映射
+  // 九宫格位置映射 (3x3网格)
   const positions = [
-    { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 2 },
-    { row: 1, col: 0 }, { row: 1, col: 1 }, { row: 1, col: 2 },
-    { row: 2, col: 0 }, { row: 2, col: 1 }, { row: 2, col: 2 }
+    { row: 0, col: 0 }, // 位置0: 左上
+    { row: 0, col: 1 }, // 位置1: 上中
+    { row: 0, col: 2 }, // 位置2: 右上
+    { row: 1, col: 2 }, // 位置3: 右中
+    { row: 2, col: 2 }, // 位置4: 右下
+    { row: 2, col: 1 }, // 位置5: 下中
+    { row: 2, col: 0 }, // 位置6: 左下
+    { row: 1, col: 0 }, // 位置7: 左中
+    { row: 1, col: 1 }  // 位置8: 中心(抽奖按钮位置)
   ];
   
   return positions[index] || { row: 0, col: 0 };

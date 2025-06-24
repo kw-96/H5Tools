@@ -14,6 +14,7 @@ import {
 import { 
   createH5Prototype 
 } from '../core/builders/h5-prototype-builder';
+import { generateChannelVersion } from '../core/builders/channel-generator';
 import { ConfigService, ThemeService } from '../core/services';
 
 // ==================== 插件消息处理器 ====================
@@ -43,6 +44,12 @@ class MessageHandler {
           break;
         case 'channel-generate':
           await this.handleGenerateChannelVersion(msg as ChannelGenerateMessage);
+          break;
+        case 'storage-set':
+          await this.handleStorageSet((msg as any).key, (msg as any).value);
+          break;
+        case 'storage-delete':
+          await this.handleStorageDelete((msg as any).key);
           break;
         default:
           console.warn('未知消息类型:', msg.type);
@@ -169,18 +176,42 @@ class MessageHandler {
 
   private async handleGenerateChannelVersion(msg: ChannelGenerateMessage): Promise<void> {
     try {
-      console.log('生成渠道版本:', msg.channel);
+      console.log('开始生成渠道版本:', msg.channel);
+      
+      // 调用渠道生成器
+      await generateChannelVersion(msg.channel);
+      
       figma.ui.postMessage({
         type: 'channel-version-generated',
-        message: `${msg.channel}渠道版本生成成功`
+        message: `${msg.channel.toUpperCase()}渠道版本生成成功`
       });
+      
+      console.log(`${msg.channel}渠道版本生成完成`);
     } catch (error) {
       console.error('生成渠道版本失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `生成渠道版本失败: ${error}`
+        message: `生成${msg.channel.toUpperCase()}渠道版本失败: ${error}`
       });
       throw error;
+    }
+  }
+
+  private async handleStorageSet(key: string, value: any): Promise<void> {
+    try {
+      await figma.clientStorage.setAsync(key, value);
+      console.log(`✅ Figma存储设置成功: ${key}`);
+    } catch (error) {
+      console.error(`Figma存储设置失败 ${key}:`, error);
+    }
+  }
+
+  private async handleStorageDelete(key: string): Promise<void> {
+    try {
+      await figma.clientStorage.deleteAsync(key);
+      console.log(`✅ Figma存储删除成功: ${key}`);
+    } catch (error) {
+      console.error(`Figma存储删除失败 ${key}:`, error);
     }
   }
 }
