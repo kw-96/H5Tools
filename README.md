@@ -198,6 +198,100 @@ H5Tools/
 - **知乎**: 适配知乎社区规范
 - **自定义**: 支持自定义渠道配置
 
+### 图标系统使用指南
+
+H5Tools使用集中式图标管理系统，所有SVG图标都通过`IconManager`类统一管理。
+
+#### 图标分类
+
+1. **标签页图标** (`TAB_ICONS`)
+   - `prototype`: 创建原型标签页图标
+   - `extension`: 延展渠道标签页图标
+   - `tools`: 工具集标签页图标
+   - `settings`: 设置标签页图标
+
+2. **模块控制图标** (`MODULE_CONTROL_ICONS`)
+   - `moveUp`: 上移模块图标
+   - `moveDown`: 下移模块图标
+   - `collapse`: 折叠/展开图标
+   - `delete`: 删除模块图标
+
+3. **其他工具图标** (`OTHER_ICONS`)
+   - `back`: 返回按钮图标
+   - `empty`: 空状态图标
+   - `chevron`: 箭头图标
+
+#### 使用方法
+
+1. **HTML中使用图标**
+   ```html
+   <!-- 使用data-icon属性引用图标 -->
+   <span data-icon="TAB_ICONS.prototype"></span>
+   <span data-icon="MODULE_CONTROL_ICONS.moveUp"></span>
+   <span data-icon="OTHER_ICONS.back"></span>
+   ```
+
+2. **JavaScript中使用图标**
+   ```javascript
+   // 获取图标SVG字符串
+   const iconSvg = window.iconManager.getIcon('TAB_ICONS.prototype');
+   
+   // 创建图标元素
+   const iconElement = window.iconManager.createIconElement('MODULE_CONTROL_ICONS.moveUp');
+   
+   // 替换现有元素的图标
+   window.iconManager.replaceIcon(element, 'OTHER_ICONS.back');
+   ```
+
+3. **动态修改图标**
+   ```javascript
+   // 更新图标颜色
+   window.iconManager.updateIconColor(element, '#FF0000');
+   
+   // 更新图标大小
+   window.iconManager.updateIconSize(element, 24);
+   ```
+
+#### 图标优化
+
+所有SVG图标在构建过程中都会经过SVGO优化，包括：
+
+- 移除多余的XML声明和注释
+- 合并和优化路径
+- 清理和简化属性
+- 移除无用的命名空间
+- 优化颜色值
+- 压缩路径数据
+
+优化后的图标可以显著减小文件体积，提升加载性能。
+
+#### 最佳实践
+
+1. **使用data-icon属性**
+   - 推荐使用`data-icon`属性引用图标
+   - 避免直接在HTML中内联SVG代码
+   - 保持HTML结构清晰简洁
+
+2. **颜色管理**
+   - 使用CSS变量控制图标颜色
+   - 适配深色/浅色主题
+   - 保持颜色一致性
+
+3. **大小控制**
+   - 使用CSS类统一管理图标大小
+   - 响应式适配不同设备
+   - 保持图标比例一致
+
+4. **性能优化**
+   - 利用构建时的SVGO优化
+   - 适当缓存常用图标
+   - 避免频繁DOM操作
+
+5. **可访问性**
+   - 添加适当的aria标签
+   - 提供替代文本
+   - 确保足够的颜色对比度
+
 ### 高级功能
 
 - **羽化遮罩**: 为图片添加专业的羽化边缘效果
