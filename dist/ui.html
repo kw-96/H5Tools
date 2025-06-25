@@ -1044,6 +1044,15 @@
 
   <script>
 
+// 🚨 关键修复：导出Figma API到全局对象 
+// 外部CDN脚本无法直接访问figma对象，需要在内联脚本中导出
+if (typeof figma !== 'undefined') {
+  window.figma = figma;
+  console.log('✅ Figma API已导出到全局对象');
+} else {
+  console.warn('⚠️ Figma API不可用，可能是开发环境');
+}
+
 // H5Tools 外部资源加载管理器
 // 构建时间: 2025-06-25T07:10:51.017Z
 
@@ -1185,25 +1194,49 @@ class ScriptLoadManager {
     
     console.log('✅ 外联脚本加载成功');
     
+    // 🚨 修复：监听自定义就绪事件
+    window.addEventListener('h5ToolsReady', (event) => {
+      console.log('🎯 收到H5Tools就绪事件:', event.detail);
+      console.log('✅ 插件通信器已就绪 (通过事件通知)');
+    });
+    
     // 延时检查插件通信器，给足够时间初始化
     this.checkPluginCommunicator();
   }
   
-  checkPluginCommunicator(attempt = 1, maxAttempts = 10) {
-    if (window.pluginComm) {
+  checkPluginCommunicator(attempt = 1, maxAttempts = 20) {
+    // 🚨 修复：更全面的插件通信器检测
+    const hasPluginComm = typeof window.pluginComm !== 'undefined' && window.pluginComm !== null;
+    
+    if (hasPluginComm) {
       console.log('✅ 插件通信器已就绪');
+      // 测试通信器是否能正常工作
+      try {
+        if (typeof window.pluginComm.postMessage === 'function') {
+          console.log('✅ 插件通信器功能验证成功');
+          // 发送初始化消息
+          window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
+        }
+      } catch (error) {
+        console.warn('⚠️ 插件通信器功能测试失败:', error);
+      }
       return;
     }
     
     if (attempt >= maxAttempts) {
       console.error('❌ 插件通信器加载失败 - 超过最大重试次数');
+      console.log('🔍 调试信息:', {
+        windowPluginComm: typeof window.pluginComm,
+        windowKeys: Object.keys(window).filter(k => k.includes('plugin')),
+        allGlobals: Object.keys(window).slice(0, 20)
+      });
       return;
     }
     
-    // 递增延时重试
+    // 递增延时重试：100ms, 200ms, 300ms...
     setTimeout(() => {
       this.checkPluginCommunicator(attempt + 1, maxAttempts);
-    }, attempt * 100); // 100ms, 200ms, 300ms...
+    }, attempt * 100);
   }
   
   onScriptsLoadFailed(reason) {
