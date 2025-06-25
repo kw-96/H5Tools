@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
   
-  <!-- 样式文件 - 模块化重构版本 -->
-  <link rel="stylesheet" href="styles/app-new.css">
+  <!-- 样式文件 - 外部CDN版本 -->
+  {{EXTERNAL_CSS_LINK}}
 </head>
 <body>
   <!-- 主容器 -->
@@ -1042,20 +1042,6 @@
     </div>
   </div>
 
-  <!-- 脚本文件 -->
-  <script src="scripts/data-manager.js"></script>
-  <script src="scripts/file-processor.js"></script>
-  <script src="scripts/image-slice-handler.js"></script>
-  <script src="scripts/plugin-communicator.js"></script>
-  <script src="scripts/notification-system.js"></script>
-  <script src="scripts/data-collector.js"></script>
-  <script src="scripts/ui-controller.js"></script>
-  <script src="scripts/module-manager.js"></script>
-  <script src="scripts/image-uploader.js"></script>
-  <script src="scripts/theme-manager.js"></script>
-  <script src="scripts/form-resetter.js"></script>
-  <script src="scripts/channel-manager.js"></script>
-  <script src="scripts/utility-functions.js"></script>
-  <script src="scripts/app.js"></script>
+  {{APP_SCRIPTS}}
 </body>
 </html> 

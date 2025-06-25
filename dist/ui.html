@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
   
-  <!-- 样式文件 - 模块化重构版本 -->
-  <link rel="stylesheet" href="styles/app-new.css">
+  <!-- 样式文件 - 外部CDN版本 -->
+  <link id="external-styles" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">
 </head>
 <body>
   <!-- 主容器 -->
@@ -1042,20 +1042,195 @@
     </div>
   </div>
 
-  <!-- 脚本文件 -->
-  <script src="scripts/data-manager.js"></script>
-  <script src="scripts/file-processor.js"></script>
-  <script src="scripts/image-slice-handler.js"></script>
-  <script src="scripts/plugin-communicator.js"></script>
-  <script src="scripts/notification-system.js"></script>
-  <script src="scripts/data-collector.js"></script>
-  <script src="scripts/ui-controller.js"></script>
-  <script src="scripts/module-manager.js"></script>
-  <script src="scripts/image-uploader.js"></script>
-  <script src="scripts/theme-manager.js"></script>
-  <script src="scripts/form-resetter.js"></script>
-  <script src="scripts/channel-manager.js"></script>
-  <script src="scripts/utility-functions.js"></script>
-  <script src="scripts/app.js"></script>
+  <script>
+
+// H5Tools 外部资源加载管理器
+// 构建时间: 2025-06-25T07:10:51.017Z
+
+/* === 样式加载管理器 === */
+class StyleLoadManager {
+  constructor() {
+    this.isStyleLoaded = false;
+    this.loadTimeout = 5000; // 5秒超时
+    this.init();
+  }
+  
+  init() {
+    this.checkStylesLoaded();
+    this.setupTimeout();
+  }
+  
+  checkStylesLoaded() {
+    const styleLink = document.getElementById('external-styles');
+    if (!styleLink) {
+      console.error('❌ 外部样式链接元素未找到');
+      this.onStylesLoadFailed('样式链接元素未找到');
+      return;
+    }
+    
+    // 检查样式是否已经加载
+    if (styleLink.sheet || this.hasValidStyleRules()) {
+      this.onStylesLoaded();
+      return;
+    }
+    
+    // 监听加载事件
+    styleLink.onload = () => this.onStylesLoaded();
+    styleLink.onerror = () => this.onStylesLoadFailed('样式加载失败');
+    
+    console.log('开始加载外部样式:', styleLink.href);
+  }
+  
+  hasValidStyleRules() {
+    try {
+      const styleSheets = document.styleSheets;
+      for (let i = 0; i < styleSheets.length; i++) {
+        const sheet = styleSheets[i];
+        if (sheet.href && sheet.href.includes('styles.min.css')) {
+          return sheet.cssRules && sheet.cssRules.length > 0;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  setupTimeout() {
+    setTimeout(() => {
+      if (!this.isStyleLoaded) {
+        this.onStylesLoadFailed('样式加载超时');
+      }
+    }, this.loadTimeout);
+  }
+  
+  onStylesLoaded() {
+    if (this.isStyleLoaded) return;
+    this.isStyleLoaded = true;
+    
+    console.log('✅ 样式加载成功');
+    
+    // 样式加载成功后，初始化脚本加载
+    new ScriptLoadManager();
+  }
+  
+  onStylesLoadFailed(reason) {
+    if (this.isStyleLoaded) return;
+    this.isStyleLoaded = true;
+    
+    console.error('❌ 样式加载失败: ' + reason);
+    this.showFallbackStyles();
+    
+    // 即使样式失败，也要尝试加载脚本
+    setTimeout(() => {
+      new ScriptLoadManager();
+    }, 1000);
+  }
+  
+  showFallbackStyles() {
+    // 添加基础备用样式
+    const fallbackStyle = document.createElement('style');
+    fallbackStyle.textContent = `
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; }
+      .container { max-width: 400px; margin: 0 auto; }
+      .tab-container { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 20px; }
+      .tab { padding: 10px 15px; cursor: pointer; border: none; background: none; }
+      .tab.active { border-bottom: 2px solid #007AFF; color: #007AFF; }
+      .form-section { margin-bottom: 20px; }
+      .form-group { margin-bottom: 15px; }
+      .create-btn { background: #007AFF; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; }
+    `;
+    document.head.appendChild(fallbackStyle);
+    console.log('✅ 备用样式已启用');
+  }
+}
+
+// 全局导出样式加载管理器
+window.StyleLoadManager = StyleLoadManager;
+
+/* === JavaScript加载管理器 === */
+class ScriptLoadManager {
+  constructor() {
+    this.isScriptLoaded = false;
+    this.loadTimeout = 8000; // 8秒超时
+    this.init();
+  }
+  
+  init() {
+    this.loadExternalScript();
+    this.setupTimeout();
+  }
+  
+  loadExternalScript() {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js';
+    script.onload = () => this.onScriptsLoaded();
+    script.onerror = () => this.onScriptsLoadFailed('脚本加载失败');
+    document.head.appendChild(script);
+    
+    console.log('开始加载外联脚本:', script.src);
+  }
+  
+  setupTimeout() {
+    setTimeout(() => {
+      if (!this.isScriptLoaded) {
+        this.onScriptsLoadFailed('脚本加载超时');
+      }
+    }, this.loadTimeout);
+  }
+  
+  onScriptsLoaded() {
+    if (this.isScriptLoaded) return;
+    this.isScriptLoaded = true;
+    
+    console.log('✅ 外联脚本加载成功');
+    
+    // 延时检查插件通信器，给足够时间初始化
+    this.checkPluginCommunicator();
+  }
+  
+  checkPluginCommunicator(attempt = 1, maxAttempts = 10) {
+    if (window.pluginComm) {
+      console.log('✅ 插件通信器已就绪');
+      return;
+    }
+    
+    if (attempt >= maxAttempts) {
+      console.error('❌ 插件通信器加载失败 - 超过最大重试次数');
+      return;
+    }
+    
+    // 递增延时重试
+    setTimeout(() => {
+      this.checkPluginCommunicator(attempt + 1, maxAttempts);
+    }, attempt * 100); // 100ms, 200ms, 300ms...
+  }
+  
+  onScriptsLoadFailed(reason) {
+    if (this.isScriptLoaded) return;
+    this.isScriptLoaded = true;
+    
+    console.error('❌ 外联脚本加载失败: ' + reason);
+    this.updateLoadingMessage('脚本加载失败，插件功能不可用');
+    
+    // 显示错误状态
+    setTimeout(() => {
+      this.updateLoadingMessage('请检查网络连接或刷新页面重试');
+    }, 2000);
+  }
+  
+  updateLoadingMessage(message) {
+    const loadingContent = document.querySelector('.loading-content div:last-child');
+    if (loadingContent) {
+      loadingContent.textContent = message;
+    }
+  }
+}
+
+// 页面加载完成后初始化样式加载管理器
+document.addEventListener('DOMContentLoaded', () => {
+  new StyleLoadManager();
+});
+</script>
 </body>
 </html> 

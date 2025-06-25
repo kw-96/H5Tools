@@ -112,8 +112,113 @@ function buildHTML() {
     const jsOutputPath = 'dist/scripts.min.js';
     fs.writeFileSync(jsOutputPath, jsContent);
     
-    // 修复的ScriptLoadManager代码
+    // 修复的StyleLoadManager和ScriptLoadManager代码
     const scriptLoadManagerCode = `
+// H5Tools 外部资源加载管理器
+// 构建时间: ${new Date().toISOString()}
+
+/* === 样式加载管理器 === */
+class StyleLoadManager {
+  constructor() {
+    this.isStyleLoaded = false;
+    this.loadTimeout = 5000; // 5秒超时
+    this.init();
+  }
+  
+  init() {
+    this.checkStylesLoaded();
+    this.setupTimeout();
+  }
+  
+  checkStylesLoaded() {
+    const styleLink = document.getElementById('external-styles');
+    if (!styleLink) {
+      console.error('❌ 外部样式链接元素未找到');
+      this.onStylesLoadFailed('样式链接元素未找到');
+      return;
+    }
+    
+    // 检查样式是否已经加载
+    if (styleLink.sheet || this.hasValidStyleRules()) {
+      this.onStylesLoaded();
+      return;
+    }
+    
+    // 监听加载事件
+    styleLink.onload = () => this.onStylesLoaded();
+    styleLink.onerror = () => this.onStylesLoadFailed('样式加载失败');
+    
+    console.log('开始加载外部样式:', styleLink.href);
+  }
+  
+  hasValidStyleRules() {
+    try {
+      const styleSheets = document.styleSheets;
+      for (let i = 0; i < styleSheets.length; i++) {
+        const sheet = styleSheets[i];
+        if (sheet.href && sheet.href.includes('styles.min.css')) {
+          return sheet.cssRules && sheet.cssRules.length > 0;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+  
+  setupTimeout() {
+    setTimeout(() => {
+      if (!this.isStyleLoaded) {
+        this.onStylesLoadFailed('样式加载超时');
+      }
+    }, this.loadTimeout);
+  }
+  
+  onStylesLoaded() {
+    if (this.isStyleLoaded) return;
+    this.isStyleLoaded = true;
+    
+    console.log('✅ 样式加载成功');
+    
+    // 样式加载成功后，初始化脚本加载
+    new ScriptLoadManager();
+  }
+  
+  onStylesLoadFailed(reason) {
+    if (this.isStyleLoaded) return;
+    this.isStyleLoaded = true;
+    
+    console.error('❌ 样式加载失败: ' + reason);
+    this.showFallbackStyles();
+    
+    // 即使样式失败，也要尝试加载脚本
+    setTimeout(() => {
+      new ScriptLoadManager();
+    }, 1000);
+  }
+  
+  showFallbackStyles() {
+    // 添加基础备用样式
+    const fallbackStyle = document.createElement('style');
+    fallbackStyle.textContent = \`
+      body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; }
+      .container { max-width: 400px; margin: 0 auto; }
+      .tab-container { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 20px; }
+      .tab { padding: 10px 15px; cursor: pointer; border: none; background: none; }
+      .tab.active { border-bottom: 2px solid #007AFF; color: #007AFF; }
+      .form-section { margin-bottom: 20px; }
+      .form-group { margin-bottom: 15px; }
+      .create-btn { background: #007AFF; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; }
+    \`;
+    document.head.appendChild(fallbackStyle);
+    console.log('✅ 备用样式已启用');
+  }
+}
+
+// 全局导出样式加载管理器
+window.StyleLoadManager = StyleLoadManager;
+
+/* === JavaScript加载管理器 === */
 class ScriptLoadManager {
   constructor() {
     this.isScriptLoaded = false;
@@ -192,17 +297,9 @@ class ScriptLoadManager {
   }
 }
 
-// 等待样式加载完成后初始化脚本加载
+// 页面加载完成后初始化样式加载管理器
 document.addEventListener('DOMContentLoaded', () => {
-  const checkStylesLoaded = () => {
-    if (window.StyleLoadManager && window.StyleLoadManager.isStyleLoaded) {
-      console.log('样式已加载，开始加载脚本...');
-      new ScriptLoadManager();
-    } else {
-      setTimeout(checkStylesLoaded, 100);
-    }
-  };
-  checkStylesLoaded();
+  new StyleLoadManager();
 });`;
 
     // 替换HTML中的模板内容
@@ -219,10 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const appContent = extractAppContent(htmlContent);
     
+    // 直接替换CSS和JS占位符
     htmlContent = htmlContent.replace('{{EXTERNAL_CSS_LINK}}', 
       '<link id="external-styles" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">');
-    
-    htmlContent = htmlContent.replace('{{APP_CONTENT}}', appContent);
     
     htmlContent = htmlContent.replace('{{APP_SCRIPTS}}', 
       `<script>\n${scriptLoadManagerCode}\n</script>`);
