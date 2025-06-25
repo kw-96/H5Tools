@@ -22,11 +22,10 @@ function generateCDNUrl(filePath) {
  * @returns {string} 合并后的CSS内容
  */
 function combineCSS() {
-  // 根据您当前的CSS文件结构配置
+  // 正确的CSS文件顺序，排除包含@import的app-new.css
   const cssFiles = [
     'src/ui/styles/base.css',
     'src/ui/styles/layout.css',
-    'src/ui/styles/app-new.css',  // 您当前使用的主CSS文件
     'src/ui/styles/components/notification.css',
     'src/ui/styles/components/loading.css',
     'src/ui/styles/components/tabs.css',
@@ -45,21 +44,33 @@ function combineCSS() {
   
   cssFiles.forEach(filePath => {
     if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf8');
-      combinedCSS += `/* === ${path.basename(filePath)} === */\n`;
+      let content = fs.readFileSync(filePath, 'utf8');
+      
+      // 移除@import语句，因为我们要直接合并文件内容
+      content = content.replace(/@import\s+[^;]+;/g, '');
+      
+      // 跳过空文件或只包含@import的文件
+      const cleanContent = content.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+      if (cleanContent.length === 0) {
+        console.warn(`⚠️  跳过空CSS文件: ${filePath}`);
+        return;
+      }
+      
+      combinedCSS += `\n/* === ${path.basename(filePath)} === */\n`;
       combinedCSS += content;
-      combinedCSS += `\n/* === End ${path.basename(filePath)} === */\n\n`;
+      combinedCSS += `\n/* === End ${path.basename(filePath)} === */\n`;
     } else {
       console.warn(`⚠️  CSS文件不存在: ${filePath}`);
     }
   });
   
-  // 简单的CSS优化（保留可读性）
+  // 轻量级CSS优化（保留换行和基本格式）
   combinedCSS = combinedCSS
-    .replace(/\/\*\s*[\s\S]*?\*\//g, '') // 移除注释
-    .replace(/\n\s*\n/g, '\n') // 移除多余空行
-    .replace(/\s+/g, ' ') // 压缩空白
-    .replace(/;\s*}/g, '}') // 移除最后的分号
+    .replace(/\/\*\s*===.*?===\s*\*\//g, '') // 移除分隔注释
+    .replace(/\n\s*\n\s*\n/g, '\n\n') // 移除多余空行
+    .replace(/\s*{\s*/g, ' {\n  ') // 格式化大括号
+    .replace(/;\s*}/g, ';\n}') // 格式化结束大括号
+    .replace(/}\s*/g, '}\n\n') // 在规则间添加空行
     .trim();
   
   console.log(`✅ CSS合并完成: ${(combinedCSS.length / 1024).toFixed(1)}KB`);
