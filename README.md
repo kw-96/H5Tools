@@ -65,7 +65,7 @@ H5Tools/
 │   ├── core/                    # 核心库构建产物
 │   ├── plugin/                  # 插件构建产物
 │   ├── styles.min.css           # 🌐 CDN CSS文件 (30.7KB)
-│   └── ui-external.html         # 外部CSS版本HTML (169.1KB)
+│   └── ui.html                  # 外部CSS版本HTML (169.1KB)
 ├── scripts/
 │   └── build-external-css.js    # 外部CSS构建脚本
 ├── manifest.json                # Figma插件配置
@@ -148,7 +148,7 @@ H5Tools/
 
    ```bash
    # 推送构建产物到GitHub，让jsDelivr CDN可以访问
-   git add dist/styles.min.css dist/ui-external.html
+   git add dist/styles.min.css dist/ui.html
    git commit -m "更新外部CSS版本构建产物"
    git push origin main
    ```

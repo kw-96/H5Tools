@@ -3,7 +3,7 @@
   "id": "1506134894807361987",
   "api": "1.0.0",
   "main": "dist/plugin/code-standalone.js",
-  "ui": "dist/ui-external.html",
+  "ui": "dist/ui.html",
   "documentAccess": "dynamic-page",
   "editorType": [
     "figma"

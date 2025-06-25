@@ -488,8 +488,8 @@ ${jsContent}
 </script>`);
   
   // 8. 写入最终HTML
-  fs.writeFileSync('dist/ui-external.html', htmlTemplate);
-  console.log('✅ 外部版本HTML生成:', 'dist/ui-external.html');
+  fs.writeFileSync('dist/ui.html', htmlTemplate);
+  console.log('✅ HTML文件生成: dist/ui.html');
   
   // 8. 显示关键信息
   const cdnUrl = generateCDNUrl('dist/styles.min.css');
@@ -499,14 +499,13 @@ ${jsContent}
   console.log(`📁 HTML文件大小: ${(htmlTemplate.length / 1024).toFixed(1)}KB`);
   
   console.log('\n🚀 下一步操作:');
-  console.log('1. 提交dist/styles.min.css到GitHub:');
-  console.log('   git add dist/styles.min.css dist/ui-external.html');
-  console.log('   git commit -m "添加外部CSS版本构建产物"');
+  console.log('1. 提交构建产物到GitHub:');
+  console.log('   git add dist/styles.min.css dist/ui.html');
+  console.log('   git commit -m "更新外部CSS版本构建产物"');
   console.log('   git push origin main');
   console.log('2. 等待1-2分钟让jsDelivr缓存更新');
   console.log(`3. 测试CDN链接: ${cdnUrl}`);
-  console.log('4. 修改manifest.json中的ui路径为"dist/ui-external.html"');
-  console.log('5. 在Figma中重新加载插件测试');
+  console.log('4. 在Figma中重新加载插件测试');
   
   return {
     cdnUrl,

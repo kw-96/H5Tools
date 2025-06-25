@@ -55,7 +55,7 @@
     "id": "1506134894807361987",
     "name": "渠道美术-H5延展工具",
     "main": "dist/plugin/code.js",
-    "ui": "dist/ui-external.html"
+    "ui": "dist/ui.html"
   },
   "eslintConfig": {
     "extends": [
