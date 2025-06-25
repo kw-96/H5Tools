@@ -13,8 +13,8 @@
       "https://www.w3.org/2000/svg",
       "https://fonts.googleapis.com",
       "https://fonts.gstatic.com",
-      "cdn.jsdelivr.net",
-      "raw.githubusercontent.com"
+      "https://cdn.jsdelivr.net",
+      "https://raw.githubusercontent.com"
     ]
   }
 } 
