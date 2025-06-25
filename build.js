@@ -119,6 +119,7 @@ function combineCSS() {
 // 合并外联JavaScript文件
 function combineExternalJavaScript() {
   const jsFiles = [
+    'src/ui/scripts/plugin-communicator.js', // 🔧 重要：插件通信器必须包含
     'src/ui/scripts/data-manager.js',
     'src/ui/scripts/file-processor.js',
     'src/ui/scripts/image-slice-handler.js',
@@ -153,77 +154,11 @@ function combineExternalJavaScript() {
   return combinedJS;
 }
 
-// 生成核心内联JavaScript（仅Figma通信相关）
+// 生成核心内联JavaScript（仅加载管理相关）
 function generateCoreJavaScript() {
   const coreJS = `
-// H5Tools 核心JavaScript - 仅Figma通信相关
+// H5Tools 核心JavaScript - 仅加载管理
 // 构建时间: ${new Date().toISOString()}
-
-/* === 插件通信管理器 === */
-class PluginCommunicator {
-  constructor() {
-    this.messageHandlers = new Map();
-    this.isInitialized = false;
-    this.init();
-  }
-  
-  init() {
-    if (this.isInitialized) return;
-    
-    window.addEventListener('message', this.handleMessage.bind(this));
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.postMessage('ui-loaded', {});
-      });
-    } else {
-      this.postMessage('ui-loaded', {});
-    }
-    
-    this.isInitialized = true;
-    console.log('插件通信器已初始化');
-  }
-  
-  postMessage(type, data = {}) {
-    try {
-      const message = { pluginMessage: { type, ...data } };
-      parent.postMessage(message, '*');
-      console.log('发送消息到插件: ' + type, message);
-    } catch (error) {
-      console.error('发送消息失败: ' + type, error);
-    }
-  }
-  
-  handleMessage(event) {
-    try {
-      const message = event.data.pluginMessage;
-      if (!message) return;
-      
-      console.log('收到插件消息: ' + message.type, message);
-      
-      const handler = this.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message);
-      } else {
-        console.warn('未找到消息处理器: ' + message.type);
-      }
-    } catch (error) {
-      console.error('处理插件消息失败:', error);
-    }
-  }
-  
-  on(type, handler) {
-    this.messageHandlers.set(type, handler);
-    console.log('注册消息处理器: ' + type);
-  }
-  
-  testConnection() {
-    this.postMessage('ping', { timestamp: Date.now() });
-  }
-}
-
-// 创建核心通信器实例
-window.pluginComm = new PluginCommunicator();
 
 /* === JavaScript加载管理器 === */
 class ScriptLoadManager {
@@ -244,6 +179,8 @@ class ScriptLoadManager {
     script.onload = () => this.onScriptsLoaded();
     script.onerror = () => this.onScriptsLoadFailed('脚本加载失败');
     document.head.appendChild(script);
+    
+    console.log('开始加载外联脚本:', script.src);
   }
   
   setupTimeout() {
@@ -259,7 +196,13 @@ class ScriptLoadManager {
     this.isScriptLoaded = true;
     
     console.log('✅ 外联脚本加载成功');
-    // 脚本加载成功后，其他模块会自动初始化
+    
+    // 脚本加载成功后，检查关键对象是否存在
+    if (window.pluginComm) {
+      console.log('✅ 插件通信器已就绪');
+    } else {
+      console.error('❌ 插件通信器加载失败');
+    }
   }
   
   onScriptsLoadFailed(reason) {
@@ -267,7 +210,12 @@ class ScriptLoadManager {
     this.isScriptLoaded = true;
     
     console.error('❌ 外联脚本加载失败: ' + reason);
-    this.updateLoadingMessage('脚本加载失败，功能可能受限');
+    this.updateLoadingMessage('脚本加载失败，插件功能不可用');
+    
+    // 显示错误状态
+    setTimeout(() => {
+      this.updateLoadingMessage('请检查网络连接或刷新页面重试');
+    }, 2000);
   }
   
   updateLoadingMessage(message) {
@@ -278,11 +226,11 @@ class ScriptLoadManager {
   }
 }
 
-// 等待DOM和样式都加载完成后初始化脚本加载
+// 等待样式加载完成后初始化脚本加载
 document.addEventListener('DOMContentLoaded', () => {
-  // 等待样式加载完成后再加载脚本
   const checkStylesLoaded = () => {
     if (window.StyleLoadManager && window.StyleLoadManager.isStyleLoaded) {
+      console.log('样式已加载，开始加载脚本...');
       new ScriptLoadManager();
     } else {
       setTimeout(checkStylesLoaded, 100);
@@ -448,7 +396,7 @@ function buildHTML() {
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <div>正在初始化...</div>
+      <div>正在加载样式和脚本...</div>
     </div>
   </div>
 
