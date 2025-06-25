@@ -238,7 +238,112 @@ function generateExternalHTML() {
     {{APP_CONTENT}}
   </div>
 
-  <script>
+  <!-- 应用JavaScript将在这里插入 -->
+  {{APP_SCRIPTS}}
+</body>
+</html>`;
+}
+
+/**
+ * 从现有HTML文件提取应用内容
+ * @returns {string} 应用内容HTML
+ */
+function extractAppContent() {
+  const htmlPath = 'src/ui/index.html';
+  
+  if (!fs.existsSync(htmlPath)) {
+    console.warn('⚠️ 源HTML文件不存在，使用空内容');
+    return '';
+  }
+  
+  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+  
+  // 提取body内容（移除head中的样式引用和script标签）
+  const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  if (bodyMatch) {
+    let content = bodyMatch[1];
+    
+    // 移除所有script标签
+    content = content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    content = content.replace(/<script[^>]*\/>/gi, '');
+    
+    return content.trim();
+  }
+  
+  console.warn('⚠️ 无法提取应用内容，使用空内容');
+  return '';
+}
+
+/**
+ * 读取并合并JavaScript文件
+ * @returns {string} 合并后的JavaScript内容
+ */
+function combineJavaScript() {
+  // 根据您当前的JS文件结构配置
+  const jsFiles = [
+    'src/ui/scripts/data-manager.js',
+    'src/ui/scripts/file-processor.js',
+    'src/ui/scripts/image-slice-handler.js',
+    'src/ui/scripts/plugin-communicator.js',
+    'src/ui/scripts/notification-system.js',
+    'src/ui/scripts/data-collector.js',
+    'src/ui/scripts/ui-controller.js',
+    'src/ui/scripts/module-manager.js',
+    'src/ui/scripts/image-uploader.js',
+    'src/ui/scripts/theme-manager.js',
+    'src/ui/scripts/form-resetter.js',
+    'src/ui/scripts/channel-manager.js',
+    'src/ui/scripts/utility-functions.js',
+    'src/ui/scripts/app.js'
+  ];
+  
+  let combinedJS = '// H5Tools UI Scripts - 外部CSS版本\n';
+  combinedJS += '// jsDelivr CDN样式 + 内联JavaScript\n';
+  combinedJS += `// 构建时间: ${new Date().toISOString()}\n\n`;
+  
+  jsFiles.forEach(filePath => {
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, 'utf8');
+      combinedJS += `/* === ${path.basename(filePath)} === */\n`;
+      combinedJS += content;
+      combinedJS += `\n/* === End ${path.basename(filePath)} === */\n\n`;
+    } else {
+      console.warn(`⚠️  JS文件不存在: ${filePath}`);
+    }
+  });
+  
+  console.log(`✅ JavaScript合并完成: ${(combinedJS.length / 1024).toFixed(1)}KB`);
+  return combinedJS;
+}
+
+/**
+ * 构建外部CSS版本
+ */
+async function buildExternalVersion() {
+  console.log('🌐 构建外部CSS版本...');
+  console.log(`🎯 GitHub仓库: ${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}`);
+  
+  // 1. 确保dist目录存在
+  if (!fs.existsSync('dist')) {
+    fs.mkdirSync('dist', { recursive: true });
+  }
+  
+  // 2. 合并CSS文件
+  const combinedCSS = combineCSS();
+  fs.writeFileSync('dist/styles.min.css', combinedCSS);
+  console.log('✅ CSS合并完成:', 'dist/styles.min.css');
+  
+  // 3. 生成外部HTML模板
+  let htmlTemplate = generateExternalHTML();
+  
+  // 4. 提取应用内容
+  const appContent = extractAppContent();
+  
+  // 5. 合并JavaScript
+  const jsContent = combineJavaScript();
+  
+  // 6. 样式加载管理器代码
+  const styleLoadManagerCode = `
     // 样式加载管理器
     class StyleLoadManager {
       constructor() {
@@ -363,112 +468,14 @@ function generateExternalHTML() {
         console.error('样式文件加载错误:', e);
       }
     });
-  </script>
-  
-  <!-- 应用JavaScript将在这里插入 -->
-  {{APP_SCRIPTS}}
-</body>
-</html>`;
-}
+  `;
 
-/**
- * 从现有HTML文件提取应用内容
- * @returns {string} 应用内容HTML
- */
-function extractAppContent() {
-  const htmlPath = 'src/ui/index.html';
-  
-  if (!fs.existsSync(htmlPath)) {
-    console.warn('⚠️ 源HTML文件不存在，使用空内容');
-    return '';
-  }
-  
-  const htmlContent = fs.readFileSync(htmlPath, 'utf8');
-  
-  // 提取body内容（移除head中的样式引用）
-  const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  if (bodyMatch) {
-    return bodyMatch[1];
-  }
-  
-  console.warn('⚠️ 无法提取应用内容，使用空内容');
-  return '';
-}
-
-/**
- * 读取并合并JavaScript文件
- * @returns {string} 合并后的JavaScript内容
- */
-function combineJavaScript() {
-  // 根据您当前的JS文件结构配置
-  const jsFiles = [
-    'src/ui/scripts/data-manager.js',
-    'src/ui/scripts/file-processor.js',
-    'src/ui/scripts/image-slice-handler.js',
-    'src/ui/scripts/plugin-communicator.js',
-    'src/ui/scripts/notification-system.js',
-    'src/ui/scripts/data-collector.js',
-    'src/ui/scripts/ui-controller.js',
-    'src/ui/scripts/module-manager.js',
-    'src/ui/scripts/image-uploader.js',
-    'src/ui/scripts/theme-manager.js',
-    'src/ui/scripts/form-resetter.js',
-    'src/ui/scripts/channel-manager.js',
-    'src/ui/scripts/utility-functions.js',
-    'src/ui/scripts/app.js'
-  ];
-  
-  let combinedJS = '// H5Tools UI Scripts - 外部CSS版本\n';
-  combinedJS += '// jsDelivr CDN样式 + 内联JavaScript\n';
-  combinedJS += `// 构建时间: ${new Date().toISOString()}\n\n`;
-  
-  jsFiles.forEach(filePath => {
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf8');
-      combinedJS += `/* === ${path.basename(filePath)} === */\n`;
-      combinedJS += content;
-      combinedJS += `\n/* === End ${path.basename(filePath)} === */\n\n`;
-    } else {
-      console.warn(`⚠️  JS文件不存在: ${filePath}`);
-    }
-  });
-  
-  console.log(`✅ JavaScript合并完成: ${(combinedJS.length / 1024).toFixed(1)}KB`);
-  return combinedJS;
-}
-
-/**
- * 构建外部CSS版本
- */
-async function buildExternalVersion() {
-  console.log('🌐 构建外部CSS版本...');
-  console.log(`🎯 GitHub仓库: ${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}`);
-  
-  // 1. 确保dist目录存在
-  if (!fs.existsSync('dist')) {
-    fs.mkdirSync('dist', { recursive: true });
-  }
-  
-  // 2. 合并CSS文件
-  const combinedCSS = combineCSS();
-  fs.writeFileSync('dist/styles.min.css', combinedCSS);
-  console.log('✅ CSS合并完成:', 'dist/styles.min.css');
-  
-  // 3. 生成外部HTML模板
-  let htmlTemplate = generateExternalHTML();
-  
-  // 4. 提取应用内容
-  const appContent = extractAppContent();
-  
-  // 5. 合并JavaScript
-  const jsContent = combineJavaScript();
-  
-  // 6. 替换模板占位符
+  // 7. 替换模板占位符
   htmlTemplate = htmlTemplate
     .replace('{{APP_CONTENT}}', appContent)
-    .replace('{{APP_SCRIPTS}}', `<script>\n${jsContent}\n</script>`);
+    .replace('{{APP_SCRIPTS}}', `<script>\n${styleLoadManagerCode}\n</script>\n\n<script>\n${jsContent}\n</script>`);
   
-  // 7. 写入最终HTML
+      // 8. 写入最终HTML
   fs.writeFileSync('dist/ui-external.html', htmlTemplate);
   console.log('✅ 外部版本HTML生成:', 'dist/ui-external.html');
   
