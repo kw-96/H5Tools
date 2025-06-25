@@ -22,7 +22,7 @@ function generateCDNUrl(filePath) {
  * @returns {string} 合并后的CSS内容
  */
 function combineCSS() {
-  // 正确的CSS文件顺序，排除包含@import的app-new.css
+  // ✅ 完整的CSS文件顺序，与app-new.css中的@import顺序一致
   const cssFiles = [
     'src/ui/styles/base.css',
     'src/ui/styles/layout.css',
