@@ -88,7 +88,84 @@ class StorageAdapter {
 </script>
 ```
 
-#### 3. 异步存储函数模式
+#### 3. CDN资源加载规则（新增）
+```javascript
+// ❌ 错误：直接使用外部资源无备用方案
+<link rel="stylesheet" href="https://cdn.example.com/styles.css">
+
+// ✅ 正确：使用智能CDN加载器
+const CDN_CONFIG = {
+  css: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css',
+  js: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js',
+  timeout: 10000, // 10秒超时
+  retryDelay: 1000, // 重试间隔
+  maxRetries: 3 // 最大重试次数
+};
+
+// 实现超时保护和重试机制
+async function loadExternalResource(url, type) {
+  return new Promise((resolve, reject) => {
+    const element = type === 'css' 
+      ? document.createElement('link') 
+      : document.createElement('script');
+    
+    // 设置属性
+    if (type === 'css') {
+      element.rel = 'stylesheet';
+      element.href = url;
+    } else {
+      element.src = url;
+    }
+    
+    // 设置超时
+    const timeout = setTimeout(() => {
+      reject(new Error(`资源加载超时: ${url}`));
+    }, CDN_CONFIG.timeout);
+    
+    // 加载事件
+    element.onload = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    
+    element.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error(`资源加载失败: ${url}`));
+    };
+    
+    document.head.appendChild(element);
+  });
+}
+```
+
+#### 4. 备用样式系统（新增）
+```javascript
+// ✅ 正确：实现备用样式系统
+function createFallbackUI() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* 基础样式 */
+    body { font-family: sans-serif; margin: 0; padding: 20px; }
+    .container { max-width: 400px; margin: 0 auto; }
+    /* 其他关键样式... */
+  `;
+  document.head.appendChild(style);
+  console.log('✅ 应急样式已加载');
+}
+
+// ✅ 正确：在CDN加载失败时激活备用样式
+try {
+  await loadCSS().catch(err => {
+    console.warn(`⚠️ CSS加载失败: ${err.message}`);
+    createFallbackUI(); // CSS失败时立即启用应急样式
+  });
+} catch (error) {
+  console.error(`❌ 加载失败: ${error.message}`);
+  createFallbackUI();
+}
+```
+
+#### 5. 异步存储函数模式
 ```javascript
 // ❌ 错误：同步存储函数
 function saveTheme(theme) {
@@ -101,7 +178,7 @@ async function saveTheme(theme) {
 }
 ```
 
-#### 4. 环境检测模式
+#### 6. 环境检测模式
 ```javascript
 // 检测是否在Figma环境中
 const isFigmaEnvironment = typeof figma !== 'undefined' && !!figma.clientStorage;
@@ -115,7 +192,7 @@ if (isFigmaEnvironment) {
 }
 ```
 
-#### 5. 🚨 变量声明管理（关键）
+#### 7. 🚨 变量声明管理（关键）
 ```javascript
 // ❌ 错误：多个文件中重复声明同一变量
 // file1.js
@@ -135,6 +212,41 @@ window.storageAdapter = storageAdapter;
 async function saveChannelSetting(channel, key, value) {
   await window.storageAdapter.setItem(storageKey, value);
 }
+```
+
+#### 8. 渐进增强规则（新增）
+```javascript
+// ✅ 正确：实现基础功能的渐进增强
+// 1. 首先确保基础标签页切换功能可用
+function initBasicTabSwitching() {
+  const tabs = document.querySelectorAll('.tab');
+  const contents = document.querySelectorAll('.tab-content');
+  
+  if (tabs.length === 0) {
+    setTimeout(initBasicTabSwitching, 100);
+    return;
+  }
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      const tabId = tab.getAttribute('data-tab');
+      const content = document.getElementById(`${tabId}-content`);
+      if (content) {
+        content.classList.add('active');
+      }
+    });
+  });
+}
+
+// 2. 立即启用基础交互，不等待外部资源
+document.addEventListener('DOMContentLoaded', () => {
+  initBasicTabSwitching();
+  startLoad(); // 然后再加载完整功能
+});
 ```
 
 **重要原则**：
@@ -167,6 +279,25 @@ async function saveChannelSetting(channel, key, value) {
 - ❌ 不要在根级别使用`parameters`字段
 - ✅ 使用单一入口模式
 
+#### 网络访问安全规则（新增）
+```json
+// ✅ 正确：明确配置允许的域名
+"networkAccess": {
+  "allowedDomains": [
+    "https://www.w3.org/2000/svg",
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com",
+    "https://cdn.jsdelivr.net",
+    "https://raw.githubusercontent.com"
+  ]
+}
+
+// ❌ 错误：使用通配符或过于宽松的配置
+"networkAccess": {
+  "allowedDomains": ["*"]
+}
+```
+
 #### 构建脚本要求
 ```javascript
 // 内联CSS处理
@@ -180,6 +311,20 @@ const inlineScript = `<script>${jsContent}</script>`;
 htmlContent = htmlContent.replace('</body>', `${inlineScript}\n</body>`);
 ```
 
+#### HTML模板替换规则（新增）
+```javascript
+// ✅ 正确：使用明确的模板标记
+htmlContent = htmlContent.replace('{{EXTERNAL_CSS_LINK}}', 
+  '<link id="external-styles" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">');
+
+htmlContent = htmlContent.replace('{{APP_SCRIPTS}}', 
+  `<script>\n${loaderCode}\n</script>`);
+
+// ❌ 错误：使用不明确的字符串替换
+htmlContent = htmlContent.replace('<link rel="stylesheet">', 
+  '<link rel="stylesheet" href="https://cdn.example.com/styles.css">');
+```
+
 ### 📋 开发检查清单
 
 #### 开发阶段
@@ -189,6 +334,8 @@ htmlContent = htmlContent.replace('</body>', `${inlineScript}\n</body>`);
 - [ ] 没有内联事件处理器（onclick等）
 - [ ] 🚨 检查全局变量无重复声明
 - [ ] 🚨 确保通过window对象访问全局变量
+- [ ] 🚨 实现CDN资源加载超时保护和重试机制
+- [ ] 🚨 提供备用样式系统
 
 #### 构建阶段  
 - [ ] CSS已完全内联到HTML中
@@ -197,12 +344,15 @@ htmlContent = htmlContent.replace('</body>', `${inlineScript}\n</body>`);
 - [ ] 构建产物无外部依赖
 - [ ] 🚨 验证JavaScript文件合并顺序正确
 - [ ] 🚨 检查内联JavaScript无重复声明
+- [ ] 🚨 验证CDN资源URL正确
 
 #### 测试阶段
 - [ ] 在Figma中测试插件加载
 - [ ] 验证存储功能正常工作
 - [ ] 检查控制台无安全错误
 - [ ] 确认UI界面完整显示
+- [ ] 测试CDN资源加载失败的备用方案
+- [ ] 验证基础功能在资源加载前可用
 
 ### 🐛 常见错误和解决方案
 
@@ -338,6 +488,13 @@ featherMaskGroup.x = groupX + centerOffset; // 绝对位置
 3. **分步迁移**：大型重构分阶段进行，每步验证
 4. **文档更新**：及时更新规范文档，记录解决方案
 
+#### 资源加载优化策略（新增）
+1. **CDN缓存利用**：使用版本化URL利用CDN缓存
+2. **超时保护**：为所有网络请求设置合理超时
+3. **重试机制**：实现自动重试和降级策略
+4. **备用方案**：提供本地备用样式和功能
+5. **渐进增强**：确保基础功能在资源加载前可用
+
 #### 7. 🎯 羽化蒙版组坐标系统最终解决方案（实战验证）
 
 **问题背景**：羽化蒙版组在头图容器中无法正确居中，经过多次调试和官方文档研究后的最终解决方案。
@@ -439,6 +596,39 @@ const fill = ColorUtils.createSolidFill(rgb);
 node.fills = [fill];
 ```
 
+### CDN资源测试（新增）
+```javascript
+// 创建CDN资源直接访问测试
+function createCDNDirectTest() {
+  const testHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>CDN资源直接访问测试</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">
+    </head>
+    <body>
+      <div class="container">
+        <h1>CDN资源直接访问测试</h1>
+        <div class="tab-container">
+          <div class="tab active" data-tab="test">测试标签</div>
+        </div>
+        <div class="tab-content active" id="test-content">
+          <p>如果您能看到样式正常应用，则CDN资源访问成功！</p>
+        </div>
+      </div>
+      <script src="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js"></script>
+    </body>
+    </html>
+  `;
+  
+  // 保存为测试文件
+  // 在实际开发中，可以使用fs.writeFileSync或其他方法保存
+  console.log('✅ CDN资源直接访问测试HTML已生成');
+}
+```
+
 ## 调试和测试
 
 ### 调试技巧
@@ -446,10 +636,14 @@ node.fills = [fill];
 - **UI调试**: 在浏览器中调试UI界面
 - **类型检查**: 使用`npm run type-check`验证类型
 - **构建测试**: 使用`npm run build`验证构建
+- **CDN测试**: 创建测试HTML验证CDN资源加载（新增）
+- **网络监控**: 使用浏览器开发工具监控网络请求（新增）
 
 ### 测试策略
 - **单元测试**: 测试工具函数和服务类
 - **集成测试**: 测试模块间交互
 - **端到端测试**: 测试完整的用户流程
 - **类型测试**: 确保TypeScript类型正确
+- **离线测试**: 测试网络不可用情况下的降级方案（新增）
+- **错误恢复测试**: 验证错误处理和恢复机制（新增）
 

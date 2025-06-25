@@ -57,6 +57,77 @@ Identifier 'storageAdapter' has already been declared
 2. **统一访问方式**：所有地方使用`window.storageAdapter`
 3. **注释说明**：添加注释避免未来重复错误
 
+## CDN环境下的变量声明管理（新增）
+
+### CDN环境的特殊性
+在使用CDN加载JavaScript时，变量声明管理变得更加重要，因为：
+1. 文件加载顺序可能不确定
+2. 全局命名空间更容易污染
+3. 依赖关系难以追踪
+
+### ✅ CDN环境下的正确做法
+
+#### 1. 使用命名空间模式
+```javascript
+// 在入口文件中定义命名空间
+window.H5Tools = window.H5Tools || {};
+
+// 在各模块文件中使用命名空间
+window.H5Tools.StorageAdapter = class StorageAdapter {
+  // 类定义...
+};
+
+// 在其他文件中访问
+async function saveData(key, value) {
+  const adapter = new window.H5Tools.StorageAdapter();
+  await adapter.setItem(key, value);
+}
+```
+
+#### 2. 使用模块加载器桥接器
+```javascript
+// CDN加载器中的桥接代码
+window.figmaBridge = {
+  modules: new Map(),
+  define: function(name, module) {
+    this.modules.set(name, module);
+  },
+  require: function(name) {
+    return this.modules.get(name);
+  }
+};
+
+// 模块定义
+window.figmaBridge.define('storageAdapter', {
+  create: function() {
+    return new StorageAdapter();
+  }
+});
+
+// 模块使用
+const storageAdapterModule = window.figmaBridge.require('storageAdapter');
+const adapter = storageAdapterModule.create();
+```
+
+#### 3. 使用延迟初始化模式
+```javascript
+// 主文件中定义初始化函数
+window.initializeModules = function() {
+  // 只在这里创建实例
+  window.storageAdapter = new StorageAdapter();
+  window.themeManager = new ThemeManager();
+  window.pluginComm = new PluginCommunicator();
+  
+  console.log('所有模块已初始化');
+};
+
+// 在所有文件加载后调用
+document.addEventListener('DOMContentLoaded', function() {
+  // 确保所有类定义都已加载
+  setTimeout(window.initializeModules, 0);
+});
+```
+
 ## 开发规范
 
 ### 文件组织原则
@@ -117,6 +188,68 @@ findstr /n "var storageAdapter" dist\\ui.html
 # 预期结果：只应该有一行声明
 ```
 
+## CDN资源加载顺序管理（新增）
+
+### 文件加载顺序控制
+```javascript
+// build.js中确保正确的文件顺序
+const jsFiles = [
+  // 1. 先加载工具函数和基础类
+  'src/ui/scripts/utility-functions.js',
+  
+  // 2. 再加载依赖基础类的模块
+  'src/ui/scripts/plugin-communicator.js',
+  'src/ui/scripts/notification-system.js',
+  'src/ui/scripts/theme-manager.js',
+  
+  // 3. 再加载业务逻辑模块
+  'src/ui/scripts/data-manager.js',
+  'src/ui/scripts/channel-manager.js',
+  
+  // 4. 最后加载应用初始化
+  'src/ui/scripts/app.js',
+  'src/ui/scripts/global-init.js'
+];
+
+// 按顺序合并文件
+let jsContent = '';
+jsFiles.forEach(file => {
+  if (fs.existsSync(file)) {
+    jsContent += fs.readFileSync(file, 'utf8') + '\n\n';
+  }
+});
+```
+
+### 依赖检查
+```javascript
+// 在build.js中添加依赖检查
+function checkDependencies(jsContent) {
+  // 检查是否在使用前声明
+  const declarations = [];
+  const usages = [];
+  
+  // 收集声明
+  const declRegex = /(?:const|let|var|class|function)\s+(\w+)/g;
+  let declMatch;
+  while ((declMatch = declRegex.exec(jsContent)) !== null) {
+    declarations.push(declMatch[1]);
+  }
+  
+  // 收集使用
+  const useRegex = /(?:new|window\.)(\w+)/g;
+  let useMatch;
+  while ((useMatch = useRegex.exec(jsContent)) !== null) {
+    usages.push(useMatch[1]);
+  }
+  
+  // 检查是否有未声明的使用
+  const undeclared = usages.filter(u => !declarations.includes(u));
+  if (undeclared.length > 0) {
+    console.warn('警告: 可能存在未声明的依赖:', undeclared);
+  }
+}
+```
+
 ## 紧急修复指南
 
 ### 快速诊断
@@ -146,16 +279,23 @@ findstr /n "const storageAdapter" dist\\ui.html
 - 其他文件通过window.variableName访问
 - 添加注释说明变量来源
 - 构建时自动检查重复声明
+- 使用命名空间组织相关变量（新增）
+- 实现延迟初始化避免依赖问题（新增）
+- 明确控制文件加载顺序（新增）
 
 ### ❌ 避免的做法
 - 在多个文件中声明同名变量
 - 直接访问可能未声明的变量
 - 忽略构建时的重复声明警告
 - 在沙盒环境中使用eval或动态声明
+- 依赖不确定的文件加载顺序（新增）
+- 过度使用全局变量（新增）
 
 ### 🔧 工具支持
 - ESLint规则：no-redeclare
 - 构建脚本：自动重复声明检查
 - TypeScript：严格模式类型检查
 - 手动验证：findstr/grep命令检查
+- 依赖分析：检查变量使用顺序（新增）
+- 加载顺序验证：确认文件加载顺序正确（新增）
 

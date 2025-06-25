@@ -248,582 +248,212 @@ src/ui/styles/
 - 📦 **复用性强**: 组件样式可在其他项目中复用
 - 🔄 **向后兼容**: 保留原始app.css作为兼容性保证
 
-### 核心库开发
+## 📜 开发规则与最佳实践
 
-核心库位于 `src/core/`，提供完整的API：
+H5Tools项目遵循一系列严格的开发规则，确保代码质量和插件在Figma沙盒环境中的稳定运行。完整的开发规则可以在 `log/rules-update.md` 中找到，以下是主要规则的概述：
 
-```typescript
-// 导入核心库
-import { 
-  H5Config, 
-  H5PrototypeBuilder,
-  ConfigService,
-  ThemeService,
-  ChannelAdapter,
-  AdvancedFeatures
-} from '@h5tools/core';
+### Figma插件沙盒环境规则
 
-// 创建H5原型
-const config: H5Config = {
-  pageTitle: '活动页面',
-  pageBgColor: '#ffffff',
-  gameName: '我的游戏',
-  gameDesc: '精彩活动等你来',
-  canvasWidth: 375,
-  canvasHeight: 812,
-  modules: []
-};
+#### 存储适配器模式
 
-const builder = new H5PrototypeBuilder(config);
-const prototype = await builder.build();
-```
-
-### 样式开发指南
-
-#### 添加新组件样式
-
-1. **创建组件样式文件**
-
-   ```css
-   /* src/ui/styles/components/new-component.css */
-   .new-component {
-     display: flex;
-     flex-direction: column;
-     padding: 16px;
-     border-radius: 8px;
-     background-color: #ffffff;
-     transition: all 0.2s ease;
-   }
-   
-   .new-component:hover {
-     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-   }
-   
-   /* 深色主题适配 */
-   body.dark-theme .new-component {
-     background-color: #2c2c2e;
-     color: #f5f5f7;
-   }
-   ```
-
-2. **在app-new.css中引用**
-
-   ```css
-   /* src/ui/styles/app-new.css */
-   @import './components/new-component.css';
-   ```
-
-3. **遵循命名规范**
-   - 使用BEM命名方式：`.block__element--modifier`
-   - 组件前缀：`.component-name`
-   - 状态类：`.is-active`, `.is-disabled`
-   - 主题适配：`body.dark-theme .component`
-
-#### 主题系统扩展
-
-```css
-/* src/ui/styles/themes/custom-theme.css */
-body.custom-theme {
-  --primary-color: #your-color;
-  --background-color: #your-bg;
-  --text-color: #your-text;
-}
-
-body.custom-theme .component {
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-```
-
-### 添加新模块
-
-1. **定义模块类型**
-
-   ```typescript
-   // src/core/types/index.ts
-   export interface CustomModuleContent {
-     title: string;
-     content: string;
-     bgImage: ImageInfo | null;
-   }
-   
-   export enum ModuleType {
-     // ... 现有类型
-     CUSTOM_MODULE = 'customModule'
-   }
-   ```
-
-2. **创建模块构建器**
-
-   ```typescript
-   // src/core/builders/module-builders.ts
-   export async function createCustomModule(content: CustomModuleContent): Promise<FrameNode> {
-     const frame = NodeUtils.createFrame('自定义模块', CONSTANTS.H5_WIDTH, 200);
-     
-     // 添加标题
-     if (content.title) {
-       const titleText = await NodeUtils.createText(content.title, 24, 'Bold');
-       frame.appendChild(titleText);
-     }
-     
-     // 添加背景图片
-     if (content.bgImage) {
-       await ImageNodeBuilder.setImageFill(frame, content.bgImage);
-     }
-     
-     return frame;
-   }
-   ```
-
-3. **注册到模块工厂**
-   ```typescript
-   // 在ModuleFactory中添加新模块类型的处理逻辑
-   ```
-
-### 自定义渠道适配
-
-```typescript
-import { ChannelAdapter, ChannelType, ChannelConfig } from '@h5tools/core';
-
-// 定义自定义渠道配置
-const customChannelConfig: ChannelConfig = {
-  name: '自定义渠道',
-  maxWidth: 1080,
-  maxHeight: 1920,
-  aspectRatio: 9/16,
-  supportedFormats: ['jpg', 'png'],
-  maxFileSize: 5 * 1024 * 1024,
-  requirements: {
-    minWidth: 300,
-    minHeight: 400,
-    preferredWidth: 1080,
-    preferredHeight: 1920
-  }
-};
-
-// 使用渠道适配器
-const adaptedConfig = ChannelAdapter.adaptH5ConfigForChannel(baseConfig, ChannelType.CUSTOM);
-```
-
-## 📚 API文档
-
-### 核心类型
-
-```typescript
-interface H5Config {
-  pageTitle: string;
-  pageBgColor: string;
-  pageBgImage: ImageInfo | null;
-  gameName: string;
-  gameDesc: string;
-  gameTextColor: string;
-  buttonVersion: string;
-  modules: ModuleData[];
-  canvasWidth: number;
-  canvasHeight: number;
-  channelType?: ChannelType;
-  // ... 更多配置项
-}
-
-interface ImageInfo {
-  data: Uint8Array;
-  width: number;
-  height: number;
-  name: string;
-  type: string;
-  fileSize?: number;
-  format?: string;
-}
-```
-
-### 主要服务类
-
-- **H5PrototypeBuilder**: H5原型构建器
-- **ConfigService**: 配置管理服务
-- **ThemeService**: 主题管理服务
-- **ChannelAdapter**: 渠道适配器
-- **AdvancedFeatures**: 高级功能服务
-- **FeatherMaskUtils**: 羽化遮罩工具
-
-详细API文档请参考 [src/core/README.md](src/core/README.md)
-
-## 🧪 测试和验证
-
-```bash
-# 类型检查
-npx tsc --noEmit
-
-# 代码规范检查
-npx eslint src/
-
-# 严格模式检查
-npx tsc --noEmit --strict
-
-# 完整构建测试
-npm run build
-```
-
-## 📦 构建和发布
-
-### 构建插件
-
-```bash
-# 🚀 统一构建（推荐）- 一键完成所有构建
-npm run build
-
-# 高级构建选项
-npm run build:core     # 仅构建核心库
-npm run build:plugin   # 仅构建插件  
-npm run build:ui       # 仅构建UI（等同于npm run build）
-npm run build:separate # 分别构建（旧方式，不含UI）
-
-# 开发模式
-npm run dev            # 插件开发模式（监听文件变化）
-npm run dev:core       # 核心库开发模式
-
-# 环境管理
-npm run clean          # 清理构建产物
-npm run setup          # 项目初始化
-```
-
-### 构建产物
-
-统一构建后生成的文件结构：
-
-```
-dist/
-├── core/                    # 核心库构建输出
-│   ├── index.js (3.8KB)    # 主入口文件
-│   ├── index.d.ts (1.1KB)  # TypeScript声明文件
-│   ├── types/               # 类型定义模块
-│   ├── utils/               # 工具函数模块
-│   ├── services/            # 服务层模块
-│   └── builders/            # 构建器模块
-├── plugin/                  # 插件构建输出
-│   ├── code-standalone.js (13KB)  # 独立版插件
-│   └── code-standalone.js.map     # Source Map
-└── ui.html (181KB)          # 完全内联的UI文件
-```
-
-### Figma插件沙盒适配
-
-构建过程自动完成Figma插件沙盒环境适配：
-
-- ✅ **CSS内联**: 30.6KB样式完全内联到HTML
-- ✅ **JavaScript内联**: 83.5KB脚本完全内联到HTML  
-- ✅ **无外部依赖**: 符合Figma插件安全策略
-- ✅ **存储适配**: localStorage替换为figma.clientStorage
-- ✅ **变量安全**: 避免重复声明，确保沙盒兼容
-
-### 发布核心库
-
-```bash
-# 进入核心库目录
-cd src/core
-
-# 构建核心库
-npm run build
-
-# 发布到npm（需要配置npm账户）
-npm publish
-```
-
-## 🚨 故障排除
-
-### 常见问题快速解决
-
-#### 1. 构建失败
-```bash
-# 清理构建产物重新构建
-npm run clean
-npm run build
-
-# 检查TypeScript错误
-npm run type-check
-
-# 检查代码规范
-npm run lint
-```
-
-#### 2. Figma插件无法启动
-- 检查`manifest.json`路径配置
-- 确认`dist/plugin/code-standalone.js`文件存在
-- 验证插件文件大小（应该<50KB）
-
-#### 3. UI界面不显示
-- 确认`dist/ui.html`文件存在且大小>170KB
-- 检查是否为完全内联版本（无外部资源引用）
-- 在Figma控制台查看错误信息
-
-#### 4. 存储功能失效
-**错误**: `Storage is disabled inside 'data:' URLs`
-**解决**: 项目已使用StorageAdapter自动适配Figma环境
-
-#### 5. 重复声明错误
-**错误**: `Identifier has already been declared`
-**解决**: 检查全局变量声明，确保无重复定义
-
-### 🔧 高级故障排除
-
-#### 模块系统问题
-如果遇到模块导入错误或重复代码问题：
-
-```bash
-# 1. 检查文件结构
-ls -la src/plugin/code-standalone.ts  # 应该<2000行
-ls -la src/core/builders/  # 确认核心库完整
-
-# 2. 验证构建产物
-npm run build
-ls -la dist/plugin/code-standalone.js  # 应该<50KB
-
-# 3. 类型检查
-npm run type-check  # 应该零错误
-```
-
-#### TypeScript编译错误
-```bash
-# 自动修复ESLint错误
-npm run lint:fix
-
-# 清理IDE缓存（VS Code）
-# 1. 重启编辑器
-# 2. 删除.vscode/settings.json错误配置
-# 3. 重新加载TypeScript服务
-```
-
-### 📋 问题诊断检查清单
-
-#### 开发环境检查
-- [ ] Node.js版本 >= 16
-- [ ] npm依赖安装完整
-- [ ] TypeScript编译无错误
-- [ ] ESLint检查通过
-
-#### 构建产物检查
-- [ ] `dist/ui.html`存在且>170KB
-- [ ] `dist/plugin/code-standalone.js`存在且<50KB
-- [ ] 所有CSS和JS已内联到HTML中
-- [ ] 无外部资源引用
-
-#### Figma插件检查
-- [ ] manifest.json配置正确
-- [ ] 插件在Figma中正常加载
-- [ ] UI界面完整显示
-- [ ] 存储功能正常工作
-
-## 🎯 最佳实践
-
-### 开发最佳实践
-
-#### 1. 代码结构
-```typescript
-// ✅ 推荐：使用核心库模块
-import { H5Config, createH5Prototype } from '../core';
-
-// ❌ 避免：重复实现核心功能
-class MyH5Builder { /* 重复代码 */ }
-```
-
-#### 2. 类型安全
-```typescript
-// ✅ 推荐：完整类型定义
-interface CustomConfig extends H5Config {
-  customField: string;
-}
-
-// ❌ 避免：使用any类型
-const config: any = { /* 缺少类型 */ };
-```
-
-#### 3. 错误处理
-```typescript
-// ✅ 推荐：完善的错误处理
-try {
-  const result = await createH5Prototype(config);
-  return result;
-} catch (error) {
-  console.error('原型创建失败:', error);
-  figma.ui.postMessage({ type: 'error', message: error.message });
-  throw error;
-}
-```
-
-### 构建最佳实践
-
-#### 1. 统一构建流程
-```bash
-# ✅ 推荐：使用统一构建命令
-npm run build
-
-# ❌ 避免：分别执行多个构建步骤
-npm run build:core
-npm run build:plugin
-node build.js  # 旧方式
-```
-
-#### 2. 构建验证
-```bash
-# 构建后验证清单
-npm run build
-npm run type-check  # 类型检查
-npm run lint        # 代码规范
-ls -la dist/        # 检查产物大小
-```
-
-#### 3. 性能优化
-- **模块化导入**: 只导入需要的功能
-- **类型检查**: 定期运行`npm run type-check`
-- **代码分割**: 核心库与插件分离
-- **构建缓存**: 利用TypeScript增量编译
-
-### Figma插件最佳实践
-
-#### 1. 沙盒环境适配
 ```javascript
-// ✅ 推荐：使用存储适配器
-await storageAdapter.setItem('key', value);
+// ❌ 错误：直接使用localStorage
+localStorage.setItem('key', 'value');
 
-// ❌ 避免：直接使用localStorage
-localStorage.setItem('key', value);  // 在Figma中被禁用
+// ✅ 正确：使用存储适配器
+class StorageAdapter {
+  constructor() {
+    this.isFigmaEnvironment = typeof figma !== 'undefined' && !!figma.clientStorage;
+    this.cache = new Map(); // 内存缓存
+  }
+
+  async setItem(key, value) {
+    if (this.isFigmaEnvironment) {
+      await figma.clientStorage.setAsync(key, value);
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+}
 ```
 
-#### 2. 资源管理
-```html
-<!-- ✅ 推荐：内联资源 -->
-<style>/* CSS内容 */</style>
-<script>/* JS内容 */</script>
+#### 资源加载规则
 
-<!-- ❌ 避免：外部资源引用 -->
-<link rel="stylesheet" href="styles.css">
-<script src="script.js"></script>
+```javascript
+// ❌ 错误：直接使用外部资源无备用方案
+<link rel="stylesheet" href="https://cdn.example.com/styles.css">
+
+// ✅ 正确：使用智能CDN加载器
+const CDN_CONFIG = {
+  css: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css',
+  js: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js',
+  timeout: 10000, // 10秒超时
+  retryDelay: 1000, // 重试间隔
+  maxRetries: 3 // 最大重试次数
+};
 ```
 
-#### 3. 性能优化
-- **异步操作**: 使用async/await处理Figma API
-- **批量操作**: 减少频繁的DOM操作
-- **内存管理**: 及时清理大型对象引用
-- **错误恢复**: 提供优雅的错误处理和重试机制
+#### 变量声明管理
 
-### 维护最佳实践
+```javascript
+// ❌ 错误：多个文件中重复声明同一变量
+// file1.js
+const storageAdapter = new StorageAdapter();
 
-#### 1. 版本管理
-- 遵循语义化版本控制
-- 记录详细的更新日志
-- 保持向后兼容性
+// file2.js  
+const storageAdapter = window.localStorage ? {...} : null; // 重复声明！
 
-#### 2. 文档维护
-- 及时更新API文档
-- 记录重要的架构决策
-- 提供清晰的使用示例
+// ✅ 正确：单一声明 + 全局访问模式
+// utility-functions.js（主文件）
+const storageAdapter = new StorageAdapter();
+window.storageAdapter = storageAdapter;
 
-#### 3. 代码质量
-- 定期进行代码审查
-- 保持测试覆盖率
-- 监控性能指标
+// channel-manager.js（其他文件）
+// 使用全局存储适配器（已在utility-functions.js中声明）
+async function saveChannelSetting(channel, key, value) {
+  await window.storageAdapter.setItem(storageKey, value);
+}
+```
 
-## 📦 构建和发布
+### 网络访问安全规则
 
-## 🎯 功能特性
+```json
+// ✅ 正确：明确配置允许的域名
+"networkAccess": {
+  "allowedDomains": [
+    "https://www.w3.org/2000/svg",
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com",
+    "https://cdn.jsdelivr.net",
+    "https://raw.githubusercontent.com"
+  ]
+}
+```
 
-### 已实现功能 ✅
+### 错误处理与恢复规则
 
-- ✅ **完整的模块化架构**: 8个核心模块，职责分离清晰
-- ✅ **CSS模块化系统**: 11个样式模块，组件化管理
-- ✅ **类型安全**: 100% TypeScript覆盖，完整的类型定义
-- ✅ **多渠道适配**: 支持8个主流渠道的自动适配
-- ✅ **丰富的模块**: 头部、游戏信息、九宫格、签到、集卡等
-- ✅ **高级功能**: 羽化遮罩、批量处理、复杂布局
-- ✅ **配置管理**: 完整的保存/加载功能
-- ✅ **主题系统**: 明暗主题支持，模块化主题管理
-- ✅ **代码质量**: 通过ESLint和TypeScript严格检查
+```javascript
+// ✅ 正确：全局错误处理
+window.addEventListener('error', (event) => {
+  logWithTime(`🚨 全局错误: ${event.error?.message || event.message}`, 'error');
+  // 尝试恢复UI状态
+  try {
+    enableFallbackMode();
+  } catch (e) {
+    console.error('无法恢复UI:', e);
+  }
+});
+```
 
-### 技术指标 📊
+### 渐进增强规则
 
-- **代码行数**: 核心库3810行 + 插件449行 = 4259行
-- **CSS模块化**: 1629行单体 → 11个模块文件
-- **类型覆盖率**: 100%
-- **模块数量**: 8个核心模块 + 11个样式模块
-- **支持渠道**: 8个主流渠道
-- **构建速度**: 相比v1.0提升40%
-- **维护性**: 相比v1.0提升90%
+```javascript
+// ✅ 正确：实现基础功能的渐进增强
+// 1. 首先确保基础标签页切换功能可用
+function initBasicTabSwitching() {
+  // 基础功能实现...
+}
+
+// 2. 立即启用基础交互，不等待外部资源
+document.addEventListener('DOMContentLoaded', () => {
+  initBasicTabSwitching();
+  startLoad(); // 然后再加载完整功能
+});
+```
+
+### 更多开发规则
+
+完整的开发规则和最佳实践请参考 `log/rules-update.md`，其中包含：
+
+- CDN资源加载规则
+- HTML模板替换规则
+- 构建顺序规则
+- 资源加载状态管理
+- Figma API全局导出规则
+- 消息转发规则
+- CDN资源验证规则
+- Figma环境模拟测试规则
+- 全局错误捕获规则
+- 文件组织规则
+- CDN资源缓存规则
+- 资源压缩规则
+- 构建验证规则
+- 功能测试规则
+
+## 🔍 故障排除
+
+常见问题及解决方案：
+
+### 外部CSS加载问题
+
+**症状**: 插件UI没有样式或样式不完整
+
+**解决方案**:
+1. 检查网络连接是否正常
+2. 验证CDN URL是否正确
+3. 检查manifest.json中的allowedDomains是否包含CDN域名
+4. 查看控制台是否有CORS错误
+
+```javascript
+// 手动测试CDN资源
+fetch('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css')
+  .then(response => response.text())
+  .then(css => console.log('CSS加载成功，大小:', css.length))
+  .catch(error => console.error('CSS加载失败:', error));
+```
+
+### 存储功能失效
+
+**症状**: 无法保存或加载配置
+
+**解决方案**:
+1. 确认使用的是StorageAdapter而非直接localStorage
+2. 检查所有存储操作是否为异步(async/await)
+3. 验证clientStorage API调用是否正确
+
+```javascript
+// 调试存储功能
+async function testStorage() {
+  try {
+    await window.storageAdapter.setItem('test-key', 'test-value');
+    const value = await window.storageAdapter.getItem('test-key');
+    console.log('存储测试:', value === 'test-value' ? '成功' : '失败');
+  } catch (error) {
+    console.error('存储测试失败:', error);
+  }
+}
+```
+
+### JavaScript重复声明错误
+
+**症状**: 控制台报错"Identifier has already been declared"
+
+**解决方案**:
+1. 检查是否有全局变量在多个文件中重复声明
+2. 使用window对象导出和访问全局变量
+3. 检查构建脚本中的文件合并顺序
+
+```bash
+# Windows环境检查重复声明
+findstr /n "const storageAdapter" dist\\ui.html
+```
+
+### 更多故障排除
+
+详细的故障排除指南请参考 `log/rules-update.md` 中的故障排除部分。
 
 ## 🤝 贡献指南
 
-我们欢迎所有形式的贡献！
+欢迎为H5Tools项目做出贡献！请遵循以下步骤：
 
-1. **Fork 项目**
-2. **创建特性分支** (`git checkout -b feature/AmazingFeature`)
-3. **提交更改** (`git commit -m 'Add some AmazingFeature'`)
-4. **推送到分支** (`git push origin feature/AmazingFeature`)
-5. **打开 Pull Request**
+1. Fork本仓库
+2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
+3. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 打开一个Pull Request
 
-### 开发规范
-
-- 使用TypeScript编写代码
-- 遵循ESLint规则
-- 添加适当的JSDoc注释
-- 确保类型安全
-- 编写清晰的提交信息
+请确保您的代码遵循项目的开发规则和最佳实践。
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 📞 支持与反馈
-
-- 🐛 **问题反馈**: [GitHub Issues](https://github.com/your-username/H5Tools/issues)
-- 📖 **项目文档**: [项目Wiki](https://github.com/your-username/H5Tools/wiki)
-- 💬 **讨论交流**: [GitHub Discussions](https://github.com/your-username/H5Tools/discussions)
-- 📧 **邮箱联系**: [your-email@example.com]
-
-## 🎯 路线图
-
-### 短期目标 (Q1 2025)
-- [ ] 添加单元测试覆盖
-- [ ] 发布核心库到npm
-- [ ] 添加更多活动模块
-- [ ] 优化性能和用户体验
-
-### 中期目标 (Q2-Q3 2025)
-- [ ] 支持更多渠道适配
-- [ ] 添加动画效果预览
-- [ ] 集成设计系统
-- [ ] 支持批量导出功能
-
-### 长期目标 (Q4 2025+)
-- [ ] 构建H5工具生态系统
-- [ ] 开源社区建设
-- [ ] 跨平台支持
-- [ ] 商业化产品探索
-
-## 📈 更新日志
-
-### v2.0.0 (2024-12-19) 🎉
-- **🏗️ 重大重构**: 完全模块化架构设计
-- **🎨 CSS模块化**: 1629行单体CSS拆分为11个模块文件
-- **🚀 性能优化**: 插件代码量减少90%，编译速度提升40%
-- **🛠️ 开发体验**: 完整TypeScript支持，100%类型覆盖
-- **📦 核心库**: 可独立发布的核心功能库
-- **🎯 渠道适配**: 支持8个主流渠道的自动适配
-- **🔧 高级功能**: 羽化遮罩、批量处理、复杂布局
-- **🌈 主题系统**: 模块化主题管理，支持明暗主题
-- **📚 文档完善**: 详细的API文档和使用指南
-- **✅ 代码质量**: 通过ESLint和TypeScript严格检查
-
-### v1.0.0 (2024-初版)
-- 🎯 初始版本发布
-- ✨ 基础H5原型生成功能
-- 🎨 基础渠道适配支持
-
----
-
-<div align="center">
-  <p>Made with ❤️ by H5Tools Team</p>
-  <p>🌟 如果这个项目对你有帮助，请给我们一个星标！</p>
-  <p>
-    <a href="#top">回到顶部</a> •
-    <a href="src/core/README.md">核心库文档</a> •
-    <a href="log.md">完整日志</a>
-  </p>
-</div>
+本项目采用 MIT 许可证 - 详见 LICENSE 文件
