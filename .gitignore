@@ -5,8 +5,13 @@ node_modules
 
 # Build outputs
 out/
-dist/
 code.js
+
+# Dist directory - 选择性包含外部CSS相关文件
+dist/
+# 但允许外部CSS相关文件被提交
+!dist/styles.min.css
+!dist/ui-external.html
 
 # Compiled TypeScript files in src (should not be committed)
 src/**/*.js
