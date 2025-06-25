@@ -21,6 +21,7 @@ var ModuleType;
     ModuleType["SIGN_IN"] = "signIn";
     ModuleType["COLLECT_CARDS"] = "collectCards";
     ModuleType["NINE_GRID"] = "nineGrid";
+    ModuleType["CAROUSEL"] = "carousel";
     ModuleType["RULES"] = "rules";
     ModuleType["CUSTOM"] = "custom";
 })(ModuleType || (exports.ModuleType = ModuleType = {}));

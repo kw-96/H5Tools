@@ -22,6 +22,7 @@ export declare enum ModuleType {
     SIGN_IN = "signIn",
     COLLECT_CARDS = "collectCards",
     NINE_GRID = "nineGrid",
+    CAROUSEL = "carousel",
     RULES = "rules",
     CUSTOM = "custom"
 }
@@ -37,7 +38,7 @@ export interface Module {
     title: string;
     content: ModuleContent;
 }
-export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent;
+export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent;
 export interface ActivityContentData {
     mainTitle: string;
     mainTitleBg: Uint8Array | ImageInfo | null;
@@ -69,9 +70,18 @@ export interface NineGridContent {
     prizeBgImage: Uint8Array | ImageInfo | null;
     prizes: PrizeItem[];
 }
+export interface CarouselContent {
+    title: string;
+    titleBgImage: Uint8Array | ImageInfo | null;
+    carouselImages: CarouselImage[];
+    carouselBgImage: Uint8Array | ImageInfo | null;
+}
 export interface PrizeItem {
     image: Uint8Array | ImageInfo | null;
     name: string;
+}
+export interface CarouselImage {
+    image: Uint8Array | ImageInfo | null;
 }
 export interface SliceStrategy {
     direction: 'horizontal' | 'vertical' | 'both' | 'none';

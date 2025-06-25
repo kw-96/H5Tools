@@ -1,4 +1,4 @@
-import { H5Config, ImageInfo, ModuleData, NineGridContent, ActivityContentData, SignInContent, CollectCardsContent } from '../types';
+import { H5Config, ImageInfo, ModuleData, NineGridContent, ActivityContentData, SignInContent, CollectCardsContent, CarouselContent } from '../types';
 export declare function createHeaderModule(headerImage: ImageInfo | null, titleUpload: ImageInfo | null): Promise<FrameNode | null>;
 export declare function createGameInfoModule(config: H5Config): Promise<FrameNode>;
 export declare function createCustomModule(module: ModuleData): Promise<FrameNode>;
@@ -19,6 +19,19 @@ export declare class NineGridModuleBuilder {
     private addDefaultButtonStyle;
     private createPrizeCell;
     private getPrizeIndex;
+    private adjustFrameHeight;
+}
+export declare class CarouselModuleBuilder {
+    private frame;
+    private content;
+    private readonly CAROUSEL_HEIGHT;
+    private readonly IMAGE_HEIGHT;
+    constructor(frame: FrameNode, content: CarouselContent);
+    build(): Promise<void>;
+    private setupFrameLayout;
+    private addTitle;
+    private addCarouselContainer;
+    private addCarouselImages;
     private adjustFrameHeight;
 }
 export declare class ActivityContentBuilder {
