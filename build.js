@@ -298,40 +298,8 @@ class ScriptLoadManager {
   }
 }
 
-    // 🚨 紧急修复：标签页切换功能直接内联
-    function initTabSwitching() {
-      const tabs = document.querySelectorAll('.tab');
-      const tabContents = document.querySelectorAll('.tab-content');
-      
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          // 移除所有标签页的激活状态
-          tabs.forEach(t => t.classList.remove('active'));
-          tabContents.forEach(content => content.classList.remove('active'));
-          
-          // 激活当前标签页
-          tab.classList.add('active');
-          
-          // 显示对应内容
-          const tabId = tab.getAttribute('data-tab');
-          const targetContent = document.getElementById(\`\${tabId}-content\`);
-          if (targetContent) {
-            targetContent.classList.add('active');
-          }
-          
-          console.log(\`✅ 标签页切换到: \${tabId}\`);
-        });
-      });
-      
-      console.log('✅ 标签页切换功能已初始化');
-    }
-
-    // 页面加载完成后立即初始化基本功能
+    // 页面加载完成后初始化样式加载管理器
     document.addEventListener('DOMContentLoaded', () => {
-      // 立即初始化标签页切换（不依赖外部脚本）
-      initTabSwitching();
-      
-      // 然后加载外部资源
       new StyleLoadManager();
     });`;
 

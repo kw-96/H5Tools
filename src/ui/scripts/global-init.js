@@ -124,9 +124,52 @@ function safeInitializeApp() {
     document.addEventListener('DOMContentLoaded', window.initializeApp);
   } else {
     // DOM已经加载完成，直接初始化
-    window.initializeApp();
+    // 使用setTimeout确保当前执行栈完成后再初始化
+    setTimeout(() => {
+      window.initializeApp();
+    }, 0);
   }
 }
 
 // 调用安全初始化
-safeInitializeApp(); 
+safeInitializeApp();
+
+// 🎯 立即初始化标签页切换功能（不等待其他模块）
+(function immediateTabInit() {
+  const initTabs = () => {
+    const tabs = document.querySelectorAll('.tab');
+    if (tabs.length === 0) {
+      // DOM可能还没有完全加载，延迟重试
+      setTimeout(initTabs, 10);
+      return;
+    }
+    
+    tabs.forEach(tab => {
+      // 移除现有事件监听器（避免重复绑定）
+      tab.removeEventListener('click', tab._tabClickHandler);
+      
+      // 创建新的事件处理器
+      tab._tabClickHandler = () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const tabId = tab.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const content = document.getElementById(`${tabId}-content`);
+        if (content) {
+          content.classList.add('active');
+        }
+        
+        console.log(`✅ 标签页切换到: ${tabId}`);
+      };
+      
+      // 绑定事件
+      tab.addEventListener('click', tab._tabClickHandler);
+    });
+    
+    console.log('✅ 立即标签页切换功能已初始化');
+  };
+  
+  // 立即尝试初始化
+  initTabs();
+})(); 
