@@ -19,3 +19,6 @@ Thumbs.db
 # - src/ 目录（所有源代码文件，包括.js）
 # - 所有配置文件（package.json, tsconfig.json等）
 # - 所有其他项目文件
+
+# 忽略日志目录
+log/
