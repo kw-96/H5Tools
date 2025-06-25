@@ -5,40 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
   
-  <!-- jsDelivr CDN样式 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css" id="external-styles">
-  
-  <!-- 加载状态样式 -->
-  <style id="loading-styles">
-    .loading-overlay { 
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-      background: #f8f9fa; display: flex; align-items: center; justify-content: center; 
-      z-index: 9999; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; color: #666; 
-    }
-    .loading-content { text-align: center; padding: 20px; }
-    .loading-spinner { 
-      width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top: 3px solid #0066cc; 
-      border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; 
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .hidden { display: none !important; }
-  </style>
-  
-  <meta name="description" content="H5Tools 渠道美术H5延展工具">
-  <meta name="keywords" content="Figma, H5, 设计工具, 渠道适配">
+  <!-- 样式文件 - 模块化重构版本 -->
+  <link rel="stylesheet" href="styles/app-new.css">
 </head>
 <body>
-  <!-- 加载状态 -->
-  <div id="loading-overlay" class="loading-overlay">
-    <div class="loading-content">
-      <div class="loading-spinner"></div>
-      <div>正在加载样式和脚本...</div>
-    </div>
-  </div>
-
-  <!-- 应用内容 -->
-  <div id="app-content" class="hidden">
-    <!-- 主容器 -->
+  <!-- 主容器 -->
   <div class="container">
     <!-- 标签页容器 -->
     <div class="tab-container">
@@ -1072,185 +1043,19 @@
   </div>
 
   <!-- 脚本文件 -->
-  </div>
-
-  <!-- 样式加载管理器 -->
-  <script>
-
-    class StyleLoadManager {
-      constructor() {
-        this.isStyleLoaded = false;
-        this.loadTimeout = 10000; // 10秒超时
-        this.init();
-      }
-      
-      init() {
-        this.checkStyleLoad();
-        this.setupTimeout();
-      }
-      
-      checkStyleLoad() {
-        const link = document.getElementById('external-styles');
-        if (link) {
-          link.onload = () => this.onStylesLoaded();
-          link.onerror = () => this.onStylesLoadFailed('样式加载失败');
-        }
-      }
-      
-      setupTimeout() {
-        setTimeout(() => {
-          if (!this.isStyleLoaded) {
-            this.onStylesLoadFailed('样式加载超时');
-          }
-        }, this.loadTimeout);
-      }
-      
-      onStylesLoaded() {
-        if (this.isStyleLoaded) return;
-        this.isStyleLoaded = true;
-        
-        console.log('✅ 样式加载成功');
-        this.hideLoading();
-        this.showApp();
-        
-        // 标记样式已加载，供脚本加载器使用
-        window.StyleLoadManager = { isStyleLoaded: true };
-      }
-      
-      onStylesLoadFailed(reason) {
-        if (this.isStyleLoaded) return;
-        this.isStyleLoaded = true;
-        
-        console.error('❌ 样式加载失败: ' + reason);
-        this.updateLoadingMessage('样式加载失败，请检查网络连接');
-        
-        setTimeout(() => {
-          this.updateLoadingMessage('请刷新页面重试');
-        }, 2000);
-      }
-      
-      updateLoadingMessage(message) {
-        const loadingContent = document.querySelector('.loading-content div:last-child');
-        if (loadingContent) {
-          loadingContent.textContent = message;
-        }
-      }
-      
-      hideLoading() {
-        const loadingOverlay = document.getElementById('loading-overlay');
-        if (loadingOverlay) {
-          loadingOverlay.style.opacity = '0';
-          setTimeout(() => {
-            loadingOverlay.classList.add('hidden');
-          }, 300);
-        }
-      }
-      
-      showApp() {
-        const appContent = document.getElementById('app-content');
-        if (appContent) {
-          appContent.classList.remove('hidden');
-        }
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      new StyleLoadManager();
-    });
-    
-    window.addEventListener('error', (e) => {
-      if (e.target && e.target.tagName === 'LINK') {
-        console.error('样式文件加载错误:', e);
-      }
-    });
-  
-  </script>
-
-  <!-- 核心JavaScript（Figma通信） -->
-  <script>
-
-// H5Tools 核心JavaScript - 仅加载管理
-// 构建时间: 2025-06-25T06:44:56.377Z
-
-/* === JavaScript加载管理器 === */
-class ScriptLoadManager {
-  constructor() {
-    this.isScriptLoaded = false;
-    this.loadTimeout = 8000; // 8秒超时
-    this.init();
-  }
-  
-  init() {
-    this.loadExternalScript();
-    this.setupTimeout();
-  }
-  
-  loadExternalScript() {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js';
-    script.onload = () => this.onScriptsLoaded();
-    script.onerror = () => this.onScriptsLoadFailed('脚本加载失败');
-    document.head.appendChild(script);
-    
-    console.log('开始加载外联脚本:', script.src);
-  }
-  
-  setupTimeout() {
-    setTimeout(() => {
-      if (!this.isScriptLoaded) {
-        this.onScriptsLoadFailed('脚本加载超时');
-      }
-    }, this.loadTimeout);
-  }
-  
-  onScriptsLoaded() {
-    if (this.isScriptLoaded) return;
-    this.isScriptLoaded = true;
-    
-    console.log('✅ 外联脚本加载成功');
-    
-    // 脚本加载成功后，检查关键对象是否存在
-    if (window.pluginComm) {
-      console.log('✅ 插件通信器已就绪');
-    } else {
-      console.error('❌ 插件通信器加载失败');
-    }
-  }
-  
-  onScriptsLoadFailed(reason) {
-    if (this.isScriptLoaded) return;
-    this.isScriptLoaded = true;
-    
-    console.error('❌ 外联脚本加载失败: ' + reason);
-    this.updateLoadingMessage('脚本加载失败，插件功能不可用');
-    
-    // 显示错误状态
-    setTimeout(() => {
-      this.updateLoadingMessage('请检查网络连接或刷新页面重试');
-    }, 2000);
-  }
-  
-  updateLoadingMessage(message) {
-    const loadingContent = document.querySelector('.loading-content div:last-child');
-    if (loadingContent) {
-      loadingContent.textContent = message;
-    }
-  }
-}
-
-// 等待样式加载完成后初始化脚本加载
-document.addEventListener('DOMContentLoaded', () => {
-  const checkStylesLoaded = () => {
-    if (window.StyleLoadManager && window.StyleLoadManager.isStyleLoaded) {
-      console.log('样式已加载，开始加载脚本...');
-      new ScriptLoadManager();
-    } else {
-      setTimeout(checkStylesLoaded, 100);
-    }
-  };
-  checkStylesLoaded();
-});
-
-  </script>
+  <script src="scripts/data-manager.js"></script>
+  <script src="scripts/file-processor.js"></script>
+  <script src="scripts/image-slice-handler.js"></script>
+  <script src="scripts/plugin-communicator.js"></script>
+  <script src="scripts/notification-system.js"></script>
+  <script src="scripts/data-collector.js"></script>
+  <script src="scripts/ui-controller.js"></script>
+  <script src="scripts/module-manager.js"></script>
+  <script src="scripts/image-uploader.js"></script>
+  <script src="scripts/theme-manager.js"></script>
+  <script src="scripts/form-resetter.js"></script>
+  <script src="scripts/channel-manager.js"></script>
+  <script src="scripts/utility-functions.js"></script>
+  <script src="scripts/app.js"></script>
 </body>
-</html>
+</html> 
