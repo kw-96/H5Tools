@@ -116,13 +116,12 @@ function combineCSS() {
   return combinedCSS;
 }
 
-// 合并JavaScript文件
-function combineJavaScript() {
+// 合并外联JavaScript文件
+function combineExternalJavaScript() {
   const jsFiles = [
     'src/ui/scripts/data-manager.js',
     'src/ui/scripts/file-processor.js',
     'src/ui/scripts/image-slice-handler.js',
-    'src/ui/scripts/plugin-communicator.js',
     'src/ui/scripts/notification-system.js',
     'src/ui/scripts/data-collector.js',
     'src/ui/scripts/ui-controller.js',
@@ -135,8 +134,8 @@ function combineJavaScript() {
     'src/ui/scripts/app.js'
   ];
   
-  let combinedJS = `// H5Tools UI Scripts - 外部CSS版本\n`;
-  combinedJS += `// 通过jsDelivr CDN加载样式，支持智能加载管理\n`;
+  let combinedJS = `// H5Tools UI Scripts\n`;
+  combinedJS += `// 外联JavaScript文件，通过CDN加载\n`;
   combinedJS += `// 构建时间: ${new Date().toISOString()}\n\n`;
   
   jsFiles.forEach(filePath => {
@@ -150,8 +149,150 @@ function combineJavaScript() {
     }
   });
   
-  console.log(`✅ JavaScript合并完成: ${(combinedJS.length / 1024).toFixed(1)}KB`);
+  console.log(`✅ 外联JavaScript合并完成: ${(combinedJS.length / 1024).toFixed(1)}KB`);
   return combinedJS;
+}
+
+// 生成核心内联JavaScript（仅Figma通信相关）
+function generateCoreJavaScript() {
+  const coreJS = `
+// H5Tools 核心JavaScript - 仅Figma通信相关
+// 构建时间: ${new Date().toISOString()}
+
+/* === 插件通信管理器 === */
+class PluginCommunicator {
+  constructor() {
+    this.messageHandlers = new Map();
+    this.isInitialized = false;
+    this.init();
+  }
+  
+  init() {
+    if (this.isInitialized) return;
+    
+    window.addEventListener('message', this.handleMessage.bind(this));
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.postMessage('ui-loaded', {});
+      });
+    } else {
+      this.postMessage('ui-loaded', {});
+    }
+    
+    this.isInitialized = true;
+    console.log('插件通信器已初始化');
+  }
+  
+  postMessage(type, data = {}) {
+    try {
+      const message = { pluginMessage: { type, ...data } };
+      parent.postMessage(message, '*');
+      console.log('发送消息到插件: ' + type, message);
+    } catch (error) {
+      console.error('发送消息失败: ' + type, error);
+    }
+  }
+  
+  handleMessage(event) {
+    try {
+      const message = event.data.pluginMessage;
+      if (!message) return;
+      
+      console.log('收到插件消息: ' + message.type, message);
+      
+      const handler = this.messageHandlers.get(message.type);
+      if (handler) {
+        handler(message);
+      } else {
+        console.warn('未找到消息处理器: ' + message.type);
+      }
+    } catch (error) {
+      console.error('处理插件消息失败:', error);
+    }
+  }
+  
+  on(type, handler) {
+    this.messageHandlers.set(type, handler);
+    console.log('注册消息处理器: ' + type);
+  }
+  
+  testConnection() {
+    this.postMessage('ping', { timestamp: Date.now() });
+  }
+}
+
+// 创建核心通信器实例
+window.pluginComm = new PluginCommunicator();
+
+/* === JavaScript加载管理器 === */
+class ScriptLoadManager {
+  constructor() {
+    this.isScriptLoaded = false;
+    this.loadTimeout = 8000; // 8秒超时
+    this.init();
+  }
+  
+  init() {
+    this.loadExternalScript();
+    this.setupTimeout();
+  }
+  
+  loadExternalScript() {
+    const script = document.createElement('script');
+    script.src = '${generateCDNUrl('scripts.min.js')}';
+    script.onload = () => this.onScriptsLoaded();
+    script.onerror = () => this.onScriptsLoadFailed('脚本加载失败');
+    document.head.appendChild(script);
+  }
+  
+  setupTimeout() {
+    setTimeout(() => {
+      if (!this.isScriptLoaded) {
+        this.onScriptsLoadFailed('脚本加载超时');
+      }
+    }, this.loadTimeout);
+  }
+  
+  onScriptsLoaded() {
+    if (this.isScriptLoaded) return;
+    this.isScriptLoaded = true;
+    
+    console.log('✅ 外联脚本加载成功');
+    // 脚本加载成功后，其他模块会自动初始化
+  }
+  
+  onScriptsLoadFailed(reason) {
+    if (this.isScriptLoaded) return;
+    this.isScriptLoaded = true;
+    
+    console.error('❌ 外联脚本加载失败: ' + reason);
+    this.updateLoadingMessage('脚本加载失败，功能可能受限');
+  }
+  
+  updateLoadingMessage(message) {
+    const loadingContent = document.querySelector('.loading-content div:last-child');
+    if (loadingContent) {
+      loadingContent.textContent = message;
+    }
+  }
+}
+
+// 等待DOM和样式都加载完成后初始化脚本加载
+document.addEventListener('DOMContentLoaded', () => {
+  // 等待样式加载完成后再加载脚本
+  const checkStylesLoaded = () => {
+    if (window.StyleLoadManager && window.StyleLoadManager.isStyleLoaded) {
+      new ScriptLoadManager();
+    } else {
+      setTimeout(checkStylesLoaded, 100);
+    }
+  };
+  checkStylesLoaded();
+});
+`;
+
+  return coreJS;
 }
 
 // 提取应用内容
@@ -180,7 +321,7 @@ function extractAppContent() {
 function buildHTML() {
   const cdnUrl = generateCDNUrl('styles.min.css');
   const appContent = extractAppContent();
-  const jsContent = combineJavaScript();
+  const coreJS = generateCoreJavaScript();
   
   // StyleLoadManager代码
   const styleLoadManagerCode = `
@@ -200,14 +341,14 @@ function buildHTML() {
         const link = document.getElementById('external-styles');
         if (link) {
           link.onload = () => this.onStylesLoaded();
-          link.onerror = () => this.onStylesLoadFailed('加载失败');
+          link.onerror = () => this.onStylesLoadFailed('样式加载失败');
         }
       }
       
       setupTimeout() {
         setTimeout(() => {
           if (!this.isStyleLoaded) {
-            this.onStylesLoadFailed('加载超时');
+            this.onStylesLoadFailed('样式加载超时');
           }
         }, this.loadTimeout);
       }
@@ -219,16 +360,18 @@ function buildHTML() {
         console.log('✅ 样式加载成功');
         this.hideLoading();
         this.showApp();
+        
+        // 标记样式已加载，供脚本加载器使用
+        window.StyleLoadManager = { isStyleLoaded: true };
       }
       
       onStylesLoadFailed(reason) {
         if (this.isStyleLoaded) return;
         this.isStyleLoaded = true;
         
-        console.error(\`❌ 样式加载失败: \${reason}\`);
+        console.error('❌ 样式加载失败: ' + reason);
         this.updateLoadingMessage('样式加载失败，请检查网络连接');
         
-        // 显示错误状态但不隐藏加载界面
         setTimeout(() => {
           this.updateLoadingMessage('请刷新页面重试');
         }, 2000);
@@ -305,7 +448,7 @@ function buildHTML() {
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <div>正在加载样式...</div>
+      <div>正在初始化...</div>
     </div>
   </div>
 
@@ -319,9 +462,9 @@ function buildHTML() {
 ${styleLoadManagerCode}
   </script>
 
-  <!-- 应用脚本 -->
+  <!-- 核心JavaScript（Figma通信） -->
   <script>
-${jsContent}
+${coreJS}
   </script>
 </body>
 </html>`;
@@ -350,14 +493,20 @@ function build() {
     fs.writeFileSync(path.join(config.distDir, 'styles.min.css'), combinedCSS);
     console.log('✅ CSS文件生成: dist/styles.min.css');
     
-    // 5. 构建HTML文件
+    // 5. 合并外联JavaScript并写入文件
+    console.log('📜 构建外联JavaScript文件...');
+    const externalJS = combineExternalJavaScript();
+    fs.writeFileSync(path.join(config.distDir, 'scripts.min.js'), externalJS);
+    console.log('✅ 外联JavaScript文件生成: dist/scripts.min.js');
+    
+    // 6. 构建HTML文件（包含内联核心JavaScript）
     console.log('🌐 构建HTML文件...');
     const htmlContent = buildHTML();
     fs.writeFileSync(path.join(config.distDir, 'ui.html'), htmlContent);
     console.log('✅ HTML文件生成: dist/ui.html');
     
     console.log('\n✅ H5Tools构建完成！');
-    console.log('🌐 CSS将通过jsDelivr CDN加载');
+    console.log('🌐 CSS和JavaScript将通过jsDelivr CDN加载');
     console.log('📁 输出目录:', config.distDir);
     
     // 显示构建结果
@@ -374,25 +523,31 @@ function build() {
     });
     
     // 显示特性信息
-    const cdnUrl = generateCDNUrl('styles.min.css');
+    const cdnStylesUrl = generateCDNUrl('styles.min.css');
+    const cdnScriptsUrl = generateCDNUrl('scripts.min.js');
     console.log('\n🔧 项目特性:');
-    console.log('   ✅ CSS通过CDN加载，减小HTML体积');
-    console.log('   ✅ StyleLoadManager智能加载管理');
+    console.log('   ✅ CSS和JavaScript通过CDN加载，极大减小HTML体积');
+    console.log('   ✅ StyleLoadManager和ScriptLoadManager智能加载管理');
+    console.log('   ✅ 核心Figma通信代码内联，确保插件基础功能');
     console.log('   ✅ jsDelivr全球CDN加速');
     console.log('   ✅ 支持CDN缓存和版本更新');
     
     console.log('\n📋 重要信息:');
-    console.log(`🔗 CDN链接: ${cdnUrl}`);
+    console.log(`🔗 CSS CDN链接: ${cdnStylesUrl}`);
+    console.log(`🔗 JavaScript CDN链接: ${cdnScriptsUrl}`);
     console.log(`📁 CSS文件大小: ${(combinedCSS.length / 1024).toFixed(1)}KB`);
+    console.log(`📁 JavaScript文件大小: ${(externalJS.length / 1024).toFixed(1)}KB`);
     console.log(`📁 HTML文件大小: ${(htmlContent.length / 1024).toFixed(1)}KB`);
     
     console.log('\n🚀 下一步操作:');
     console.log('1. 提交构建产物到GitHub:');
-    console.log('   git add dist/styles.min.css dist/ui.html');
-    console.log('   git commit -m "更新构建产物"');
+    console.log('   git add dist/styles.min.css dist/scripts.min.js dist/ui.html');
+    console.log('   git commit -m "外联CSS+JS版本构建产物"');
     console.log('   git push origin main');
     console.log('2. 等待1-2分钟让jsDelivr缓存更新');
-    console.log(`3. 测试CDN链接: ${cdnUrl}`);
+    console.log(`3. 测试CDN链接:`);
+    console.log(`   - CSS: ${cdnStylesUrl}`);
+    console.log(`   - JavaScript: ${cdnScriptsUrl}`);
     console.log('4. 在Figma中重新加载插件测试');
     
   } catch (error) {
@@ -412,7 +567,8 @@ module.exports = {
   buildCore,
   buildPlugin,
   combineCSS,
-  combineJavaScript,
+  combineExternalJavaScript,
+  generateCoreJavaScript,
   buildHTML,
   generateCDNUrl,
   GITHUB_CONFIG
