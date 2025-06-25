@@ -176,8 +176,8 @@ function extractAppContent() {
   return content.trim();
 }
 
-// 构建外部CSS版本HTML
-function buildExternalHTML() {
+// 构建HTML文件
+function buildHTML() {
   const cdnUrl = generateCDNUrl('styles.min.css');
   const appContent = extractAppContent();
   const jsContent = combineJavaScript();
@@ -187,14 +187,13 @@ function buildExternalHTML() {
     class StyleLoadManager {
       constructor() {
         this.isStyleLoaded = false;
-        this.loadTimeout = 5000;
+        this.loadTimeout = 10000; // 10秒超时
         this.init();
       }
       
       init() {
         this.checkStyleLoad();
         this.setupTimeout();
-        this.setupFallbackDetection();
       }
       
       checkStyleLoad() {
@@ -213,38 +212,11 @@ function buildExternalHTML() {
         }, this.loadTimeout);
       }
       
-      setupFallbackDetection() {
-        window.addEventListener('load', () => {
-          setTimeout(() => {
-            if (!this.isStyleLoaded) {
-              this.checkStyleRules();
-            }
-          }, 1000);
-        });
-      }
-      
-      checkStyleRules() {
-        try {
-          const sheets = Array.from(document.styleSheets);
-          const externalSheet = sheets.find(sheet => 
-            sheet.href && sheet.href.includes('jsdelivr')
-          );
-          
-          if (externalSheet && externalSheet.cssRules && externalSheet.cssRules.length > 0) {
-            this.onStylesLoaded();
-          } else {
-            this.onStylesLoadFailed('样式规则为空');
-          }
-        } catch (e) {
-          this.onStylesLoadFailed('样式检测失败');
-        }
-      }
-      
       onStylesLoaded() {
         if (this.isStyleLoaded) return;
         this.isStyleLoaded = true;
         
-        console.log('✅ 外部样式加载成功');
+        console.log('✅ 样式加载成功');
         this.hideLoading();
         this.showApp();
       }
@@ -253,21 +225,13 @@ function buildExternalHTML() {
         if (this.isStyleLoaded) return;
         this.isStyleLoaded = true;
         
-        console.warn(\`⚠️ 外部样式加载失败: \${reason}，启用备用样式\`);
-        this.enableFallbackStyles();
-        this.updateLoadingMessage('使用备用样式模式');
+        console.error(\`❌ 样式加载失败: \${reason}\`);
+        this.updateLoadingMessage('样式加载失败，请检查网络连接');
         
+        // 显示错误状态但不隐藏加载界面
         setTimeout(() => {
-          this.hideLoading();
-          this.showApp();
-        }, 1000);
-      }
-      
-      enableFallbackStyles() {
-        const fallbackStyles = document.getElementById('fallback-styles');
-        if (fallbackStyles) {
-          fallbackStyles.classList.remove('hidden');
-        }
+          this.updateLoadingMessage('请刷新页面重试');
+        }, 2000);
       }
       
       updateLoadingMessage(message) {
@@ -314,37 +278,30 @@ function buildExternalHTML() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
   
-  <!-- jsDelivr CDN 样式 - 自动缓存和加速 -->
+  <!-- jsDelivr CDN样式 -->
   <link rel="stylesheet" href="${cdnUrl}" id="external-styles">
   
-  <!-- 样式加载状态管理 -->
+  <!-- 加载状态样式 -->
   <style id="loading-styles">
-    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; color: #666; }
+    .loading-overlay { 
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+      background: #f8f9fa; display: flex; align-items: center; justify-content: center; 
+      z-index: 9999; font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; color: #666; 
+    }
     .loading-content { text-align: center; padding: 20px; }
-    .loading-spinner { width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top: 3px solid #0066cc; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    .loading-spinner { 
+      width: 40px; height: 40px; border: 3px solid #e0e0e0; border-top: 3px solid #0066cc; 
+      border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; 
+    }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .hidden { display: none !important; }
   </style>
   
-  <!-- 备用内联样式（核心样式压缩版） -->
-  <style id="fallback-styles" class="hidden">
-    body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 16px; background: #f8f9fa; color: #333; }
-    .container { max-width: 400px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
-    .tab-container { display: flex; background: #ffffff; border-bottom: 1px solid #e0e0e0; }
-    .tab { flex: 1; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent; }
-    .tab.active { background: #f0f7ff; border-bottom-color: #0066cc; color: #0066cc; }
-    .tab-content { padding: 20px; display: none; }
-    .tab-content.active { display: block; }
-    .btn, .upload-btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
-    .btn-primary { background: #0066cc; color: white; }
-  </style>
-  
-  <!-- H5Tools 外部CSS版本 -->
-  <meta name="description" content="H5Tools 渠道美术H5延展工具 - 外部CSS版本">
+  <meta name="description" content="H5Tools 渠道美术H5延展工具">
   <meta name="keywords" content="Figma, H5, 设计工具, 渠道适配">
 </head>
 <body>
-  <!-- 加载状态覆盖层 -->
+  <!-- 加载状态 -->
   <div id="loading-overlay" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
@@ -352,12 +309,12 @@ function buildExternalHTML() {
     </div>
   </div>
 
-  <!-- 应用主内容 -->
+  <!-- 应用内容 -->
   <div id="app-content" class="hidden">
     ${appContent}
   </div>
 
-  <!-- StyleLoadManager -->
+  <!-- 样式加载管理器 -->
   <script>
 ${styleLoadManagerCode}
   </script>
@@ -375,7 +332,7 @@ ${jsContent}
 
 // 主构建函数
 function build() {
-  console.log('🚀 开始构建H5Tools（外部CSS版本）...\n');
+  console.log('🚀 开始构建H5Tools...\n');
   
   try {
     // 1. 清理输出目录
@@ -395,11 +352,11 @@ function build() {
     
     // 5. 构建HTML文件
     console.log('🌐 构建HTML文件...');
-    const htmlContent = buildExternalHTML();
+    const htmlContent = buildHTML();
     fs.writeFileSync(path.join(config.distDir, 'ui.html'), htmlContent);
     console.log('✅ HTML文件生成: dist/ui.html');
     
-    console.log('\n✅ H5Tools外部CSS版本构建完成！');
+    console.log('\n✅ H5Tools构建完成！');
     console.log('🌐 CSS将通过jsDelivr CDN加载');
     console.log('📁 输出目录:', config.distDir);
     
@@ -416,13 +373,13 @@ function build() {
       }
     });
     
-    // 显示CDN信息
+    // 显示特性信息
     const cdnUrl = generateCDNUrl('styles.min.css');
-    console.log('\n🔧 外部CSS版本特性:');
+    console.log('\n🔧 项目特性:');
     console.log('   ✅ CSS通过CDN加载，减小HTML体积');
     console.log('   ✅ StyleLoadManager智能加载管理');
-    console.log('   ✅ 备用样式自动降级保障');
-    console.log('   ✅ 支持CDN缓存和全球加速');
+    console.log('   ✅ jsDelivr全球CDN加速');
+    console.log('   ✅ 支持CDN缓存和版本更新');
     
     console.log('\n📋 重要信息:');
     console.log(`🔗 CDN链接: ${cdnUrl}`);
@@ -432,7 +389,7 @@ function build() {
     console.log('\n🚀 下一步操作:');
     console.log('1. 提交构建产物到GitHub:');
     console.log('   git add dist/styles.min.css dist/ui.html');
-    console.log('   git commit -m "更新外部CSS版本构建产物"');
+    console.log('   git commit -m "更新构建产物"');
     console.log('   git push origin main');
     console.log('2. 等待1-2分钟让jsDelivr缓存更新');
     console.log(`3. 测试CDN链接: ${cdnUrl}`);
@@ -456,7 +413,7 @@ module.exports = {
   buildPlugin,
   combineCSS,
   combineJavaScript,
-  buildExternalHTML,
+  buildHTML,
   generateCDNUrl,
   GITHUB_CONFIG
 }; 
