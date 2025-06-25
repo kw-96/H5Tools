@@ -64,13 +64,10 @@ function combineCSS() {
     }
   });
   
-  // 轻量级CSS优化（保留换行和基本格式）
+  // 轻量级CSS优化（保留原始格式，只移除分隔注释）
   combinedCSS = combinedCSS
     .replace(/\/\*\s*===.*?===\s*\*\//g, '') // 移除分隔注释
     .replace(/\n\s*\n\s*\n/g, '\n\n') // 移除多余空行
-    .replace(/\s*{\s*/g, ' {\n  ') // 格式化大括号
-    .replace(/;\s*}/g, ';\n}') // 格式化结束大括号
-    .replace(/}\s*/g, '}\n\n') // 在规则间添加空行
     .trim();
   
   console.log(`✅ CSS合并完成: ${(combinedCSS.length / 1024).toFixed(1)}KB`);

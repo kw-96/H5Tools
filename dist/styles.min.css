@@ -1,6 +1,6 @@
 /* H5Tools - 渠道美术H5延展工具样式文件 */
 /* 版本: 2.0.0 - jsDelivr CDN版本 */
-/* 构建时间: 2025-06-25T05:39:13.021Z */
+/* 构建时间: 2025-06-25T05:42:28.588Z */
 /* CDN链接: https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css */
 
 /* 基础样式和重置 */
@@ -45,25 +45,13 @@ body {
 
 /* 动画效果 */
 @keyframes fadeIn {
-  from {
-  opacity: 0; transform: translateY(5px);
-}
-
-to {
-  opacity: 1; transform: translateY(0);
-}
-
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {
-  0% {
-  transform: rotate(0deg);
-}
-
-100% {
-  transform: rotate(360deg);
-}
-
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 通用工具类 */
@@ -126,7 +114,7 @@ to {
 /* 隐藏元素 */
 .visually-hidden {
   display: none !important;
-}
+} 
 
 /* 布局样式 */
 .page-footer {
@@ -164,7 +152,7 @@ to {
 .theme-buttons {
   display: flex;
   gap: 8px;
-}
+} 
 
 /* 通知样式 */
 .notification {
@@ -236,7 +224,7 @@ to {
   font-size: 14px;
   color: #333;
   font-weight: 500;
-}
+} 
 
 /* 标签页和导航 */
 .tab-container {
@@ -306,7 +294,7 @@ to {
   display: block;
   animation: fadeIn 0.3s ease-in-out;
   position: relative;
-}
+} 
 
 /* 表单控件 */
 .form-group {
@@ -468,7 +456,7 @@ input.color-value {
 
 .section-dropdown:hover {
   border-color: rgba(0, 0, 0, 0.2);
-}
+} 
 
 /* 按钮和控件 */
 button {
@@ -645,7 +633,7 @@ button#cancel:hover {
   background-color: #0071e3;
   color: #ffffff;
   border-color: #0071e3;
-}
+} 
 
 /* 上传和预览组件 */
 .file-upload-btn, 
@@ -811,7 +799,7 @@ button#cancel:hover {
   max-width: 100%;
   max-height: none;
   min-height: 50px;
-}
+} 
 
 /* 模块管理相关样式 */
 .module-management {
@@ -1335,7 +1323,7 @@ button#cancel:hover {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
+} 
 
 /* 深色主题样式 */
 body.dark-theme {
