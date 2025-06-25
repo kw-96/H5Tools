@@ -4,7 +4,6 @@ node_modules/
 # 临时文件
 *.tmp
 *.temp
-*.log
 
 # 操作系统文件
 .DS_Store
@@ -14,24 +13,9 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 
-# 允许所有其他文件上传，包括：
-# - dist/ 目录（构建产物）
-# - log/ 目录（日志文件）  
-# - src/ 目录（源代码，包括.js文件）
-# - 配置文件等
-
-# Build outputs
-out/
-code.js
-
-
-# Dist directory - 选择性包含外部CSS相关文件
-dist/
-# 但允许外部CSS相关文件被提交
-!dist/styles.min.css
-!dist/ui-external.html
-
-# Compiled TypeScript files in src (should not be committed)
-src/**/*.js
-src/**/*.js.map
-!src/ui/scripts/*.js
+# 注意：允许以下文件/目录上传：
+# - dist/ 目录（所有构建产物）
+# - log/ 目录（所有日志文件）
+# - src/ 目录（所有源代码文件，包括.js）
+# - 所有配置文件（package.json, tsconfig.json等）
+# - 所有其他项目文件
