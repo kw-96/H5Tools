@@ -6,6 +6,13 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "build": "node build.js",
+    "build:inline": "set BUILD_MODE=inline && node build.js",
+    "build:external": "set BUILD_MODE=external && node build.js",
+    "build:css-only": "node scripts/build-external-css.js",
+    "test:cdn": "node -e \"console.log(require('./scripts/build-external-css').generateCDNUrl('dist/styles.min.css'))\"",
+    "switch:external": "node scripts/switch-mode.js external",
+    "switch:inline": "node scripts/switch-mode.js inline",
+    "switch:status": "node scripts/switch-mode.js status",
     "build:core": "cd src/core && npm run build",
     "build:plugin": "rollup -c rollup.config.js",
     "build:plugin:webpack": "webpack --config webpack.config.js",

@@ -4,6 +4,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// 构建模式检测
+const BUILD_MODE = (process.env.BUILD_MODE || 'inline').trim();
+
 // 构建配置
 const config = {
   srcDir: 'src',
@@ -186,8 +189,47 @@ JS大小: ${(jsContent.length / 1024).toFixed(1)}KB
 
 // 主构建函数
 function build() {
-  console.log('🚀 开始构建H5Tools (Figma插件沙盒适配版本)...\n');
+  console.log('🚀 开始构建H5Tools...\n');
   
+  // 检查构建模式
+  if (BUILD_MODE === 'external') {
+    console.log('🌐 使用外部CSS模式构建...');
+    buildExternalMode();
+    return;
+  }
+  
+  console.log('📦 使用内联模式构建 (Figma插件沙盒适配版本)...');
+  buildInlineMode();
+}
+
+// 外部CSS模式构建
+function buildExternalMode() {
+  try {
+    // 1. 清理输出目录
+    cleanDist();
+    
+    // 2. 构建核心库
+    buildCore();
+    
+    // 3. 构建插件
+    buildPlugin();
+    
+    // 4. 调用外部CSS构建脚本
+    const { buildExternalVersion } = require('./scripts/build-external-css');
+    buildExternalVersion();
+    
+    console.log('\n✅ 外部CSS模式构建完成！');
+    console.log('🌐 CSS将通过jsDelivr CDN加载');
+    console.log('📁 输出目录:', config.distDir);
+    
+  } catch (error) {
+    console.error('\n❌ 外部CSS模式构建失败:', error.message);
+    process.exit(1);
+  }
+}
+
+// 内联模式构建（原有逻辑）
+function buildInlineMode() {
   try {
     // 1. 清理输出目录
     cleanDist();
