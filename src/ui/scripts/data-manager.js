@@ -49,5 +49,4 @@ class ImageDataManager {
     }
   }
   
-  // 创建全局图片管理器实例并挂载到window对象
-  window.imageManager = new ImageDataManager(); 
+  // 注意：实例创建现在在global-init.js中统一管理 

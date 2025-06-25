@@ -11,6 +11,9 @@ window.dataCollector = new DataCollector();
 // 创建全局图片数据管理器实例  
 window.imageDataManager = new ImageDataManager();
 
+// 🚨 向后兼容：为imageManager创建别名
+window.imageManager = window.imageDataManager;
+
 // 创建全局渠道管理器实例
 window.channelManager = new ChannelManager();
 
@@ -68,7 +71,7 @@ console.log('✅ 所有全局实例创建完成:', {
   pluginComm: !!window.pluginComm,
   notificationSystem: !!window.notificationSystem,
   dataCollector: !!window.dataCollector,
-  imageDataManager: !!window.imageDataManager,
+  imageManager: !!window.imageManager,
   channelManager: !!window.channelManager,
   imageUploader: !!window.imageUploader,
   imageSliceHandler: !!window.imageSliceHandler,
