@@ -473,9 +473,16 @@ async function buildExternalVersion() {
   // 7. 替换模板占位符
   htmlTemplate = htmlTemplate
     .replace('{{APP_CONTENT}}', appContent)
-    .replace('{{APP_SCRIPTS}}', `<script>\n${styleLoadManagerCode}\n</script>\n\n<script>\n${jsContent}\n</script>`);
+    .replace('{{APP_SCRIPTS}}', 
+      `<script>
+${styleLoadManagerCode}
+</script>
+
+<script>
+${jsContent}
+</script>`);
   
-      // 8. 写入最终HTML
+  // 8. 写入最终HTML
   fs.writeFileSync('dist/ui-external.html', htmlTemplate);
   console.log('✅ 外部版本HTML生成:', 'dist/ui-external.html');
   
