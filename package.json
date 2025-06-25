@@ -6,22 +6,11 @@
   "scripts": {
     "type-check": "tsc --noEmit",
     "build": "node build.js",
-    "build:inline": "set BUILD_MODE=inline && node build.js",
-    "build:external": "set BUILD_MODE=external && node build.js",
-    "build:css-only": "node scripts/build-external-css.js",
-    "test:cdn": "node -e \"console.log(require('./scripts/build-external-css').generateCDNUrl('dist/styles.min.css'))\"",
-    "switch:external": "node scripts/switch-mode.js external",
-    "switch:inline": "node scripts/switch-mode.js inline",
-    "switch:status": "node scripts/switch-mode.js status",
     "build:core": "cd src/core && npm run build",
     "build:plugin": "rollup -c rollup.config.js",
-    "build:plugin:webpack": "webpack --config webpack.config.js",
-    "build:plugin:tsc": "tsc -p tsconfig.json",
-    "build:ui": "node build.js",
-    "build:separate": "npm run build:core && npm run build:plugin",
+    "build:css": "node scripts/build-external-css.js",
+    "test:cdn": "node -e \"console.log(require('./scripts/build-external-css').generateCDNUrl('dist/styles.min.css'))\"",
     "dev": "rollup -c rollup.config.js --watch",
-    "dev:webpack": "webpack --config webpack.config.js --watch",
-    "dev:tsc": "npm run build:plugin:tsc -- --watch",
     "dev:core": "cd src/core && npm run dev",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules --ignore-pattern dist .",
     "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --ignore-pattern dist --fix .",
@@ -66,7 +55,7 @@
     "id": "1506134894807361987",
     "name": "渠道美术-H5延展工具",
     "main": "dist/plugin/code.js",
-    "ui": "dist/ui.html"
+    "ui": "dist/ui-external.html"
   },
   "eslintConfig": {
     "extends": [

@@ -50,6 +50,7 @@ module.exports = {
     "ui-structure-index.md", // 忽略UI结构索引
     "node_modules",   // 忽略依赖包
     "dist",           // 忽略构建输出
-    "build.js"        // 忽略构建脚本
+    "build.js",        // 忽略构建脚本
+    "0ui.html"
   ], // 忽略ESLint配置文件本身、旧代码文件和所有md文档
 };

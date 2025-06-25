@@ -1,3 +1,7 @@
+// H5Tools 外部CSS构建脚本
+// 主要构建脚本，生成外部CSS版本的H5Tools
+// 通过jsDelivr CDN加载样式，支持智能加载管理和自动降级
+
 const fs = require('fs');
 const path = require('path');
 
@@ -14,7 +18,8 @@ const GITHUB_CONFIG = {
  * @returns {string} CDN链接
  */
 function generateCDNUrl(filePath) {
-  return `https://cdn.jsdelivr.net/gh/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}@${GITHUB_CONFIG.branch}/${filePath}`;
+  const fileName = filePath.replace('dist/', '');
+  return `https://cdn.jsdelivr.net/gh/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}@${GITHUB_CONFIG.branch}/dist/${fileName}`;
 }
 
 /**
