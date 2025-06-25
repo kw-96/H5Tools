@@ -72,7 +72,10 @@ class ImageUploader {
       'combine-button-upload': `${moduleId}-combinebtn`,
       'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
       'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
-      'activity-content-image-upload': `${moduleId}-image`
+      'activity-content-image-upload': `${moduleId}-image`,
+      'carousel-title-bg-upload': `${moduleId}-title-bg`,
+      'carousel-image-upload': `${moduleId}-image`,
+      'carousel-image-bg-upload': `${moduleId}-image-bg`
     };
     
     // 特殊处理奖品图片上传

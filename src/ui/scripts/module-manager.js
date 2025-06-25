@@ -49,7 +49,8 @@ class ModuleManager {
       'lotteryModule': 'nineGrid',
       'signInModule': 'signIn', 
       'collectModule': 'collectCards',
-      'activityContentModule': 'activityContent'
+      'activityContentModule': 'activityContent',
+      'carouselModule': 'carousel'
     };
     
     newModule.dataset.moduleType = moduleTypeMapping[moduleType] || moduleType;
@@ -83,7 +84,8 @@ class ModuleManager {
       'lotteryModule': 'nineGrid',
       'signInModule': 'signIn', 
       'collectModule': 'collectCards',
-      'activityContentModule': 'activityContent'
+      'activityContentModule': 'activityContent',
+      'carouselModule': 'carousel'
     };
     return typeMap[templateType] || templateType;
   }
