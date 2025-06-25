@@ -13,6 +13,7 @@ import {
   ActivityContentData,
   SignInContent,
   CollectCardsContent,
+  CarouselContent,
   CONSTANTS 
 } from '../types';
 import { NodeUtils, ColorUtils, ImageNodeBuilder, createTitleContainer } from './figma-utils';
@@ -690,6 +691,10 @@ class ModuleFactory {
         case ModuleType.NINE_GRID:
           moduleFrame = await this.createNineGridModule(module.content as NineGridContent);
           break;
+        case 'carousel':
+        case ModuleType.CAROUSEL:
+          moduleFrame = await this.createCarouselModule(module.content as CarouselContent);
+          break;
         default:
           console.warn(`未知的模块类型: ${moduleType}`);
           return this.createErrorModule(module, `未知的模块类型: ${moduleType}`);
@@ -767,6 +772,15 @@ class ModuleFactory {
   private async createNineGridModule(content: NineGridContent): Promise<FrameNode> {
     const builder = new NineGridModuleBuilder(content);
     return builder.build();
+  }
+
+  private async createCarouselModule(content: CarouselContent): Promise<FrameNode> {
+    const frame = NodeUtils.createFrame('轮播模块', CONSTANTS.H5_WIDTH, 800);
+    
+    const builder = new CarouselModuleBuilder(frame, content);
+    await builder.build();
+    
+    return frame;
   }
 
   private async createErrorModule(module: Module, error: unknown): Promise<FrameNode> {
@@ -1083,6 +1097,8 @@ class FooterBuilder {
   }
 }
 
+
+
 // ==================== 九宫格抽奖模块构建器 ====================
 
 export class NineGridModuleBuilder {
@@ -1374,6 +1390,180 @@ export class NineGridModuleBuilder {
 
   private adjustFrameHeight(): void {
     this.frame.resize(CONSTANTS.H5_WIDTH, this.currentY + 90);
+  }
+}
+
+// ==================== 图片轮播（横版）模块构建器 ====================
+
+export class CarouselModuleBuilder {
+  private frame: FrameNode;
+  private content: CarouselContent;
+  private readonly CAROUSEL_HEIGHT = 600;  // 轮播容器高度
+  private readonly IMAGE_HEIGHT = 450;     // 轮播图片高度
+
+  constructor(frame: FrameNode, content: CarouselContent) {
+    this.frame = frame;
+    this.content = content;
+  }
+
+  async build(): Promise<void> {
+    console.log('开始构建图片轮播（横版）模块');
+    
+    try {
+      // 设置框架布局
+      this.setupFrameLayout();
+      
+      // 添加标题
+      await this.addTitle();
+      
+      // 添加轮播容器
+      await this.addCarouselContainer();
+      
+      // 调整框架高度
+      this.adjustFrameHeight();
+      
+      console.log('图片轮播（横版）模块构建完成');
+    } catch (error) {
+      console.error('图片轮播（横版）模块构建过程中出错：', error);
+      throw error;
+    }
+  }
+
+  // 设置框架布局
+  private setupFrameLayout(): void {
+    NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 40, 90); // 垂直布局，间距40px，上下边距90px
+  }
+
+  // 添加标题
+  private async addTitle(): Promise<void> {
+    if (!this.content.title) return;
+
+    console.log('添加轮播标题...');
+
+    // 如果有标题背景图片，创建带背景的标题容器
+    if (this.content.titleBgImage) {
+      const titleContainer = NodeUtils.createFrame("轮播标题容器", 1080, 120);
+      titleContainer.fills = []; // 透明背景
+
+      // 添加标题背景图片
+      try {
+        const titleBgImage = await ImageNodeBuilder.insertImage(
+          this.content.titleBgImage,
+          "轮播标题背景图片",
+          1080,
+          120
+        );
+      
+        if (titleBgImage) {
+          titleBgImage.x = 0;
+          titleBgImage.y = 0;
+          NodeUtils.safeAppendChild(titleContainer, titleBgImage, '轮播标题背景图片添加');
+        }
+      } catch (error) {
+        console.error('轮播标题背景图片创建失败:', error);
+      }
+
+      // 添加标题文本
+      const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
+      titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+      titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
+      titleText.textAlignHorizontal = "CENTER";
+      titleText.x = 0;
+      titleText.y = (120 - titleText.height) / 2; // 垂直居中
+
+      NodeUtils.safeAppendChild(titleContainer, titleText, '轮播标题文本添加');
+      NodeUtils.safeAppendChild(this.frame, titleContainer, '轮播标题容器添加');
+    } else {
+      // 没有背景图片时，直接添加文本标题
+      const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
+      titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+      titleText.resize(CONSTANTS.MODULE_WIDTH, titleText.height);
+      titleText.textAlignHorizontal = "CENTER";
+
+      NodeUtils.safeAppendChild(this.frame, titleText, '轮播标题添加');
+    }
+  }
+
+  // 添加轮播容器
+  private async addCarouselContainer(): Promise<void> {
+    if (!this.content.carouselImages || this.content.carouselImages.length === 0) {
+      console.warn('没有轮播图片，跳过轮播容器创建');
+      return;
+    }
+
+    console.log('创建轮播容器...');
+
+    // 创建轮播主容器
+    const carouselContainer = NodeUtils.createFrame("轮播容器", CONSTANTS.MODULE_WIDTH, this.CAROUSEL_HEIGHT);
+    
+    // 如果有轮播背景图，设置背景图
+    if (this.content.carouselBgImage) {
+      try {
+        const bgImage = await ImageNodeBuilder.insertImage(
+          this.content.carouselBgImage,
+          "轮播背景图片",
+          CONSTANTS.MODULE_WIDTH,
+          this.CAROUSEL_HEIGHT
+        );
+        
+        if (bgImage) {
+          bgImage.x = 0;
+          bgImage.y = 0;
+          NodeUtils.safeAppendChild(carouselContainer, bgImage, '轮播背景图片添加');
+        }
+      } catch (error) {
+        console.error('轮播背景图片创建失败:', error);
+      }
+    } else {
+      // 没有背景图时使用默认背景色
+      carouselContainer.fills = [ColorUtils.createSolidFill({ r: 0.1, g: 0.1, b: 0.1 })]; // 深灰色背景
+    }
+    
+    carouselContainer.cornerRadius = 16; // 圆角
+
+    // 添加轮播图片区域
+    await this.addCarouselImages(carouselContainer);
+
+    NodeUtils.safeAppendChild(this.frame, carouselContainer, '轮播容器添加');
+  }
+
+  // 添加轮播图片
+  private async addCarouselImages(container: FrameNode): Promise<void> {
+    console.log('添加轮播图片...');
+
+    const imageContainer = NodeUtils.createFrame("轮播图片容器", CONSTANTS.MODULE_WIDTH, this.IMAGE_HEIGHT);
+    imageContainer.fills = []; // 透明背景
+    imageContainer.y = 0;
+
+    // 只显示第一张图片作为静态展示
+    if (this.content.carouselImages[0] && this.content.carouselImages[0].image) {
+      try {
+        const firstImage = await ImageNodeBuilder.insertImage(
+          this.content.carouselImages[0].image,
+          `轮播图片_1`,
+          CONSTANTS.MODULE_WIDTH,
+          this.IMAGE_HEIGHT
+        );
+
+        if (firstImage) {
+          firstImage.x = 0;
+          firstImage.y = 0;
+          // 设置图片填充模式为适应
+          firstImage.resize(CONSTANTS.MODULE_WIDTH, this.IMAGE_HEIGHT);
+          NodeUtils.safeAppendChild(imageContainer, firstImage, '轮播图片添加');
+        }
+      } catch (error) {
+        console.error('轮播图片创建失败:', error);
+      }
+    }
+
+    NodeUtils.safeAppendChild(container, imageContainer, '轮播图片容器添加');
+  }
+
+  // 调整框架高度
+  private adjustFrameHeight(): void {
+    // 自动布局会自动调整高度，无需手动设置
+    console.log('轮播模块框架高度已自动调整');
   }
 }
 

@@ -32,6 +32,7 @@ export enum ModuleType {
   SIGN_IN = 'signIn',
   COLLECT_CARDS = 'collectCards',
   NINE_GRID = 'nineGrid',
+  CAROUSEL = 'carousel',
   RULES = 'rules',
   CUSTOM = 'custom'
 }
@@ -53,7 +54,7 @@ export interface Module {
 }
 
 // 模块内容类型定义
-export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent;
+export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent;
 
 // ==================== 具体模块内容接口 ====================
 
@@ -96,10 +97,23 @@ export interface NineGridContent {
   prizes: PrizeItem[];          // 奖品列表
 }
 
+// 图片轮播（横版）内容接口
+export interface CarouselContent {
+  title: string;                // 轮播标题
+  titleBgImage: Uint8Array | ImageInfo | null;  // 标题背景图片
+  carouselImages: CarouselImage[];      // 轮播图片列表
+  carouselBgImage: Uint8Array | ImageInfo | null;  // 轮播图背景图片
+}
+
 // 奖品项目接口
 export interface PrizeItem {
   image: Uint8Array | ImageInfo | null;  // 奖品图片，使用 Uint8Array 或 ImageInfo 存储二进制数据，可以为 null
   name: string;              // 奖品名称
+}
+
+// 轮播图片项目接口
+export interface CarouselImage {
+  image: Uint8Array | ImageInfo | null;  // 轮播图片数据
 }
 
 // ==================== 图片切片相关接口 ====================
