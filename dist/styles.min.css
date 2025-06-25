@@ -1,6 +1,6 @@
 /* H5Tools - 渠道美术H5延展工具样式文件 */
 /* 版本: 2.0.0 - jsDelivr CDN版本 */
-/* 构建时间: 2025-06-25T06:11:42.596Z */
+/* 构建时间: 2025-06-25T06:16:00.489Z */
 /* CDN链接: https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css */
 
 /* 基础样式和重置 */
@@ -115,7 +115,6 @@ body {
 .visually-hidden {
   display: none !important;
 } 
-
 /* 布局样式 */
 .page-footer {
   width: 100%;
@@ -153,7 +152,6 @@ body {
   display: flex;
   gap: 8px;
 } 
-
 /* 通知样式 */
 .notification {
   position: fixed;
@@ -186,7 +184,6 @@ body {
 .notification.info {
   background-color: #0071e3;
 }
-
 /* 加载遮罩样式 */
 #loadingOverlay {
   position: fixed;
@@ -225,7 +222,6 @@ body {
   color: #333;
   font-weight: 500;
 } 
-
 /* 标签页和导航 */
 .tab-container {
   display: flex;
@@ -295,7 +291,6 @@ body {
   animation: fadeIn 0.3s ease-in-out;
   position: relative;
 } 
-
 /* 表单控件 */
 .form-group {
   margin-bottom: 14px;
@@ -457,7 +452,6 @@ input.color-value {
 .section-dropdown:hover {
   border-color: rgba(0, 0, 0, 0.2);
 } 
-
 /* 按钮和控件 */
 button {
   padding: 10px 20px;
@@ -634,7 +628,6 @@ button#cancel:hover {
   color: #ffffff;
   border-color: #0071e3;
 } 
-
 /* 上传和预览组件 */
 .file-upload-btn, 
 .img-upload-wrapper {
@@ -800,7 +793,6 @@ button#cancel:hover {
   max-height: none;
   min-height: 50px;
 } 
-
 /* 模块管理相关样式 */
 .module-management {
   margin-bottom: 20px;
@@ -1026,7 +1018,6 @@ button#cancel:hover {
   text-overflow: ellipsis;
   line-height: 1.2;
 }
-
 /* 渠道设置视图样式 */
 .channel-settings-view {
   padding: 20px;
@@ -1324,7 +1315,6 @@ button#cancel:hover {
   transform: none;
   box-shadow: none;
 } 
-
 /* 深色主题样式 */
 body.dark-theme {
   color: #f5f5f7;

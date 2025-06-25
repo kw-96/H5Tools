@@ -66,8 +66,6 @@ H5Tools/
 │   ├── plugin/                  # 插件构建产物
 │   ├── styles.min.css           # 🌐 CDN CSS文件 (30.7KB)
 │   └── ui.html                  # 外部CSS版本HTML (169.1KB)
-├── scripts/
-│   └── build-external-css.js    # 外部CSS构建脚本
 ├── manifest.json                # Figma插件配置
 ├── package.json                 # 项目主配置
 ├── tsconfig.json                # TypeScript主配置
