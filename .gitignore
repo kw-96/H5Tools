@@ -6,7 +6,7 @@ node_modules
 # Build outputs
 out/
 code.js
-0ui.html
+
 
 # Dist directory - 选择性包含外部CSS相关文件
 dist/
