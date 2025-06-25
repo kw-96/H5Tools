@@ -91,7 +91,8 @@ function buildHTML() {
       'src/ui/scripts/module-manager.js',
       'src/ui/scripts/form-resetter.js',
       'src/ui/scripts/ui-controller.js',
-      'src/ui/scripts/app.js'
+      'src/ui/scripts/app.js',
+      'src/ui/scripts/global-init.js'  // 🚨 最后执行，确保所有类都已定义
     ];
     
     let jsContent = '// H5Tools UI Scripts\n';

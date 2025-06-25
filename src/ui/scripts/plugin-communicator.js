@@ -69,7 +69,29 @@ class PluginCommunicator {
 }
 
 // 创建通信器实例并挂载到window对象
-window.pluginComm = new PluginCommunicator();
+console.log('🔧 准备创建PluginCommunicator实例...');
+try {
+  window.pluginComm = new PluginCommunicator();
+  console.log('✅ PluginCommunicator实例创建成功:', !!window.pluginComm);
+} catch (error) {
+  console.error('❌ PluginCommunicator创建失败:', error);
+  // 创建一个简化版本的通信器
+  window.pluginComm = {
+    postMessage: function(type, data = {}) {
+      try {
+        const message = { pluginMessage: { type, ...data } };
+        parent.postMessage(message, '*');
+        console.log(`📤 发送消息到插件: ${type}`, message);
+      } catch (err) {
+        console.error(`📤 发送消息失败: ${type}`, err);
+      }
+    },
+    on: function(type) {
+      console.log(`📝 注册消息处理器: ${type} (简化版)`);
+    }
+  };
+  console.log('✅ 已创建简化版PluginCommunicator');
+}
 
 // 注册图片切片消息处理器
 window.pluginComm.on('slice-large-image', async (message) => {

@@ -95,8 +95,8 @@ function registerMessageHandlers() {
   });
 }
 
-// 初始化应用
-async function initializeApp() {
+// 初始化应用 (全局函数，供global-init.js调用)
+window.initializeApp = async function() {
   try {
     console.log('🚀 开始初始化H5Tools应用...');
     
@@ -135,7 +135,7 @@ async function initializeApp() {
     // 即使初始化失败，也尝试显示基础UI
     forceShowUI();
   }
-}
+};
 
 // 🚨 强制显示UI内容 - 解决空白页面问题
 function forceShowUI() {
@@ -220,22 +220,4 @@ function initializeThemeSystem() {
   }
 }
 
-// DOM 加载完成后初始化
-document.addEventListener('DOMContentLoaded', initializeApp);
-
-// 兼容性函数 - 保持向后兼容
-window.collectFormData = function() {
-  return window.dataCollector ? window.dataCollector.collectFormData() : null;
-};
-
-window.postMessageToPlugin = function(type, data) {
-  if (window.pluginComm) {
-    window.pluginComm.postMessage(type, data);
-  }
-};
-
-window.showNotification = function(message, type) {
-  if (window.notificationSystem) {
-    window.notificationSystem.show(message, type);
-  }
-};
+// 注意：DOM事件监听器和兼容性函数现在在global-init.js中处理
