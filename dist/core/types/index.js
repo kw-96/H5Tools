@@ -1,0 +1,39 @@
+"use strict";
+// 渠道美术-H5延展工具 - 核心类型定义
+// 这个文件包含所有的接口和类型定义，将作为独立库发布到GitHub
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChannelType = exports.ModuleType = exports.CONSTANTS = void 0;
+// ==================== 常量定义 ====================
+exports.CONSTANTS = {
+    H5_WIDTH: 1080, // H5画板宽度
+    MODULE_WIDTH: 950, // 模块宽度
+    PADDING: 0, // 内边距
+    GRID_SIZE: 3, // 九宫格行列数
+    DEFAULT_SPACING: 20 // 默认间距
+};
+// 模块类型枚举
+var ModuleType;
+(function (ModuleType) {
+    ModuleType["HEADER"] = "header";
+    ModuleType["GAME_INFO"] = "gameInfo";
+    ModuleType["FOOTER"] = "footer";
+    ModuleType["ACTIVITY_CONTENT"] = "activityContent";
+    ModuleType["SIGN_IN"] = "signIn";
+    ModuleType["COLLECT_CARDS"] = "collectCards";
+    ModuleType["NINE_GRID"] = "nineGrid";
+    ModuleType["RULES"] = "rules";
+    ModuleType["CUSTOM"] = "custom";
+})(ModuleType || (exports.ModuleType = ModuleType = {}));
+// 渠道类型枚举
+var ChannelType;
+(function (ChannelType) {
+    ChannelType["WECHAT"] = "wechat";
+    ChannelType["WEIBO"] = "weibo";
+    ChannelType["DOUYIN"] = "douyin";
+    ChannelType["XIAOHONGSHU"] = "xiaohongshu";
+    ChannelType["KUAISHOU"] = "kuaishou";
+    ChannelType["BILIBILI"] = "bilibili";
+    ChannelType["ZHIHU"] = "zhihu";
+    ChannelType["CUSTOM"] = "custom";
+})(ChannelType || (exports.ChannelType = ChannelType = {}));
+//# sourceMappingURL=index.js.map

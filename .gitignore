@@ -1,27 +1,24 @@
-# Node modules - 排除依赖包
+# 依赖包目录
 node_modules/
 
 # 临时文件
 *.tmp
 *.temp
+*.log
 
 # 操作系统文件
 .DS_Store
 Thumbs.db
 
-# IDE文件
+# IDE配置
 .vscode/settings.json
 .idea/
 
 # 允许所有其他文件上传，包括：
 # - dist/ 目录（构建产物）
 # - log/ 目录（日志文件）  
-# - src/ 目录（源代码）
+# - src/ 目录（源代码，包括.js文件）
 # - 配置文件等
-
-# Node
-*.log
-*.log.*
 
 # Build outputs
 out/

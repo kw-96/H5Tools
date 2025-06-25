@@ -1,0 +1,231 @@
+export declare const CONSTANTS: {
+    readonly H5_WIDTH: 1080;
+    readonly MODULE_WIDTH: 950;
+    readonly PADDING: 0;
+    readonly GRID_SIZE: 3;
+    readonly DEFAULT_SPACING: 20;
+};
+export interface ImageInfo {
+    data: Uint8Array;
+    width: number;
+    height: number;
+    name: string;
+    type: string;
+    fileSize?: number;
+    format?: string;
+}
+export declare enum ModuleType {
+    HEADER = "header",
+    GAME_INFO = "gameInfo",
+    FOOTER = "footer",
+    ACTIVITY_CONTENT = "activityContent",
+    SIGN_IN = "signIn",
+    COLLECT_CARDS = "collectCards",
+    NINE_GRID = "nineGrid",
+    RULES = "rules",
+    CUSTOM = "custom"
+}
+export interface ModuleData {
+    id: string;
+    title: string;
+    type: string;
+    content: Record<string, unknown>;
+}
+export interface Module {
+    id: string;
+    type: ModuleType;
+    title: string;
+    content: ModuleContent;
+}
+export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent;
+export interface ActivityContentData {
+    mainTitle: string;
+    mainTitleBg: Uint8Array | ImageInfo | null;
+    subTitle: string;
+    subTitleBg: Uint8Array | ImageInfo | null;
+    text: string;
+    image: Uint8Array | ImageInfo | null;
+}
+export interface SignInContent {
+    titleImage: Uint8Array | null;
+    bgImage: Uint8Array | null;
+    daysCount: number;
+    dayIcon: Uint8Array | null;
+    signButton: Uint8Array | null;
+}
+export interface CollectCardsContent {
+    titleImage: Uint8Array | null;
+    bgImage: Uint8Array | null;
+    cardsCount: number;
+    cardStyle: 'style1' | 'style2' | 'style3';
+    cardBg: Uint8Array | null;
+    combineButton: Uint8Array | null;
+}
+export interface NineGridContent {
+    mainTitle: string;
+    titleBgImage: Uint8Array | ImageInfo | null;
+    gridBgImage: Uint8Array | ImageInfo | null;
+    drawButtonImage: Uint8Array | ImageInfo | null;
+    prizeBgImage: Uint8Array | ImageInfo | null;
+    prizes: PrizeItem[];
+}
+export interface PrizeItem {
+    image: Uint8Array | ImageInfo | null;
+    name: string;
+}
+export interface SliceStrategy {
+    direction: 'horizontal' | 'vertical' | 'both' | 'none';
+    sliceWidth: number;
+    sliceHeight: number;
+    slicesCount: number;
+    description: string;
+}
+export interface SliceData {
+    bytes: ArrayBuffer;
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+}
+export interface ChannelImageData {
+    data: number[] | string;
+    width: number;
+    height: number;
+    name: string;
+    type: string;
+    size: number;
+    timestamp: number;
+}
+export interface ChannelImages {
+    [channel: string]: {
+        eggBreaking?: ChannelImageData;
+        footerStyle?: ChannelImageData;
+    };
+}
+export type PluginMessageType = 'create-prototype' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'generate' | 'channel-generate' | 'channel-image-upload' | 'storage-set' | 'storage-delete';
+export interface BasePluginMessage {
+    type: PluginMessageType;
+}
+export interface CreatePrototypeMessage extends BasePluginMessage {
+    type: 'create-prototype' | 'generate';
+    config: H5Config;
+}
+export interface ConfigMessage extends BasePluginMessage {
+    type: 'save-config' | 'load-config';
+    config?: H5Config;
+}
+export interface ThemeMessage extends BasePluginMessage {
+    type: 'get-theme' | 'save-theme';
+    theme?: string;
+}
+export interface ChannelImageMessage extends BasePluginMessage {
+    type: 'channel-image-upload';
+    channel: string;
+    imageType: string;
+    imageData: ChannelImageData;
+}
+export interface ChannelGenerateMessage extends BasePluginMessage {
+    type: 'channel-generate';
+    channel: string;
+}
+export interface SimpleMessage extends BasePluginMessage {
+    type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
+}
+export interface StorageMessage extends BasePluginMessage {
+    type: 'storage-set' | 'storage-delete';
+    key?: string;
+    value?: string;
+}
+export type PluginMessage = CreatePrototypeMessage | ConfigMessage | ThemeMessage | ChannelImageMessage | ChannelGenerateMessage | SimpleMessage | StorageMessage;
+export interface H5Config {
+    pageTitle: string;
+    pageBgColor: string;
+    pageBgImage: ImageInfo | null;
+    headerImage: ImageInfo | null;
+    titleUpload: ImageInfo | null;
+    gameIcon: ImageInfo | null;
+    gameName: string;
+    gameDesc: string;
+    gameTextColor: string;
+    buttonVersion: string;
+    iconButtonText: string;
+    iconButtonTextColor: string;
+    iconButtonBg: ImageInfo | null;
+    singleButtonText: string;
+    singleButtonTextColor: string;
+    singleButtonBg: ImageInfo | null;
+    leftButtonText: string;
+    leftButtonTextColor: string;
+    leftButtonBg: ImageInfo | null;
+    rightButtonText: string;
+    rightButtonTextColor: string;
+    rightButtonBg: ImageInfo | null;
+    buttonSpacing: number;
+    modules: ModuleData[];
+    rulesTitle: string;
+    rulesBgImage: ImageInfo | null;
+    rulesContent: string;
+    footerLogo: ImageInfo | null;
+    footerBg: ImageInfo | null;
+    canvasWidth: number;
+    canvasHeight: number;
+    title?: string;
+    channelType?: ChannelType;
+    channelConfig?: ChannelConfig;
+}
+export interface ChannelConfig {
+    name: string;
+    maxWidth: number;
+    maxHeight: number;
+    aspectRatio: number;
+    supportedFormats: string[];
+    maxFileSize: number;
+    requirements: {
+        minWidth: number;
+        minHeight: number;
+        preferredWidth: number;
+        preferredHeight: number;
+    };
+}
+export interface ActivityRulesContent {
+    rulesTitle: string;
+    rulesBgImage: ImageInfo | null;
+    rulesContent: string;
+}
+export interface NineGridConfig {
+    name?: string;
+    totalWidth: number;
+    totalHeight: number;
+    gap: number;
+    backgroundColor?: RGB;
+    images?: ImageInfo[];
+    cellConfig?: Record<string, unknown>;
+}
+export interface BatchProcessConfig {
+    images: ImageInfo[];
+    operations: Array<{
+        type: string;
+        params: Record<string, unknown>;
+    }>;
+}
+export declare enum ChannelType {
+    WECHAT = "wechat",
+    WEIBO = "weibo",
+    DOUYIN = "douyin",
+    XIAOHONGSHU = "xiaohongshu",
+    KUAISHOU = "kuaishou",
+    BILIBILI = "bilibili",
+    ZHIHU = "zhihu",
+    CUSTOM = "custom"
+}
+export interface ChannelAdapterConfig {
+    channelType: ChannelType;
+    targetWidth: number;
+    targetHeight: number;
+    quality: number;
+    format: 'jpg' | 'png' | 'webp';
+    enableOptimization: boolean;
+    compressionLevel: number;
+    customSettings: Record<string, unknown>;
+}
+//# sourceMappingURL=index.d.ts.map

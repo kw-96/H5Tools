@@ -1,0 +1,57 @@
+import { H5Config, ImageInfo, ModuleData, NineGridContent, ActivityContentData, SignInContent, CollectCardsContent } from '../types';
+export declare function createHeaderModule(headerImage: ImageInfo | null, titleUpload: ImageInfo | null): Promise<FrameNode | null>;
+export declare function createGameInfoModule(config: H5Config): Promise<FrameNode>;
+export declare function createCustomModule(module: ModuleData): Promise<FrameNode>;
+export declare function createRulesModule(config: H5Config): Promise<FrameNode>;
+export declare function createFooterModule(config: H5Config): Promise<FrameNode | null>;
+export declare class NineGridModuleBuilder {
+    private frame;
+    private content;
+    private readonly CELL_SIZE;
+    private readonly CELL_SPACING;
+    private currentY;
+    constructor(content: NineGridContent);
+    build(): Promise<FrameNode>;
+    private addTitle;
+    private addNineGrid;
+    private createGridCell;
+    private createDrawButton;
+    private addDefaultButtonStyle;
+    private createPrizeCell;
+    private getPrizeIndex;
+    private adjustFrameHeight;
+}
+export declare class ActivityContentBuilder {
+    private frame;
+    private content;
+    constructor(frame: FrameNode, content: ActivityContentData);
+    build(): Promise<void>;
+    private setupAutoLayout;
+    private addMainTitle;
+    private addSubTitle;
+    private addTextContent;
+    private addImage;
+    private adjustFrameHeight;
+}
+export declare class SignInModuleBuilder {
+    private frame;
+    private content;
+    constructor(frame: FrameNode, content: SignInContent);
+    build(): Promise<void>;
+    private setupBackground;
+    private addTitle;
+    private addDefaultTitle;
+    private addSignInDays;
+    private createDayItem;
+    private createDayIcon;
+    private addSignInButton;
+    private addDefaultButton;
+}
+export declare class CollectCardsModuleBuilder {
+    private frame;
+    private content;
+    constructor(frame: FrameNode, content: CollectCardsContent);
+    build(): Promise<void>;
+    private createCardItem;
+}
+//# sourceMappingURL=module-builders.d.ts.map
