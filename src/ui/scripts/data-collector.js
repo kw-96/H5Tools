@@ -117,7 +117,7 @@ class DataCollector {
     }
   }
   
-    // 收集九宫格抽奖数据
+  // 收集九宫格抽奖数据
   collectLotteryData(container, moduleId) {
     const data = {
       mainTitle: container.querySelector('.big-title-input')?.value || "抽奖活动",
@@ -127,7 +127,7 @@ class DataCollector {
       prizeBgImage: window.imageManager.getModule(`${moduleId}-prizebg`),
       prizes: this.collectNineGridPrizes(container, moduleId)
     };
-
+    
     return data;
   }
   

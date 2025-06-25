@@ -3,22 +3,6 @@
   "version": "2.0.0",
   "description": "渠道美术-H5延展工具 - 重构版本",
   "main": "dist/plugin/code.js",
-  "homepage": "https://github.com/kw-96/H5Tools",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kw-96/H5Tools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kw-96/H5Tools/issues"
-  },
-  "homepage": "https://github.com/kw-96/H5Tools",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kw-96/H5Tools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kw-96/H5Tools/issues"
-  },
   "scripts": {
     "type-check": "tsc --noEmit",
     "build": "node build.js",
@@ -37,11 +21,7 @@
     "clean": "rimraf dist && cd src/core && rimraf dist",
     "setup": "npm install && cd src/core && npm install",
     "test": "jest",
-    "test:core": "cd src/core && npm test",
-    "release": "node scripts/release.js",
-    "release:patch": "node scripts/release.js patch",
-    "release:minor": "node scripts/release.js minor",
-    "release:major": "node scripts/release.js major"
+    "test:core": "cd src/core && npm test"
   },
   "keywords": [
     "figma",
