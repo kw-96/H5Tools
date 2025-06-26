@@ -110,36 +110,3 @@ body {
 .visually-hidden {
   display: none !important;
 }
-
-/* SVG图标基础样式 */
-.icon {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  vertical-align: middle;
-  fill: currentColor;
-}
-
-/* 标签页图标样式 */
-.tab .icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 8px;
-}
-
-/* 控制按钮图标样式 */
-.control-btn .icon {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.2s ease;
-}
-
-/* 折叠按钮展开状态 */
-.control-btn.expanded .icon {
-  transform: rotate(180deg);
-}
-
-/* 隐藏SVG Sprite定义 */
-.svg-sprite {
-  display: none;
-} 
