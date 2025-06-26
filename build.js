@@ -5,60 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const { execSync } = require('child_process');
-const svgo = require('svgo'); // 添加SVGO依赖
 
-// 配置SVGO优化选项 (2.0+版本格式)
-const svgoConfig = {
-  multipass: true, // 多遍优化
-  plugins: [
-    // 基础预设
-    {
-      name: 'preset-default'
-    },
-    // 禁用特定插件
-    {
-      name: 'removeViewBox',
-      active: false
-    },
-    {
-      name: 'removeTitle',
-      active: false
-    },
-    {
-      name: 'removeDesc',
-      active: false
-    },
-    // 自定义插件配置
-    {
-      name: 'removeAttrs',
-      params: {
-        attrs: ['data-name']
-      }
-    },
-    {
-      name: 'addAttributesToSVGElement',
-      params: {
-        attributes: [
-          {
-            preserveAspectRatio: 'xMidYMid meet'
-          }
-        ]
-      }
-    },
-    {
-      name: 'sortAttrs',
-      params: {
-        xmlnsOrder: 'alphabetical'
-      }
-    },
-    {
-      name: 'convertColors',
-      params: {
-        currentColor: true
-      }
-    }
-  ]
-};
 
 // 运行系统命令
 function runCommand(command) {
@@ -92,49 +39,6 @@ function clearDistDirectory() {
   }
   fs.mkdirSync('dist', { recursive: true });
   console.log('✅ 构建目录已清理');
-}
-
-// 压缩SVG图标
-async function optimizeSvgIcons() {
-  console.log('🎨 开始优化SVG图标...');
-  
-  // 读取icon-manager.js文件
-  const iconManagerPath = 'src/ui/scripts/icon-manager.js';
-  let iconContent = fs.readFileSync(iconManagerPath, 'utf8');
-  
-  // 提取所有SVG字符串
-  const svgRegex = /`<svg[^`]*`/g;
-  let match;
-  let optimizedCount = 0;
-  let totalSavings = 0;
-  
-  while ((match = svgRegex.exec(iconContent)) !== null) {
-    const originalSvg = match[0].slice(1, -1); // 移除反引号
-    const originalSize = originalSvg.length;
-    
-    try {
-      // 优化SVG
-      const result = await svgo.optimize(originalSvg, svgoConfig);
-      const optimizedSvg = result.data;
-      const newSize = optimizedSvg.length;
-      const savings = originalSize - newSize;
-      
-      // 替换原始SVG
-      iconContent = iconContent.replace(originalSvg, optimizedSvg);
-      
-      optimizedCount++;
-      totalSavings += savings;
-    } catch (error) {
-      console.warn(`⚠️ 图标优化失败: ${error.message}`);
-    }
-  }
-  
-  // 保存优化后的文件
-  fs.writeFileSync(iconManagerPath, iconContent);
-  
-  console.log(`✅ SVG图标优化完成:`);
-  console.log(`   - 优化图标数: ${optimizedCount}`);
-  console.log(`   - 总节省空间: ${(totalSavings / 1024).toFixed(2)}KB`);
 }
 
 // 构建HTML文件
@@ -179,7 +83,6 @@ function buildHTML() {
       'src/ui/scripts/plugin-communicator.js',
       'src/ui/scripts/notification-system.js',
       'src/ui/scripts/theme-manager.js',
-      'src/ui/scripts/icon-manager.js',  // 添加图标管理器
       'src/ui/scripts/file-processor.js',
       'src/ui/scripts/data-collector.js',
       'src/ui/scripts/data-manager.js',
@@ -596,9 +499,6 @@ async function build() {
     
     // 清理输出目录
     clearDistDirectory();
-    
-    // 优化SVG图标
-    await optimizeSvgIcons();
     
     // 构建核心库
     await buildCore();
