@@ -80,8 +80,21 @@ console.log('✅ 所有全局实例创建完成:', {
   uiController: !!window.uiController,
   themeManager: !!window.themeManager,
   fileProcessor: !!window.fileProcessor,
-  utilityFunctions: !!window.utilityFunctions
+  utilityFunctions: !!window.utilityFunctions,
+  IconManager: !!window.IconManager
 });
+
+// 🎯 立即初始化图标管理器（关键修复）
+if (window.IconManager && typeof window.IconManager.init === 'function') {
+  try {
+    window.IconManager.init();
+    console.log('🎨 图标管理器强制初始化完成');
+  } catch (error) {
+    console.error('❌ 图标管理器初始化失败:', error);
+  }
+} else {
+  console.warn('⚠️ IconManager未找到或init方法不存在');
+}
 
 // 🚨 重要：触发插件通信器就绪事件（告知内联脚本）
 if (window.pluginComm) {

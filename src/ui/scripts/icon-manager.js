@@ -67,7 +67,19 @@ class IconManager {
   }
 }
 
-// 页面加载完成后初始化图标
-document.addEventListener('DOMContentLoaded', () => {
+// 立即初始化图标（兼容CDN加载模式）
+function initializeIcons() {
   IconManager.init();
-});
+  console.log('✅ 图标管理器已初始化');
+}
+
+// 页面加载完成后初始化图标
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeIcons);
+} else {
+  // 如果DOM已经加载完成（CDN加载模式），立即初始化
+  initializeIcons();
+}
+
+// 导出供全局使用
+window.IconManager = IconManager;
