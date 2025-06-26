@@ -201,7 +201,10 @@ function buildHTML() {
       if (fs.existsSync(file)) {
         const fileContent = fs.readFileSync(file, 'utf8');
         const fileName = path.basename(file);
+        console.log(`📁 包含文件: ${fileName} (${(fileContent.length / 1024).toFixed(1)}KB)`);
         jsContent += `/* === ${fileName} === */\n${fileContent}\n\n`;
+      } else {
+        console.warn(`⚠️ 文件不存在: ${file}`);
       }
     });
     

@@ -84,16 +84,33 @@ console.log('✅ 所有全局实例创建完成:', {
   IconManager: !!window.IconManager
 });
 
-// 🎯 立即初始化图标管理器（关键修复）
+// 🎯 立即初始化图标管理器（关键修复 + 调试增强）
+console.log('🔍 检查图标管理器状态:', {
+  windowIconManager: !!window.IconManager,
+  IconManagerInit: !!(window.IconManager && typeof window.IconManager.init === 'function'),
+  documentReady: document.readyState,
+  timestamp: new Date().toISOString()
+});
+
 if (window.IconManager && typeof window.IconManager.init === 'function') {
   try {
+    console.log('🚀 开始强制初始化图标管理器...');
     window.IconManager.init();
     console.log('🎨 图标管理器强制初始化完成');
+    
+    // 验证初始化结果
+    const iconElements = document.querySelectorAll('[data-icon]');
+    const filledIcons = Array.from(iconElements).filter(el => el.innerHTML.trim() !== '');
+    console.log(`📊 图标初始化结果: ${filledIcons.length}/${iconElements.length} 个图标已填充`);
+    
   } catch (error) {
     console.error('❌ 图标管理器初始化失败:', error);
   }
 } else {
-  console.warn('⚠️ IconManager未找到或init方法不存在');
+  console.warn('⚠️ IconManager未找到或init方法不存在', {
+    IconManager: window.IconManager,
+    hasInit: window.IconManager && typeof window.IconManager.init === 'function'
+  });
 }
 
 // 🚨 重要：触发插件通信器就绪事件（告知内联脚本）

@@ -47,23 +47,72 @@ class IconManager {
     chevron: `<svg class="chevron-icon" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 11"><path d="m.13 2.33 7.312 7.577c.23.23.594.244.84.04l.044-.04 7.542-7.576a.17.17 0 0 0 .049-.117V.91a.167.167 0 0 0-.285-.118L7.909 8.55.37.8a.167.167 0 0 0-.286.116v1.298c0 .043.017.085.047.116"/></svg>`
   };
 
-  // 初始化图标
+  // 初始化图标（增强调试版本）
   static init() {
+    console.log('🎨 IconManager.init() 开始执行...');
+    console.log('🔍 IconManager对象检查:', {
+      TAB_ICONS: !!IconManager.TAB_ICONS,
+      MODULE_CONTROL_ICONS: !!IconManager.MODULE_CONTROL_ICONS,
+      OTHER_ICONS: !!IconManager.OTHER_ICONS,
+      TAB_ICONS_keys: Object.keys(IconManager.TAB_ICONS || {}),
+      prototype_icon: !!IconManager.TAB_ICONS?.prototype
+    });
+    
     // 替换所有带data-icon属性的元素
-    document.querySelectorAll('[data-icon]').forEach(element => {
+    const iconElements = document.querySelectorAll('[data-icon]');
+    console.log(`🔍 找到 ${iconElements.length} 个图标元素`);
+    
+    iconElements.forEach((element, index) => {
       const iconPath = element.getAttribute('data-icon');
+      console.log(`📝 处理图标 ${index + 1}: ${iconPath}`, element);
+      
       const iconParts = iconPath.split('.');
       let icon = IconManager;
+      let pathLog = 'IconManager';
       
       // 遍历路径获取图标
       iconParts.forEach(part => {
-        icon = icon[part];
+        pathLog += `.${part}`;
+        if (icon && icon[part]) {
+          icon = icon[part];
+          console.log(`✅ 路径有效: ${pathLog}`);
+        } else {
+          console.error(`❌ 图标路径无效: ${pathLog}`, { 
+            availableKeys: icon ? Object.keys(icon) : 'N/A',
+            targetPart: part,
+            currentIcon: icon 
+          });
+          icon = null;
+        }
       });
 
-      if (icon) {
+      if (icon && typeof icon === 'string') {
         element.innerHTML = icon;
+        element.style.display = 'inline-block'; // 确保图标可见
+        element.style.width = '16px';
+        element.style.height = '16px';
+        console.log(`✅ 图标设置成功: ${iconPath}`, element.innerHTML.substring(0, 50) + '...');
+      } else {
+        console.error(`❌ 图标未找到或无效: ${iconPath}`, { 
+          icon, 
+          iconType: typeof icon,
+          element,
+          elementHTML: element.innerHTML
+        });
+        // 设置一个备用图标
+        element.innerHTML = '●';
+        element.style.color = '#999';
       }
     });
+    
+    console.log('🎨 IconManager.init() 执行完成');
+    
+    // 再次验证结果
+    setTimeout(() => {
+      const filledElements = document.querySelectorAll('[data-icon]');
+      const filledCount = Array.from(filledElements).filter(el => el.innerHTML.trim() !== '').length;
+      console.log(`📊 最终验证: ${filledCount}/${filledElements.length} 个图标已填充`);
+    }, 100);
   }
 }
 
