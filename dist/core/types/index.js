@@ -28,13 +28,9 @@ var ModuleType;
 // 渠道类型枚举
 var ChannelType;
 (function (ChannelType) {
-    ChannelType["WECHAT"] = "wechat";
-    ChannelType["WEIBO"] = "weibo";
-    ChannelType["DOUYIN"] = "douyin";
-    ChannelType["XIAOHONGSHU"] = "xiaohongshu";
-    ChannelType["KUAISHOU"] = "kuaishou";
-    ChannelType["BILIBILI"] = "bilibili";
-    ChannelType["ZHIHU"] = "zhihu";
-    ChannelType["CUSTOM"] = "custom";
+    ChannelType["OPPO"] = "oppo";
+    ChannelType["VIVO"] = "vivo";
+    ChannelType["HUAWEI"] = "huawei";
+    ChannelType["XIAOMI"] = "xiaomi";
 })(ChannelType || (exports.ChannelType = ChannelType = {}));
 //# sourceMappingURL=index.js.map

@@ -73,15 +73,12 @@ export interface NineGridContent {
 export interface CarouselContent {
     title: string;
     titleBgImage: Uint8Array | ImageInfo | null;
-    carouselImages: CarouselImage[];
+    carouselImage: Uint8Array | ImageInfo | null;
     carouselBgImage: Uint8Array | ImageInfo | null;
 }
 export interface PrizeItem {
     image: Uint8Array | ImageInfo | null;
     name: string;
-}
-export interface CarouselImage {
-    image: Uint8Array | ImageInfo | null;
 }
 export interface SliceStrategy {
     direction: 'horizontal' | 'vertical' | 'both' | 'none';
@@ -219,14 +216,10 @@ export interface BatchProcessConfig {
     }>;
 }
 export declare enum ChannelType {
-    WECHAT = "wechat",
-    WEIBO = "weibo",
-    DOUYIN = "douyin",
-    XIAOHONGSHU = "xiaohongshu",
-    KUAISHOU = "kuaishou",
-    BILIBILI = "bilibili",
-    ZHIHU = "zhihu",
-    CUSTOM = "custom"
+    OPPO = "oppo",
+    VIVO = "vivo",
+    HUAWEI = "huawei",
+    XIAOMI = "xiaomi"
 }
 export interface ChannelAdapterConfig {
     channelType: ChannelType;

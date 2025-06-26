@@ -101,7 +101,7 @@ export interface NineGridContent {
 export interface CarouselContent {
   title: string;                // 轮播标题
   titleBgImage: Uint8Array | ImageInfo | null;  // 标题背景图片
-  carouselImages: CarouselImage[];      // 轮播图片列表
+  carouselImage: Uint8Array | ImageInfo | null;  // 轮播图片
   carouselBgImage: Uint8Array | ImageInfo | null;  // 轮播图背景图片
 }
 
@@ -111,10 +111,7 @@ export interface PrizeItem {
   name: string;              // 奖品名称
 }
 
-// 轮播图片项目接口
-export interface CarouselImage {
-  image: Uint8Array | ImageInfo | null;  // 轮播图片数据
-}
+
 
 // ==================== 图片切片相关接口 ====================
 
@@ -330,14 +327,10 @@ export interface BatchProcessConfig {
 
 // 渠道类型枚举
 export enum ChannelType {
-  WECHAT = 'wechat',
-  WEIBO = 'weibo',
-  DOUYIN = 'douyin',
-  XIAOHONGSHU = 'xiaohongshu',
-  KUAISHOU = 'kuaishou',
-  BILIBILI = 'bilibili',
-  ZHIHU = 'zhihu',
-  CUSTOM = 'custom'
+  OPPO = 'oppo',
+  VIVO = 'vivo',
+  HUAWEI = 'huawei',
+  XIAOMI = 'xiaomi'
 }
 
 // 渠道适配器配置接口

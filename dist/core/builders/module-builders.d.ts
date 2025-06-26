@@ -24,15 +24,20 @@ export declare class NineGridModuleBuilder {
 export declare class CarouselModuleBuilder {
     private frame;
     private content;
-    private readonly CAROUSEL_HEIGHT;
-    private readonly IMAGE_HEIGHT;
+    private readonly TITLE_HEIGHT;
+    private readonly CAROUSEL_AREA_HEIGHT;
+    private readonly CAROUSEL_BG_WIDTH;
+    private readonly CAROUSEL_BG_HEIGHT;
+    private readonly CAROUSEL_IMAGE_WIDTH;
+    private readonly CAROUSEL_IMAGE_HEIGHT;
+    private readonly BUTTON_HEIGHT;
     constructor(frame: FrameNode, content: CarouselContent);
     build(): Promise<void>;
     private setupFrameLayout;
-    private addTitle;
-    private addCarouselContainer;
-    private addCarouselImages;
-    private adjustFrameHeight;
+    private addTitleContainer;
+    private addCarouselPreview;
+    private addCarouselArea;
+    private addCarouselButtons;
 }
 export declare class ActivityContentBuilder {
     private frame;

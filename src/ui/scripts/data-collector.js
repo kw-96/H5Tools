@@ -188,17 +188,18 @@ class DataCollector {
   collectCarouselData(container, moduleId) {
     const data = {
       title: container.querySelector('.carousel-title-input')?.value || '',
-      titleBg: window.imageManager.getModule(`${moduleId}-title-bg`),
-      image: window.imageManager.getModule(`${moduleId}-image`),
-      imageBg: window.imageManager.getModule(`${moduleId}-image-bg`)
+      titleBgImage: window.imageManager.getModule(`${moduleId}-title-bg`),
+      carouselImage: window.imageManager.getModule(`${moduleId}-image`),
+      carouselBgImage: window.imageManager.getModule(`${moduleId}-image-bg`)
     };
     
     console.log('🔍 [图片轮播数据收集]', {
       moduleId,
       data,
       标题: data.title,
-      图片: !!data.image,
-      背景: !!data.imageBg
+      轮播图片: !!data.carouselImage,
+      标题背景: !!data.titleBgImage,
+      轮播背景: !!data.carouselBgImage
     });
     
     return data;

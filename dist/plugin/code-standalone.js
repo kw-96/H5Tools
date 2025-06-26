@@ -28,14 +28,10 @@
     // 渠道类型枚举
     var ChannelType;
     (function (ChannelType) {
-        ChannelType["WECHAT"] = "wechat";
-        ChannelType["WEIBO"] = "weibo";
-        ChannelType["DOUYIN"] = "douyin";
-        ChannelType["XIAOHONGSHU"] = "xiaohongshu";
-        ChannelType["KUAISHOU"] = "kuaishou";
-        ChannelType["BILIBILI"] = "bilibili";
-        ChannelType["ZHIHU"] = "zhihu";
-        ChannelType["CUSTOM"] = "custom";
+        ChannelType["OPPO"] = "oppo";
+        ChannelType["VIVO"] = "vivo";
+        ChannelType["HUAWEI"] = "huawei";
+        ChannelType["XIAOMI"] = "xiaomi";
     })(ChannelType || (ChannelType = {}));
 
     // 渠道美术-H5延展工具 - 核心工具函数
@@ -1876,22 +1872,26 @@
     // ==================== 图片轮播（横版）模块构建器 ====================
     class CarouselModuleBuilder {
         constructor(frame, content) {
-            this.CAROUSEL_HEIGHT = 600; // 轮播容器高度
-            this.IMAGE_HEIGHT = 450; // 轮播图片高度
+            // 根据Figma设计的精确尺寸
+            this.TITLE_HEIGHT = 120; // 标题容器高度
+            this.CAROUSEL_AREA_HEIGHT = 607; // 轮播区域高度
+            this.CAROUSEL_BG_WIDTH = 1000; // 轮播图背景宽度
+            this.CAROUSEL_BG_HEIGHT = 540; // 轮播图背景高度
+            this.CAROUSEL_IMAGE_WIDTH = 960; // 轮播图宽度
+            this.CAROUSEL_IMAGE_HEIGHT = 500; // 轮播图高度
+            this.BUTTON_HEIGHT = 20; // 轮播按钮高度
             this.frame = frame;
             this.content = content;
         }
         async build() {
-            console.log('开始构建图片轮播（横版）模块');
+            console.log('开始构建图片轮播（横版）模块 - 按Figma设计实现');
             try {
                 // 设置框架布局
                 this.setupFrameLayout();
-                // 添加标题
-                await this.addTitle();
-                // 添加轮播容器
-                await this.addCarouselContainer();
-                // 调整框架高度
-                this.adjustFrameHeight();
+                // 添加标题容器
+                await this.addTitleContainer();
+                // 添加轮播预览区域
+                await this.addCarouselPreview();
                 console.log('图片轮播（横版）模块构建完成');
             }
             catch (error) {
@@ -1899,110 +1899,140 @@
                 throw error;
             }
         }
-        // 设置框架布局
+        // 设置框架布局 - 按Figma设计：垂直布局，间距30px，内边距90px
         setupFrameLayout() {
-            NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 40, 90); // 垂直布局，间距40px，上下边距90px
+            NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 30, 90);
         }
-        // 添加标题
-        async addTitle() {
-            if (!this.content.title)
+        // 添加标题容器 - 与活动内容模块保持一致
+        async addTitleContainer() {
+            if (!this.content.title && !this.content.titleBgImage)
                 return;
-            console.log('添加轮播标题...');
-            // 如果有标题背景图片，创建带背景的标题容器
+            console.log('添加标题容器 - 1080x120px');
+            // 创建标题容器：1080x120px
+            const titleContainer = NodeUtils.createFrame("标题容器", 1080, this.TITLE_HEIGHT);
+            titleContainer.fills = []; // 透明背景
+            // 添加标题背景图片 - 1080x120px（与活动内容模块一致）
             if (this.content.titleBgImage) {
-                const titleContainer = NodeUtils.createFrame("轮播标题容器", 1080, 120);
-                titleContainer.fills = []; // 透明背景
-                // 添加标题背景图片
                 try {
-                    const titleBgImage = await ImageNodeBuilder.insertImage(this.content.titleBgImage, "轮播标题背景图片", 1080, 120);
+                    const titleBgImage = await ImageNodeBuilder.insertImage(this.content.titleBgImage, "标题背景图片", 1080, 120);
                     if (titleBgImage) {
                         titleBgImage.x = 0;
                         titleBgImage.y = 0;
-                        NodeUtils.safeAppendChild(titleContainer, titleBgImage, '轮播标题背景图片添加');
+                        NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
                     }
                 }
                 catch (error) {
-                    console.error('轮播标题背景图片创建失败:', error);
+                    console.error('标题背景图片创建失败:', error);
                 }
-                // 添加标题文本
+            }
+            // 添加标题文本 - 48px字体，白色，垂直居中（与活动内容模块一致）
+            if (this.content.title) {
                 const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
-                titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-                titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
+                titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 白色
+                titleText.resize(1080, titleText.height);
                 titleText.textAlignHorizontal = "CENTER";
                 titleText.x = 0;
-                titleText.y = (120 - titleText.height) / 2; // 垂直居中
-                NodeUtils.safeAppendChild(titleContainer, titleText, '轮播标题文本添加');
-                NodeUtils.safeAppendChild(this.frame, titleContainer, '轮播标题容器添加');
+                titleText.y = (120 - titleText.height) / 2; // 垂直居中（与活动内容模块一致）
+                NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
             }
-            else {
-                // 没有背景图片时，直接添加文本标题
-                const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
-                titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-                titleText.resize(CONSTANTS.MODULE_WIDTH, titleText.height);
-                titleText.textAlignHorizontal = "CENTER";
-                NodeUtils.safeAppendChild(this.frame, titleText, '轮播标题添加');
-            }
+            NodeUtils.safeAppendChild(this.frame, titleContainer, '标题容器添加');
         }
-        // 添加轮播容器
-        async addCarouselContainer() {
-            if (!this.content.carouselImages || this.content.carouselImages.length === 0) {
-                console.warn('没有轮播图片，跳过轮播容器创建');
-                return;
-            }
-            console.log('创建轮播容器...');
-            // 创建轮播主容器
-            const carouselContainer = NodeUtils.createFrame("轮播容器", CONSTANTS.MODULE_WIDTH, this.CAROUSEL_HEIGHT);
-            // 如果有轮播背景图，设置背景图
+        // 添加轮播预览区域 - 精确按Figma设计实现
+        async addCarouselPreview() {
+            console.log('添加轮播预览区域');
+            // 创建轮播预览容器
+            const carouselPreview = NodeUtils.createFrame("轮播图预览", 1080, this.CAROUSEL_AREA_HEIGHT);
+            carouselPreview.fills = []; // 透明背景
+            NodeUtils.setupAutoLayout(carouselPreview, 'VERTICAL', 0, 0);
+            // 添加轮播区域
+            await this.addCarouselArea(carouselPreview);
+            // 添加轮播按钮
+            await this.addCarouselButtons(carouselPreview);
+            NodeUtils.safeAppendChild(this.frame, carouselPreview, '轮播预览区域添加');
+        }
+        // 添加轮播区域 - 包含轮播图背景和轮播图
+        async addCarouselArea(parent) {
+            console.log('添加轮播区域 - 1080x607px');
+            // 创建轮播区域容器
+            const carouselArea = NodeUtils.createFrame("轮播区域", 1080, this.CAROUSEL_AREA_HEIGHT);
+            carouselArea.fills = []; // 透明背景
+            // 添加轮播图背景 - 1000x540px，白色，居中
+            const carouselBg = NodeUtils.createFrame("轮播图背景", this.CAROUSEL_BG_WIDTH, this.CAROUSEL_BG_HEIGHT);
             if (this.content.carouselBgImage) {
+                // 使用用户上传的背景图片
                 try {
-                    const bgImage = await ImageNodeBuilder.insertImage(this.content.carouselBgImage, "轮播背景图片", CONSTANTS.MODULE_WIDTH, this.CAROUSEL_HEIGHT);
+                    const bgImage = await ImageNodeBuilder.insertImage(this.content.carouselBgImage, "轮播图背景图片", this.CAROUSEL_BG_WIDTH, this.CAROUSEL_BG_HEIGHT);
                     if (bgImage) {
                         bgImage.x = 0;
                         bgImage.y = 0;
-                        NodeUtils.safeAppendChild(carouselContainer, bgImage, '轮播背景图片添加');
+                        NodeUtils.safeAppendChild(carouselBg, bgImage, '轮播图背景图片添加');
                     }
                 }
                 catch (error) {
-                    console.error('轮播背景图片创建失败:', error);
+                    console.error('轮播图背景图片创建失败:', error);
+                    // 失败时使用默认白色背景
+                    carouselBg.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
                 }
             }
             else {
-                // 没有背景图时使用默认背景色
-                carouselContainer.fills = [ColorUtils.createSolidFill({ r: 0.1, g: 0.1, b: 0.1 })]; // 深灰色背景
+                // 默认白色背景
+                carouselBg.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
             }
-            carouselContainer.cornerRadius = 16; // 圆角
-            // 添加轮播图片区域
-            await this.addCarouselImages(carouselContainer);
-            NodeUtils.safeAppendChild(this.frame, carouselContainer, '轮播容器添加');
-        }
-        // 添加轮播图片
-        async addCarouselImages(container) {
-            console.log('添加轮播图片...');
-            const imageContainer = NodeUtils.createFrame("轮播图片容器", CONSTANTS.MODULE_WIDTH, this.IMAGE_HEIGHT);
-            imageContainer.fills = []; // 透明背景
-            imageContainer.y = 0;
-            // 只显示第一张图片作为静态展示
-            if (this.content.carouselImages[0] && this.content.carouselImages[0].image) {
+            // 轮播图背景居中定位
+            carouselBg.x = (1080 - this.CAROUSEL_BG_WIDTH) / 2; // 水平居中
+            carouselBg.y = (this.CAROUSEL_AREA_HEIGHT - this.CAROUSEL_BG_HEIGHT) / 2 + 0.5; // 垂直居中偏移0.5px
+            NodeUtils.safeAppendChild(carouselArea, carouselBg, '轮播图背景添加');
+            // 添加轮播图 - 960x500px，居中在背景上
+            if (this.content.carouselImage) {
                 try {
-                    const firstImage = await ImageNodeBuilder.insertImage(this.content.carouselImages[0].image, `轮播图片_1`, CONSTANTS.MODULE_WIDTH, this.IMAGE_HEIGHT);
-                    if (firstImage) {
-                        firstImage.x = 0;
-                        firstImage.y = 0;
-                        // 设置图片填充模式为适应
-                        firstImage.resize(CONSTANTS.MODULE_WIDTH, this.IMAGE_HEIGHT);
-                        NodeUtils.safeAppendChild(imageContainer, firstImage, '轮播图片添加');
+                    const carouselImageNode = await ImageNodeBuilder.insertImage(this.content.carouselImage, "轮播图", this.CAROUSEL_IMAGE_WIDTH, this.CAROUSEL_IMAGE_HEIGHT);
+                    if (carouselImageNode) {
+                        // 轮播图居中定位
+                        carouselImageNode.x = (1080 - this.CAROUSEL_IMAGE_WIDTH) / 2; // 水平居中
+                        carouselImageNode.y = (this.CAROUSEL_AREA_HEIGHT - this.CAROUSEL_IMAGE_HEIGHT) / 2 + 0.5; // 垂直居中偏移0.5px
+                        NodeUtils.safeAppendChild(carouselArea, carouselImageNode, '轮播图添加');
                     }
                 }
                 catch (error) {
-                    console.error('轮播图片创建失败:', error);
+                    console.error('轮播图创建失败:', error);
+                    // 创建红色占位矩形
+                    const placeholder = figma.createRectangle();
+                    placeholder.name = "轮播图";
+                    placeholder.resize(this.CAROUSEL_IMAGE_WIDTH, this.CAROUSEL_IMAGE_HEIGHT);
+                    placeholder.fills = [ColorUtils.createSolidFill({ r: 1, g: 0.3, b: 0.3 })]; // 红色占位
+                    placeholder.x = (1080 - this.CAROUSEL_IMAGE_WIDTH) / 2;
+                    placeholder.y = (this.CAROUSEL_AREA_HEIGHT - this.CAROUSEL_IMAGE_HEIGHT) / 2 + 0.5;
+                    NodeUtils.safeAppendChild(carouselArea, placeholder, '轮播图占位添加');
                 }
             }
-            NodeUtils.safeAppendChild(container, imageContainer, '轮播图片容器添加');
+            NodeUtils.safeAppendChild(parent, carouselArea, '轮播区域添加');
         }
-        // 调整框架高度
-        adjustFrameHeight() {
-            // 自动布局会自动调整高度，无需手动设置
-            console.log('轮播模块框架高度已自动调整');
+        // 添加轮播按钮 - 按Figma设计：5个圆形按钮，第一个为长椭圆
+        async addCarouselButtons(parent) {
+            console.log('添加轮播按钮');
+            // 创建轮播按钮容器
+            const buttonsContainer = NodeUtils.createFrame("轮播按钮", 300, this.BUTTON_HEIGHT);
+            buttonsContainer.fills = []; // 透明背景
+            NodeUtils.setupAutoLayout(buttonsContainer, 'HORIZONTAL', 24, 0); // 水平布局，间距24px
+            // 第一个按钮 - 长椭圆形，活跃状态
+            const activeButton = figma.createEllipse();
+            activeButton.name = "活跃按钮";
+            activeButton.resize(60, this.BUTTON_HEIGHT);
+            activeButton.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 白色填充
+            NodeUtils.safeAppendChild(buttonsContainer, activeButton, '活跃按钮添加');
+            // 其他4个按钮 - 圆形，非活跃状态
+            for (let i = 1; i < 5; i++) {
+                const button = figma.createEllipse();
+                button.name = `按钮${i + 1}`;
+                button.resize(this.BUTTON_HEIGHT, this.BUTTON_HEIGHT);
+                button.fills = []; // 透明填充
+                button.strokes = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 白色边框
+                button.strokeWeight = 2;
+                NodeUtils.safeAppendChild(buttonsContainer, button, `按钮${i + 1}添加`);
+            }
+            // 按钮容器居中
+            buttonsContainer.x = (1080 - buttonsContainer.width) / 2;
+            NodeUtils.safeAppendChild(parent, buttonsContainer, '轮播按钮容器添加');
         }
     }
     // ==================== 活动内容构建器 ====================
