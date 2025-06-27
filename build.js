@@ -19,6 +19,16 @@ function runCommand(command) {
   });
 }
 
+// 创建内容生成函数
+function createContentHeader(type, description) {
+    return [
+        `// H5Tools UI ${type}`,
+        `// ${description}`,
+        `// 构建时间: ${new Date().toISOString()}`,
+        ''
+    ].join('\n');
+}
+
 // 构建核心库
 async function buildCore() {
   console.log('🔧 构建核心库...');
@@ -47,6 +57,7 @@ function buildHTML() {
     console.log('📄 开始构建HTML文件...');
     
     let htmlContent = fs.readFileSync('src/ui/index.html', 'utf8');
+    let jsContent = ''; // 初始化 jsContent
     
     // 读取并处理CSS文件
   const cssFiles = [
@@ -56,6 +67,8 @@ function buildHTML() {
       ...glob.sync('src/ui/styles/components/*.css'),
       ...glob.sync('src/ui/styles/themes/*.css')
     ];
+
+    const cssHeader = createContentHeader('CSS', '外联CSS文件，通过CDN加载');
     
     let cssContent = '';
     cssFiles.forEach(file => {
@@ -96,9 +109,7 @@ function buildHTML() {
       'src/ui/scripts/global-init.js'  // 🚨 最后执行，确保所有类都已定义
     ];
     
-    let jsContent = '// H5Tools UI Scripts\n';
-    jsContent += '// 外联JavaScript文件，通过CDN加载\n';
-    jsContent += `// 构建时间: ${new Date().toISOString()}\n\n`;
+    const jsHeader = createContentHeader('Scripts', 'JavaScript 文件');
     
     jsFiles.forEach(file => {
       if (fs.existsSync(file)) {
