@@ -112,7 +112,14 @@ body {
 }
 
 .svg-sprite {
-  display: none;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  display: block !important;
 }
 /* 布局样式 */
 .page-footer {
