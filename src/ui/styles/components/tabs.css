@@ -35,29 +35,31 @@
   color: #FFFFFF;
 }
 
+/* 标签图标样式 */
 .tab svg {
-  width: 20px;
-  height: 20px;
-  display: block;
+  width: 20px;                /* 设置图标宽度为20像素 */
+  height: 20px;               /* 设置图标高度为20像素 */
+  display: block;             /* 将图标设置为块级元素 */
 }
 
+/* 标签文本样式 */
 .tab-label {
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
+  font-size: 16px;                /* 设置字体大小为12像素 */
+  line-height: 1;                 /* 设置行高为1，即与字体大小相同 */
+  white-space: nowrap;            /* 防止文本换行，保持在一行内显示 */
 }
 
 /* 内容区域 */
 .tab-content {
-  display: none;
-  padding: 8px 16px 16px 16px;
-  margin: 0;
-  width: 100%;
-  flex: 1;
-  background-color: #ffffff;
-  overflow-y: auto;
-  overflow-x: hidden;
-  box-sizing: border-box;
+  display: none;                    /* 初始状态下隐藏内容 */
+  padding: 60px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
+  margin: 0;                        /* 移除外边距 */
+  width: 100%;                      /* 宽度占满父容器 */
+  flex: 1;                          /* 在flex容器中占用剩余空间 */
+  background-color: #ffffff;        /* 设置背景颜色为白色 */
+  overflow-y: auto;                 /* 垂直方向内容溢出时显示滚动条 */
+  overflow-x: hidden;               /* 水平方向内容溢出时隐藏 */
+  box-sizing: border-box;           /* 将padding和border包含在元素的总宽高中 */
 }
 
 .tab-content.active {
