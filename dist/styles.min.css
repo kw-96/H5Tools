@@ -16,9 +16,22 @@
   background: transparent;
 }
 
+/* SVG Sprite样式 */
+.svg-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+svg {
+  fill: currentColor;
+}
+
 body {
   margin: 0;
-  padding: 0;
+  padding: 48px 0 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #1d1d1f;
   background-color: #ffffff;
@@ -31,7 +44,7 @@ body {
   max-width: 100%;
   margin: 0 auto;
   overflow-x: hidden;
-  height: 100vh;
+  height: calc(100vh - 48px);
   display: flex;
   flex-direction: column;
   padding-bottom: 40px;
@@ -1099,7 +1112,7 @@ input.color-value {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.95);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
@@ -1109,7 +1122,7 @@ input.color-value {
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 56px;
+  height: 48px;
   box-sizing: border-box;
 }
 
@@ -1120,7 +1133,7 @@ input.color-value {
   justify-content: center;
   flex: 1;
   width: 25%;
-  padding: 8px 4px;
+  padding: 4px;
   border-radius: 8px;
   transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
   cursor: pointer;
@@ -1130,7 +1143,8 @@ input.color-value {
 .tab svg {
   width: 20px;
   height: 20px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  display: block;
 }
 
 .tab-label {
@@ -1155,15 +1169,16 @@ input.color-value {
   padding: 8px 16px 16px 16px;
   margin: 0;
   width: 100%;
+  flex: 1;
   background-color: #ffffff;
   overflow-y: auto;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .tab-content.active {
   display: block;
   animation: fadeIn 0.3s ease-in-out;
-  position: relative;
 } 
 /* 上传和预览组件 */
 .file-upload-btn, 
