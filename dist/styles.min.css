@@ -1094,36 +1094,31 @@ input.color-value {
 }
 /* 标签页和导航 */
 .tab-container {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 6px 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  height: 48px;
-  box-sizing: border-box;
+  display: flex;                                /* 使用弹性布局 */
+  width: 100%;                                  /* 宽度占满父容器 */
+  justify-content: space-between;               /* 子元素之间平均分配空间 */
+  background-color: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
+  -webkit-backdrop-filter: blur(20px);          /* Safari浏览器背景模糊效果 */
+  backdrop-filter: blur(20px);                  /* 标准背景模糊效果 */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);  /* 底部添加细边框 */
+  padding: 6px 0;                               /* 上下内边距 */
+
 }
 
+/* 标签样式 */
 .tab {
-  flex: 1;
-  height: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  transition: color 0.2s ease;
-  user-select: none;
-  -webkit-user-select: none;
+  flex: 1;                          /* 平均分配容器空间 */
+  height: 60px;                     /* 固定高度 */
+  display: flex;                    /* 使用弹性布局 */
+  flex-direction: column;           /* 垂直排列子元素 */
+  align-items: center;              /* 水平居中对齐 */
+  justify-content: center;          /* 垂直居中对齐 */
+  gap: 4px;                         /* 子元素间距 */
+  color: rgba(255, 255, 255, 0.5);  /* 半透明白色文字 */
+  cursor: pointer;                  /* 鼠标悬停时显示手型光标 */
+  transition: color 0.2s ease;      /* 颜色过渡动画 */
+  user-select: none;                /* 禁止文本选择 */
+  -webkit-user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
 }
 
 .tab:hover {
