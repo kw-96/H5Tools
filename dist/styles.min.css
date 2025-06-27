@@ -34,7 +34,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 60px;
+  padding-top: 40px;
   padding-bottom: 40px;
 }
 
@@ -193,7 +193,7 @@ button {
   cursor: pointer;
   transition: all 0.2s;
   background-color: transparent;
-  position: relative;
+  overflow: hidden;
 }
 
 .control-btn:hover {
@@ -206,18 +206,13 @@ button {
 
 .collapse-btn svg {
   width: 12px;
-  height: 7px;
+  height: 8px;
   color: inherit;
   fill: currentColor;
   stroke: currentColor;
   transition: transform 0.3s ease;
   display: block;
   flex-shrink: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transform-origin: center;
 }
 
 .chevron-icon {
@@ -229,7 +224,7 @@ button {
 
 .collapse-btn.collapsed svg,
 .collapse-btn.collapsed .chevron-icon {
-  transform: translate(-50%, -50%) rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .add-btn {
