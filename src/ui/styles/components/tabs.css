@@ -60,7 +60,7 @@
 /* 内容区域 */
 .tab-content {
   display: none;                    /* 初始状态下隐藏内容 */
-  padding: 60px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
+  padding: 8px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
   margin: 0;                        /* 移除外边距 */
   width: 100%;                      /* 宽度占满父容器 */
   flex: 1;                          /* 在flex容器中占用剩余空间 */
