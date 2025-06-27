@@ -110,6 +110,10 @@ body {
 .visually-hidden {
   display: none !important;
 }
+
+.svg-sprite {
+  display: none;
+}
 /* 布局样式 */
 .page-footer {
   width: 100%;

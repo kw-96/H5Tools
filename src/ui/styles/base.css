@@ -110,3 +110,7 @@ body {
 .visually-hidden {
   display: none !important;
 }
+
+.svg-sprite {
+  display: none;
+}
