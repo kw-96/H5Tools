@@ -34,8 +34,6 @@ button {
 }
 
 .collapse-btn svg {
-  width: 10px;
-  height: 6px;
   color: inherit;
   fill: currentColor;
   transition: transform 0.3s ease;

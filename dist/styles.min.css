@@ -110,17 +110,6 @@ body {
   display: none !important;
 }
 
-.svg-sprite {
-  width: 0 !important;
-  height: 0 !important;
-  position: absolute !important;
-  left: -9999px !important;
-  top: -9999px !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
-  display: block !important;
-  visibility: hidden !important;
-}
 /* 布局样式 */
 .page-footer {
   width: 100%;
@@ -215,8 +204,6 @@ button {
 }
 
 .collapse-btn svg {
-  width: 10px;
-  height: 6px;
   color: inherit;
   fill: currentColor;
   transition: transform 0.3s ease;
@@ -725,8 +712,8 @@ input[type="text"],
   border-radius: 8px;
   background-color: #ffffff;
   transition: all 0.2s;
-  appearance: none;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 .text-area {
@@ -793,8 +780,8 @@ input.color-value {
 }
 
 .section-dropdown {
-  appearance: none;
   -webkit-appearance: none;
+  appearance: none;
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid rgba(0, 0, 0, 0.1);

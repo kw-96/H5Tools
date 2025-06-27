@@ -1,5 +1,9 @@
 {
   "extends": [
     "development"
-  ]
+  ],
+  "connector": { "name": "chrome" },
+  "hints": {
+    "no-inline-styles": "off"
+  }
 }
