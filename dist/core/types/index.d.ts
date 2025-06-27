@@ -138,17 +138,19 @@ export interface ChannelGenerateMessage extends BasePluginMessage {
 export interface SimpleMessage extends BasePluginMessage {
     type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
 }
-export interface StorageMessage extends BasePluginMessage {
+export type StorageMessage = {
     type: 'storage-set' | 'storage-delete';
-    key?: string;
-    value?: string;
-}
+    key: string;
+    value?: unknown;
+};
 export type PluginMessage = {
     type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'channel-image-upload' | 'channel-generate' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
     config?: H5Config;
     theme?: string;
     message?: string;
     data?: Record<string, unknown>;
+    key?: string;
+    value?: unknown;
 };
 export interface H5Config {
     pageTitle: string;

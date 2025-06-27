@@ -1,5 +1,11 @@
 // ==================== 主应用初始化和消息处理 ====================
 
+// 应用初始化状态
+const AppState = {
+  initialized: false,
+  initializationPromise: null
+};
+
 // 等待所有模块加载完成后初始化
 function waitForModules() {
   return new Promise((resolve) => {
@@ -97,43 +103,66 @@ function registerMessageHandlers() {
 
 // 初始化应用 (全局函数，供global-init.js调用)
 window.initializeApp = async function() {
+  // 防止重复初始化
+  if (AppState.initialized) {
+    console.log('⚠️ 应用已经初始化，跳过重复初始化');
+    return;
+  }
+
+  // 如果正在初始化，等待完成
+  if (AppState.initializationPromise) {
+    console.log('⚠️ 应用正在初始化，等待完成...');
+    await AppState.initializationPromise;
+    return;
+  }
+
   try {
-    console.log('🚀 开始初始化H5Tools应用...');
-    
-    // 等待所有模块加载完成
-    await waitForModules();
-    
-    // 注册消息处理器
-    registerMessageHandlers();
-    
-    // 🎯 强制显示UI内容 - 修复空白页面问题
-    forceShowUI();
-    
-    // 初始化UI控制器
-    if (window.uiController) {
-    window.uiController.init();
-    } else {
-      console.warn('⚠️ UIController未加载，使用备用初始化');
-      fallbackUIInit();
-    }
-    
-    // 设置全局事件监听器
-    setupEventListeners();
-    
-    // 初始化主题系统（可选）
-    initializeThemeSystem();
-    
-    console.log('✅ H5Tools应用初始化完成');
-    
-    // 发送初始化完成消息
-    if (window.pluginComm) {
-      window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
-    }
-    
+    // 设置初始化Promise
+    AppState.initializationPromise = (async () => {
+      console.log('🚀 开始初始化H5Tools应用...');
+      
+      // 等待所有模块加载完成
+      await waitForModules();
+      
+      // 注册消息处理器
+      registerMessageHandlers();
+      
+      // 🎯 强制显示UI内容 - 修复空白页面问题
+      forceShowUI();
+      
+      // 初始化UI控制器
+      if (window.uiController) {
+        window.uiController.init();
+      } else {
+        console.warn('⚠️ UIController未加载，使用备用初始化');
+        fallbackUIInit();
+      }
+      
+      // 设置全局事件监听器
+      setupEventListeners();
+      
+      // 初始化主题系统（可选）
+      initializeThemeSystem();
+      
+      console.log('✅ H5Tools应用初始化完成');
+      
+      // 发送初始化完成消息（确保只发送一次）
+      if (window.pluginComm && !AppState.initialized) {
+        window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
+      }
+
+      // 标记初始化完成
+      AppState.initialized = true;
+    })();
+
+    await AppState.initializationPromise;
   } catch (error) {
     console.error('❌ 应用初始化失败:', error);
     // 即使初始化失败，也尝试显示基础UI
     forceShowUI();
+    // 重置初始化状态，允许重试
+    AppState.initialized = false;
+    AppState.initializationPromise = null;
   }
 };
 

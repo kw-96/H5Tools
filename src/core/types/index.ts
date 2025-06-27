@@ -212,11 +212,11 @@ export interface SimpleMessage extends BasePluginMessage {
   type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
 }
 
-export interface StorageMessage extends BasePluginMessage {
+export type StorageMessage = {
   type: 'storage-set' | 'storage-delete';
-  key?: string;
-  value?: string;
-}
+  key: string;
+  value?: unknown;
+};
 
 // 联合类型
 export type PluginMessage = {
@@ -228,6 +228,8 @@ export type PluginMessage = {
   theme?: string;
   message?: string;
   data?: Record<string, unknown>;
+  key?: string;
+  value?: unknown;
 };
 
 // ==================== H5配置接口 ====================

@@ -9,7 +9,8 @@ import {
   H5Config, 
   PluginMessage,
   ChannelImageMessage,
-  ChannelGenerateMessage
+  ChannelGenerateMessage,
+  StorageMessage
 } from '../core/types';
 import { 
   createH5Prototype 
@@ -22,13 +23,23 @@ import { ConfigService, ThemeService } from '../core/services';
 class MessageHandler {
   async handleMessage(msg: PluginMessage): Promise<void> {
     try {
+      // 提前声明所有变量
+      let setMsg: StorageMessage;
+      let deleteMsg: StorageMessage;
+
       switch (msg.type) {
         case 'create-prototype':
         case 'generate':
+          if (!msg.config) {
+            throw new Error('配置信息不能为空');
+          }
           await this.handleCreatePrototype(msg.config);
           break;
         case 'save-config':
-          await this.handleSaveConfig(msg.config!);
+          if (!msg.config) {
+            throw new Error('配置信息不能为空');
+          }
+          await this.handleSaveConfig(msg.config);
           break;
         case 'load-config':
           await this.handleLoadConfig();
@@ -37,7 +48,10 @@ class MessageHandler {
           await this.handleGetTheme();
           break;
         case 'save-theme':
-          await this.handleSaveTheme(msg.theme!);
+          if (!msg.theme) {
+            throw new Error('主题信息不能为空');
+          }
+          await this.handleSaveTheme(msg.theme);
           break;
         case 'channel-image-upload':
           await this.handleChannelImageUpload(msg as ChannelImageMessage);
@@ -46,10 +60,18 @@ class MessageHandler {
           await this.handleGenerateChannelVersion(msg as ChannelGenerateMessage);
           break;
         case 'storage-set':
-          await this.handleStorageSet((msg as any).key, (msg as any).value);
+          setMsg = msg as StorageMessage;
+          if (!setMsg.key || setMsg.value === undefined) {
+            throw new Error('存储键和值不能为空');
+          }
+          await this.handleStorageSet(setMsg.key, setMsg.value);
           break;
         case 'storage-delete':
-          await this.handleStorageDelete((msg as any).key);
+          deleteMsg = msg as StorageMessage;
+          if (!deleteMsg.key) {
+            throw new Error('存储键不能为空');
+          }
+          await this.handleStorageDelete(deleteMsg.key);
           break;
         case 'ui-loaded':
           console.log('UI界面已加载');
@@ -64,7 +86,7 @@ class MessageHandler {
       console.error('处理消息失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `操作失败: ${error}`
+        message: `操作失败: ${error instanceof Error ? error.message : String(error)}`
       });
     }
   }
@@ -85,7 +107,7 @@ class MessageHandler {
       console.error('创建H5原型失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `创建H5原型失败: ${error}`
+        message: `创建H5原型失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -102,7 +124,7 @@ class MessageHandler {
       console.error('保存配置失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `保存配置失败: ${error}`
+        message: `保存配置失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -119,7 +141,7 @@ class MessageHandler {
       console.error('加载配置失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `加载配置失败: ${error}`
+        message: `加载配置失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -136,7 +158,7 @@ class MessageHandler {
       console.error('获取主题失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `获取主题失败: ${error}`
+        message: `获取主题失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -153,7 +175,7 @@ class MessageHandler {
       console.error('保存主题失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `保存主题失败: ${error}`
+        message: `保存主题失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -174,7 +196,7 @@ class MessageHandler {
       console.error('渠道图片上传失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `渠道图片上传失败: ${error}`
+        message: `渠道图片上传失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
@@ -197,13 +219,13 @@ class MessageHandler {
       console.error('生成渠道版本失败:', error);
       figma.ui.postMessage({
         type: 'error',
-        message: `生成${msg.channel.toUpperCase()}渠道版本失败: ${error}`
+        message: `生成${msg.channel.toUpperCase()}渠道版本失败: ${error instanceof Error ? error.message : String(error)}`
       });
       throw error;
     }
   }
 
-  private async handleStorageSet(key: string, value: any): Promise<void> {
+  private async handleStorageSet(key: string, value: unknown): Promise<void> {
     try {
       await figma.clientStorage.setAsync(key, value);
       console.log(`✅ Figma存储设置成功: ${key}`);
