@@ -38,19 +38,8 @@ button {
 }
 
 .collapse-btn svg {
-  width: 12px !important;
-  height: 7px !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: 12px !important;
-  max-height: 7px !important;
   display: block;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  flex-grow: 0;
-  align-self: center;
-  justify-self: center;
+  margin: auto;
 }
 
 .collapse-btn.collapsed svg {
