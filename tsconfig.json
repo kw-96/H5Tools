@@ -1,42 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["ES2017", "DOM"],
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "declaration": false,
+    "target": "ES2015",
+    "module": "ES2020",
+    "lib": ["ES2015", "DOM"],
+    "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "dist/plugin",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
+    "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
       "@core/*": ["src/core/*"],
       "@plugin/*": ["src/plugin/*"],
       "@ui/*": ["src/ui/*"]
-    }
+    },
+    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/core/types"
+    ],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts",
-    "code.ts"
+    "**/*.spec.ts"
   ]
 }

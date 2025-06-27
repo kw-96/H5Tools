@@ -53,8 +53,6 @@ class StorageAdapter {
       return Object.keys(localStorage);
     }
   }
-
-
 }
 
 // ==================== 配置管理服务 ====================
@@ -422,52 +420,74 @@ export class ValidationService {
 
 // ==================== 服务管理器 ====================
 
+// 服务模块导出
+export * from './storage.service';
+export * from './theme.service';
+export * from './plugin-service';
+export * from './config.service';
+export * from './channel-image.service';
+export * from './validation.service';
+
+// 服务管理器
 export class ServiceManager {
-  static readonly config = ConfigService;
-  static readonly theme = ThemeService;
-  static readonly channelImage = ChannelImageService;
-  static readonly validation = ValidationService;
-  
-  // 初始化所有服务
-  static async initialize(): Promise<void> {
-    try {
-      // 清理过期数据
-      await ChannelImageService.clearExpiredChannelImages();
-      
-      // 其他初始化逻辑...
-      console.log('服务管理器初始化完成');
-    } catch (error) {
-      console.error('服务管理器初始化失败:', error);
+  static readonly config = {
+    loadConfig: async () => {
+      const { ConfigService } = await import('./config.service');
+      return ConfigService.loadConfig();
     }
+  };
+  
+  static readonly theme = {
+    getInstance: async () => {
+      const { ThemeService } = await import('./theme.service');
+      return ThemeService.getInstance();
+    }
+  };
+  
+  static readonly channelImage = {
+    clearExpiredChannelImages: async () => {
+      const { ChannelImageService } = await import('./channel-image.service');
+      return ChannelImageService.clearExpiredChannelImages();
+    },
+    getStorageUsage: async () => {
+      const { ChannelImageService } = await import('./channel-image.service');
+      return ChannelImageService.getStorageUsage();
+    }
+  };
+  
+  static readonly validation = {
+    validateH5Config: async (config: any) => {
+      const { ValidationService } = await import('./validation.service');
+      return ValidationService.validateH5Config(config);
+    }
+  };
+  
+  static async initialize(): Promise<void> {
+    // 初始化所有服务
+    await Promise.all([
+      this.config.loadConfig(),
+      this.theme.getInstance(),
+      this.channelImage.clearExpiredChannelImages()
+    ]);
   }
   
-  // 获取系统状态
   static async getSystemStatus(): Promise<{
     configLoaded: boolean;
     theme: string;
     storageUsage: { used: number; max: number; percentage: number };
   }> {
-    try {
-      const config = await ConfigService.loadConfig();
-      const theme = await ThemeService.getCurrentTheme();
-      const storageUsage = await ChannelImageService.getStorageUsage();
-      
-      return {
-        configLoaded: config !== null,
-        theme,
-        storageUsage
-      };
-    } catch (error) {
-      console.error('获取系统状态失败:', error);
-      return {
-        configLoaded: false,
-        theme: 'light',
-        storageUsage: { used: 0, max: 50 * 1024 * 1024, percentage: 0 }
-      };
-    }
+    const [config, themeInstance, storageUsage] = await Promise.all([
+      this.config.loadConfig(),
+      this.theme.getInstance(),
+      this.channelImage.getStorageUsage()
+    ]);
+    
+    const theme = await themeInstance.getCurrentTheme();
+    
+    return {
+      configLoaded: !!config,
+      theme,
+      storageUsage
+    };
   }
-}
-
-// ==================== 插件服务导出 ====================
-
-export * from './plugin-service'; 
+} 

@@ -1,10 +1,7 @@
-"use strict";
 // 渠道美术-H5延展工具 - 羽化遮罩工具
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FeatherMaskUtils = void 0;
-const figma_utils_1 = require("./figma-utils");
+import { NodeUtils } from './figma-utils';
 // ==================== 羽化遮罩工具类 ====================
-class FeatherMaskUtils {
+export class FeatherMaskUtils {
     /**
      * 为节点创建羽化遮罩效果
      * @param node 目标节点
@@ -33,11 +30,11 @@ class FeatherMaskUtils {
             maskRect.isMask = true;
             // 添加到父容器
             if (parent) {
-                figma_utils_1.NodeUtils.safeAppendChild(parent, maskContainer, '羽化遮罩容器添加');
+                NodeUtils.safeAppendChild(parent, maskContainer, '羽化遮罩容器添加');
             }
             // 移除原节点
             if (node.parent) {
-                figma_utils_1.NodeUtils.safeRemoveNode(node, '原节点移除');
+                NodeUtils.safeRemoveNode(node, '原节点移除');
             }
             return maskContainer;
         }
@@ -97,10 +94,10 @@ class FeatherMaskUtils {
             clonedNode.isMask = false;
             maskRect.isMask = true;
             // 添加到父容器
-            figma_utils_1.NodeUtils.safeAppendChild(parent, maskContainer, '自定义羽化遮罩容器添加');
+            NodeUtils.safeAppendChild(parent, maskContainer, '自定义羽化遮罩容器添加');
             // 移除原节点
             if (node.parent) {
-                figma_utils_1.NodeUtils.safeRemoveNode(node, '原节点移除');
+                NodeUtils.safeRemoveNode(node, '原节点移除');
             }
             return maskContainer;
         }
@@ -231,7 +228,7 @@ class FeatherMaskUtils {
         try {
             const maskRect = this.findMaskRectangle(node);
             if (maskRect) {
-                figma_utils_1.NodeUtils.safeRemoveNode(maskRect, '羽化遮罩移除');
+                NodeUtils.safeRemoveNode(maskRect, '羽化遮罩移除');
                 return true;
             }
             return false;
@@ -276,5 +273,4 @@ class FeatherMaskUtils {
         }
     }
 }
-exports.FeatherMaskUtils = FeatherMaskUtils;
 //# sourceMappingURL=feather-mask-utils.js.map

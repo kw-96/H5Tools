@@ -1,54 +1,64 @@
-"use strict";
 // Figma相关工具类
 // 这些工具类专门用于Figma API操作
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ImageNodeBuilder = exports.NodeUtils = exports.ColorUtils = exports.FontManager = void 0;
-exports.createTitleContainer = createTitleContainer;
-const utils_1 = require("../utils");
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { Utils, ImageUtils } from '../utils';
 // ==================== 字体管理器 ====================
-class FontManager {
-    static async loadAll() {
-        const loadPromises = this.fonts.map(async (font) => {
-            try {
-                await figma.loadFontAsync(font);
-                return { success: true, font };
-            }
-            catch (error) {
-                return { success: false, font, error };
+export class FontManager {
+    static loadAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const loadPromises = this.fonts.map((font) => __awaiter(this, void 0, void 0, function* () {
+                try {
+                    yield figma.loadFontAsync(font);
+                    return { success: true, font };
+                }
+                catch (error) {
+                    return { success: false, font, error };
+                }
+            }));
+            const results = yield Promise.all(loadPromises);
+            const failedFonts = results
+                .filter(result => !result.success)
+                .map(result => result.font);
+            if (failedFonts.length > 0) {
+                console.warn('部分字体加载失败:', failedFonts);
             }
         });
-        const results = await Promise.all(loadPromises);
-        const failedFonts = results
-            .filter(result => !result.success)
-            .map(result => result.font);
-        if (failedFonts.length > 0) {
-            console.warn('部分字体加载失败:', failedFonts);
-        }
     }
-    static async loadSingle(fontName) {
-        try {
-            await figma.loadFontAsync(fontName);
-        }
-        catch (error) {
-            console.warn(`字体加载失败: ${fontName.family} ${fontName.style}`, error);
-        }
+    static loadSingle(fontName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield figma.loadFontAsync(fontName);
+            }
+            catch (error) {
+                console.warn(`字体加载失败: ${fontName.family} ${fontName.style}`, error);
+            }
+        });
     }
     /**
      * 加载Inter字体系列（别名方法）
      * @returns Promise<void>
      */
-    static async loadInterFonts() {
-        return this.loadAll();
+    static loadInterFonts() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.loadAll();
+        });
     }
 }
-exports.FontManager = FontManager;
 FontManager.fonts = [
     { family: "Inter", style: "Regular" },
     { family: "Inter", style: "Medium" },
     { family: "Inter", style: "Bold" }
 ];
 // ==================== 颜色工具 ====================
-class ColorUtils {
+export class ColorUtils {
     static hexToRgb(hex) {
         // 处理无效输入，返回默认颜色（白色）
         if (!hex || typeof hex !== 'string' || hex.trim() === '') {
@@ -79,9 +89,8 @@ class ColorUtils {
         };
     }
 }
-exports.ColorUtils = ColorUtils;
 // ==================== 节点工具 ====================
-class NodeUtils {
+export class NodeUtils {
     // 创建一个新的Frame节点
     static createFrame(name, width, height) {
         const frame = figma.createFrame();
@@ -90,16 +99,18 @@ class NodeUtils {
         return frame;
     }
     // 创建一个新的Text节点并设置其属性
-    static async createText(text, fontSize, fontWeight = 'Regular') {
-        const textNode = figma.createText();
-        const fontName = { family: "Inter", style: fontWeight };
-        // 加载所需的字体
-        await FontManager.loadSingle(fontName);
-        // 设置文本节点的属性
-        textNode.characters = text;
-        textNode.fontSize = fontSize;
-        textNode.fontName = fontName;
-        return textNode;
+    static createText(text_1, fontSize_1) {
+        return __awaiter(this, arguments, void 0, function* (text, fontSize, fontWeight = 'Regular') {
+            const textNode = figma.createText();
+            const fontName = { family: "Inter", style: fontWeight };
+            // 加载所需的字体
+            yield FontManager.loadSingle(fontName);
+            // 设置文本节点的属性
+            textNode.characters = text;
+            textNode.fontSize = fontSize;
+            textNode.fontName = fontName;
+            return textNode;
+        });
     }
     // 为Frame节点设置自动布局属性
     static setupAutoLayout(frame, direction = 'VERTICAL', spacing = 0, padding = 0) {
@@ -192,257 +203,270 @@ class NodeUtils {
         }
     }
 }
-exports.NodeUtils = NodeUtils;
 // ==================== 图片节点构建器 ====================
-class ImageNodeBuilder {
+export class ImageNodeBuilder {
     // 创建图片对象
-    static async createImage(bytes) {
-        try {
-            return figma.createImage(bytes);
-        }
-        catch (error) {
-            console.error('图片创建失败:', error);
-            return null;
-        }
+    static createImage(bytes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return figma.createImage(bytes);
+            }
+            catch (error) {
+                console.error('图片创建失败:', error);
+                return null;
+            }
+        });
     }
     // 创建大图片的兼容方法（当figma.createImage失败时使用）
-    static async createLargeImage(bytes, width, height, name = "大图片") {
-        try {
-            // 创建矩形节点
-            const rect = figma.createRectangle();
-            rect.name = name;
-            rect.resize(width, height);
-            // 尝试通过填充方式设置图片
-            await this.fillTheSelection(rect, bytes);
-            return rect;
-        }
-        catch (error) {
-            console.error('大图片创建失败:', error);
-            return null;
-        }
+    static createLargeImage(bytes_1, width_1, height_1) {
+        return __awaiter(this, arguments, void 0, function* (bytes, width, height, name = "大图片") {
+            try {
+                // 创建矩形节点
+                const rect = figma.createRectangle();
+                rect.name = name;
+                rect.resize(width, height);
+                // 尝试通过填充方式设置图片
+                yield this.fillTheSelection(rect, bytes);
+                return rect;
+            }
+            catch (error) {
+                console.error('大图片创建失败:', error);
+                return null;
+            }
+        });
     }
     // 填充选中节点的方法（适配原始代码逻辑）
-    static async fillTheSelection(node, bytes) {
-        try {
-            // 尝试创建图片
-            const image = await this.createImage(bytes);
-            if (image) {
-                node.fills = [{
-                        type: 'IMAGE',
-                        imageHash: image.hash,
-                        scaleMode: 'FILL'
-                    }];
+    static fillTheSelection(node, bytes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // 尝试创建图片
+                const image = yield this.createImage(bytes);
+                if (image) {
+                    node.fills = [{
+                            type: 'IMAGE',
+                            imageHash: image.hash,
+                            scaleMode: 'FILL'
+                        }];
+                }
+                else {
+                    // 如果创建图片失败，设置为灰色填充
+                    node.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 })];
+                    console.warn('图片过大，使用默认填充');
+                }
             }
-            else {
-                // 如果创建图片失败，设置为灰色填充
+            catch (error) {
+                console.error('填充图片失败:', error);
+                // 设置为灰色填充作为后备方案
                 node.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 })];
-                console.warn('图片过大，使用默认填充');
             }
-        }
-        catch (error) {
-            console.error('填充图片失败:', error);
-            // 设置为灰色填充作为后备方案
-            node.fills = [ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 })];
-        }
+        });
     }
     // 创建图片填充
-    static async createImageFill(bytes, scaleMode = 'FILL') {
-        const image = await this.createImage(bytes);
-        if (image) {
-            return {
-                type: 'IMAGE',
-                imageHash: image.hash,
-                scaleMode: scaleMode
-            };
-        }
-        // 失败时返回灰色填充
-        return ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 });
+    static createImageFill(bytes_1) {
+        return __awaiter(this, arguments, void 0, function* (bytes, scaleMode = 'FILL') {
+            const image = yield this.createImage(bytes);
+            if (image) {
+                return {
+                    type: 'IMAGE',
+                    imageHash: image.hash,
+                    scaleMode: scaleMode
+                };
+            }
+            // 失败时返回灰色填充
+            return ColorUtils.createSolidFill({ r: 0.9, g: 0.9, b: 0.9 });
+        });
     }
     // 直接插入图片节点，使用前端获取的真实尺寸
-    static async insertImage(imageData, name, defaultWidth = 800, defaultHeight = 600) {
-        try {
-            let uint8Array;
-            let width;
-            let height;
-            // 处理不同的数据格式
-            if (imageData && typeof imageData === 'object' && 'data' in imageData) {
-                uint8Array = imageData.data;
-                width = imageData.width;
-                height = imageData.height;
+    static insertImage(imageData_1, name_1) {
+        return __awaiter(this, arguments, void 0, function* (imageData, name, defaultWidth = 800, defaultHeight = 600) {
+            try {
+                let uint8Array;
+                let width;
+                let height;
+                // 处理不同的数据格式
+                if (imageData && typeof imageData === 'object' && 'data' in imageData) {
+                    uint8Array = imageData.data;
+                    width = imageData.width;
+                    height = imageData.height;
+                }
+                else if (imageData instanceof Uint8Array) {
+                    uint8Array = imageData;
+                    width = defaultWidth;
+                    height = defaultHeight;
+                }
+                else {
+                    console.warn(`图片数据格式错误: ${name}`);
+                    return null;
+                }
+                if (!uint8Array || uint8Array.length === 0) {
+                    console.warn(`图片数据为空: ${name}`);
+                    return null;
+                }
+                // 检查是否超过Figma尺寸限制（4096x4096）
+                const maxSize = 4096;
+                const isOversized = ImageUtils.isOversized(width, height, maxSize);
+                if (isOversized) {
+                    return yield this.handleOversizedImage(uint8Array, width, height, name);
+                }
+                // 尝试正常创建图片
+                const image = yield this.createImage(uint8Array);
+                if (image) {
+                    const imageNode = figma.createRectangle();
+                    imageNode.name = name;
+                    imageNode.resize(width, height);
+                    imageNode.fills = [{
+                            type: 'IMAGE',
+                            imageHash: image.hash,
+                            scaleMode: 'FILL'
+                        }];
+                    return imageNode;
+                }
+                else {
+                    // 创建失败但尺寸不大，可能是其他原因
+                    console.warn(`图片创建失败: ${name}，创建占位矩形`);
+                    return this.createPlaceholderRect(width, height, name, '图片创建失败');
+                }
             }
-            else if (imageData instanceof Uint8Array) {
-                uint8Array = imageData;
-                width = defaultWidth;
-                height = defaultHeight;
-            }
-            else {
-                console.warn(`图片数据格式错误: ${name}`);
+            catch (error) {
+                console.error(`图片插入失败: ${name}`, error);
                 return null;
             }
-            if (!uint8Array || uint8Array.length === 0) {
-                console.warn(`图片数据为空: ${name}`);
-                return null;
-            }
-            // 检查是否超过Figma尺寸限制（4096x4096）
-            const maxSize = 4096;
-            const isOversized = utils_1.ImageUtils.isOversized(width, height, maxSize);
-            if (isOversized) {
-                return await this.handleOversizedImage(uint8Array, width, height, name);
-            }
-            // 尝试正常创建图片
-            const image = await this.createImage(uint8Array);
-            if (image) {
-                const imageNode = figma.createRectangle();
-                imageNode.name = name;
-                imageNode.resize(width, height);
-                imageNode.fills = [{
-                        type: 'IMAGE',
-                        imageHash: image.hash,
-                        scaleMode: 'FILL'
-                    }];
-                return imageNode;
-            }
-            else {
-                // 创建失败但尺寸不大，可能是其他原因
-                console.warn(`图片创建失败: ${name}，创建占位矩形`);
-                return this.createPlaceholderRect(width, height, name, '图片创建失败');
-            }
-        }
-        catch (error) {
-            console.error(`图片插入失败: ${name}`, error);
-            return null;
-        }
+        });
     }
     // 处理超大尺寸图片
-    static async handleOversizedImage(bytes, width, height, name) {
-        return new Promise((resolve) => {
-            const timeout = setTimeout(() => {
-                console.warn(`图片分割超时: ${name}`);
-                resolve(this.createPlaceholderRect(width, height, name, '图片尺寸过大'));
-            }, 15000); // 增加超时时间到15秒
-            // 计算最优切割策略
-            const maxSize = 4096;
-            const sliceInfo = utils_1.ImageUtils.calculateSliceStrategy(width, height, maxSize);
-            // 构建符合SliceStrategy接口的对象
-            const sliceStrategy = {
-                direction: sliceInfo.direction,
-                sliceWidth: sliceInfo.sliceWidth,
-                sliceHeight: sliceInfo.sliceHeight,
-                slicesCount: sliceInfo.slicesCount,
-                description: sliceInfo.description
-            };
-            // 向UI请求分割处理
-            figma.ui.postMessage({
-                type: 'slice-large-image',
-                imageData: {
-                    bytes: Array.from(bytes),
-                    width,
-                    height,
-                    name,
-                    type: 'image/png' // 默认类型
-                },
-                sliceWidth: sliceStrategy.sliceWidth,
-                sliceHeight: sliceStrategy.sliceHeight,
-                sliceStrategy
-            });
-            // 监听分割结果
-            const messageHandler = async (msg) => {
-                if (msg.type === 'slice-image-response' && msg.imageName === name) {
-                    clearTimeout(timeout);
-                    if (msg.success && msg.slices && msg.slices.length > 0) {
-                        try {
-                            // 完整的切片组装实现
-                            const result = await this.assembleSlicedImage(msg.slices, width, height, name, sliceStrategy);
-                            resolve(result);
+    static handleOversizedImage(bytes, width, height, name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve) => {
+                const timeout = setTimeout(() => {
+                    console.warn(`图片分割超时: ${name}`);
+                    resolve(this.createPlaceholderRect(width, height, name, '图片尺寸过大'));
+                }, 15000); // 增加超时时间到15秒
+                // 计算最优切割策略
+                const maxSize = 4096;
+                const sliceInfo = ImageUtils.calculateSliceStrategy(width, height, maxSize);
+                // 构建符合SliceStrategy接口的对象
+                const sliceStrategy = {
+                    direction: sliceInfo.direction,
+                    sliceWidth: sliceInfo.sliceWidth,
+                    sliceHeight: sliceInfo.sliceHeight,
+                    slicesCount: sliceInfo.slicesCount,
+                    description: sliceInfo.description
+                };
+                // 向UI请求分割处理
+                figma.ui.postMessage({
+                    type: 'slice-large-image',
+                    imageData: {
+                        bytes: Array.from(bytes),
+                        width,
+                        height,
+                        name,
+                        type: 'image/png' // 默认类型
+                    },
+                    sliceWidth: sliceStrategy.sliceWidth,
+                    sliceHeight: sliceStrategy.sliceHeight,
+                    sliceStrategy
+                });
+                // 监听分割结果
+                const messageHandler = (msg) => __awaiter(this, void 0, void 0, function* () {
+                    if (msg.type === 'slice-image-response' && msg.imageName === name) {
+                        clearTimeout(timeout);
+                        if (msg.success && msg.slices && msg.slices.length > 0) {
+                            try {
+                                // 完整的切片组装实现
+                                const result = yield this.assembleSlicedImage(msg.slices, width, height, name, sliceStrategy);
+                                resolve(result);
+                            }
+                            catch (error) {
+                                console.error(`图片组装失败: ${name}`, error);
+                                resolve(this.createPlaceholderRect(width, height, name, '图片组装失败'));
+                            }
                         }
-                        catch (error) {
-                            console.error(`图片组装失败: ${name}`, error);
-                            resolve(this.createPlaceholderRect(width, height, name, '图片组装失败'));
+                        else {
+                            console.warn(`图片切片失败: ${name}`, msg.error || '未知错误');
+                            resolve(this.createPlaceholderRect(width, height, name, '图片切片失败'));
                         }
+                        // 移除消息监听器
+                        figma.ui.off('message', messageHandler);
                     }
-                    else {
-                        console.warn(`图片切片失败: ${name}`, msg.error || '未知错误');
-                        resolve(this.createPlaceholderRect(width, height, name, '图片切片失败'));
-                    }
-                    // 移除消息监听器
+                });
+                figma.ui.on('message', messageHandler);
+                // 清理监听器（防止内存泄漏）
+                setTimeout(() => {
                     figma.ui.off('message', messageHandler);
-                }
-            };
-            figma.ui.on('message', messageHandler);
-            // 清理监听器（防止内存泄漏）
-            setTimeout(() => {
-                figma.ui.off('message', messageHandler);
-            }, 16000);
+                }, 16000);
+            });
         });
     }
     // 组装切片后的图片
-    static async assembleSlicedImage(slices, _totalWidth, _totalHeight, name, strategy) {
-        try {
-            figma.notify(`正在组装图片: ${name} (${strategy.description})`, { timeout: 2000 });
-            const sliceNodes = [];
-            // 创建每个图片切片
-            for (let i = 0; i < slices.length; i++) {
-                const slice = slices[i];
-                const sliceBytes = new Uint8Array(slice.bytes);
-                try {
-                    const image = await this.createImage(sliceBytes);
-                    if (image) {
-                        const sliceNode = figma.createRectangle();
-                        sliceNode.name = `${name}_slice_${i + 1}`;
-                        sliceNode.resize(slice.width, slice.height);
-                        // 设置相对位置（相对于组的原点）
-                        sliceNode.x = slice.x;
-                        sliceNode.y = slice.y;
-                        sliceNode.fills = [{
-                                type: 'IMAGE',
-                                imageHash: image.hash,
-                                scaleMode: 'FILL'
-                            }];
-                        // 不立即添加到页面，先收集所有节点
-                        sliceNodes.push(sliceNode);
+    static assembleSlicedImage(slices, _totalWidth, _totalHeight, name, strategy) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                figma.notify(`正在组装图片: ${name} (${strategy.description})`, { timeout: 2000 });
+                const sliceNodes = [];
+                // 创建每个图片切片
+                for (let i = 0; i < slices.length; i++) {
+                    const slice = slices[i];
+                    const sliceBytes = new Uint8Array(slice.bytes);
+                    try {
+                        const image = yield this.createImage(sliceBytes);
+                        if (image) {
+                            const sliceNode = figma.createRectangle();
+                            sliceNode.name = `${name}_slice_${i + 1}`;
+                            sliceNode.resize(slice.width, slice.height);
+                            // 设置相对位置（相对于组的原点）
+                            sliceNode.x = slice.x;
+                            sliceNode.y = slice.y;
+                            sliceNode.fills = [{
+                                    type: 'IMAGE',
+                                    imageHash: image.hash,
+                                    scaleMode: 'FILL'
+                                }];
+                            // 不立即添加到页面，先收集所有节点
+                            sliceNodes.push(sliceNode);
+                        }
+                        else {
+                            console.warn(`切片 ${i + 1} 图片创建失败，跳过此切片`);
+                        }
                     }
-                    else {
-                        console.warn(`切片 ${i + 1} 图片创建失败，跳过此切片`);
+                    catch (sliceError) {
+                        console.error(`切片 ${i + 1} 处理失败:`, sliceError);
                     }
                 }
-                catch (sliceError) {
-                    console.error(`切片 ${i + 1} 处理失败:`, sliceError);
+                // 创建分组
+                if (sliceNodes.length > 0) {
+                    try {
+                        // 先将所有切片批量添加到页面，然后立即分组
+                        const successCount = NodeUtils.safeBatchAppendChildren(figma.currentPage, sliceNodes, '图片切片批量添加到页面');
+                        if (successCount !== sliceNodes.length) {
+                            console.warn(`部分切片添加失败，成功：${successCount}/${sliceNodes.length}`);
+                        }
+                        // 立即创建分组，避免节点被其他操作影响
+                        const group = figma.group(sliceNodes, figma.currentPage);
+                        group.name = name;
+                        // 重新定位组到原点
+                        group.x = 0;
+                        group.y = 0;
+                        figma.notify(`图片组装完成: ${name}`, { timeout: 1000 });
+                        return group;
+                    }
+                    catch (groupError) {
+                        console.error('创建分组失败:', groupError);
+                        // 清理已创建的节点
+                        sliceNodes.forEach((node, index) => {
+                            NodeUtils.safeRemoveNode(node, `清理图片切片${index + 1}`);
+                        });
+                        throw groupError;
+                    }
+                }
+                else {
+                    throw new Error('没有成功创建任何切片');
                 }
             }
-            // 创建分组
-            if (sliceNodes.length > 0) {
-                try {
-                    // 先将所有切片批量添加到页面，然后立即分组
-                    const successCount = NodeUtils.safeBatchAppendChildren(figma.currentPage, sliceNodes, '图片切片批量添加到页面');
-                    if (successCount !== sliceNodes.length) {
-                        console.warn(`部分切片添加失败，成功：${successCount}/${sliceNodes.length}`);
-                    }
-                    // 立即创建分组，避免节点被其他操作影响
-                    const group = figma.group(sliceNodes, figma.currentPage);
-                    group.name = name;
-                    // 重新定位组到原点
-                    group.x = 0;
-                    group.y = 0;
-                    figma.notify(`图片组装完成: ${name}`, { timeout: 1000 });
-                    return group;
-                }
-                catch (groupError) {
-                    console.error('创建分组失败:', groupError);
-                    // 清理已创建的节点
-                    sliceNodes.forEach((node, index) => {
-                        NodeUtils.safeRemoveNode(node, `清理图片切片${index + 1}`);
-                    });
-                    throw groupError;
-                }
+            catch (error) {
+                console.error('图片组装失败:', error);
+                throw error;
             }
-            else {
-                throw new Error('没有成功创建任何切片');
-            }
-        }
-        catch (error) {
-            console.error('图片组装失败:', error);
-            throw error;
-        }
+        });
     }
     // 创建占位矩形
     static createPlaceholderRect(width, height, name, reason = '未知原因') {
@@ -479,45 +503,48 @@ class ImageNodeBuilder {
         return rect;
     }
     // 设置图片填充
-    static async setImageFill(node, imageData, scaleMode = 'FILL') {
-        if (!imageData)
-            return;
-        const bytes = utils_1.Utils.extractUint8Array(imageData);
-        if (!bytes)
-            return;
-        try {
-            const imageFill = await this.createImageFill(bytes, scaleMode);
-            node.fills = [imageFill];
-        }
-        catch (error) {
-            console.error('设置图片填充失败:', error);
-        }
+    static setImageFill(node_1, imageData_1) {
+        return __awaiter(this, arguments, void 0, function* (node, imageData, scaleMode = 'FILL') {
+            if (!imageData)
+                return;
+            const bytes = Utils.extractUint8Array(imageData);
+            if (!bytes)
+                return;
+            try {
+                const imageFill = yield this.createImageFill(bytes, scaleMode);
+                node.fills = [imageFill];
+            }
+            catch (error) {
+                console.error('设置图片填充失败:', error);
+            }
+        });
     }
 }
-exports.ImageNodeBuilder = ImageNodeBuilder;
 // ==================== 标题容器创建函数 ====================
-async function createTitleContainer(title, bgImage, width, height, fontSize = 24, fontWeight = 'Bold') {
-    // 创建容器框架
-    const container = NodeUtils.createFrame('标题容器', width, height);
-    // 如果有背景图片，设置背景
-    if (bgImage) {
-        await ImageNodeBuilder.setImageFill(container, bgImage);
-    }
-    else {
-        // 默认背景色
-        container.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
-    }
-    // 创建标题文本
-    if (title) {
-        const titleText = await NodeUtils.createText(title, fontSize, fontWeight);
-        titleText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })];
-        titleText.textAlignHorizontal = 'CENTER';
-        titleText.textAlignVertical = 'CENTER';
-        // 居中定位
-        titleText.x = (width - titleText.width) / 2;
-        titleText.y = (height - titleText.height) / 2;
-        container.appendChild(titleText);
-    }
-    return container;
+export function createTitleContainer(title_1, bgImage_1, width_1, height_1) {
+    return __awaiter(this, arguments, void 0, function* (title, bgImage, width, height, fontSize = 24, fontWeight = 'Bold') {
+        // 创建容器框架
+        const container = NodeUtils.createFrame('标题容器', width, height);
+        // 如果有背景图片，设置背景
+        if (bgImage) {
+            yield ImageNodeBuilder.setImageFill(container, bgImage);
+        }
+        else {
+            // 默认背景色
+            container.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+        }
+        // 创建标题文本
+        if (title) {
+            const titleText = yield NodeUtils.createText(title, fontSize, fontWeight);
+            titleText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })];
+            titleText.textAlignHorizontal = 'CENTER';
+            titleText.textAlignVertical = 'CENTER';
+            // 居中定位
+            titleText.x = (width - titleText.width) / 2;
+            titleText.y = (height - titleText.height) / 2;
+            container.appendChild(titleText);
+        }
+        return container;
+    });
 }
 //# sourceMappingURL=figma-utils.js.map

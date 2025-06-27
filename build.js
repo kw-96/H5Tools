@@ -1,19 +1,180 @@
 // H5Tools 主构建脚本 - 外部CSS版本
 // 统一构建脚本，包含核心库、插件和外部CSS版本构建
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { glob } from 'glob';
+import { execSync } from 'child_process';
+import crypto from 'crypto';
+import cssnano from 'cssnano';
+import { minify } from 'terser';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// 构建配置
+const BUILD_CONFIG = {
+  paths: {
+    dist: 'dist',
+    core: path.join('src', 'core'),
+    plugin: path.join('src', 'plugin'),
+    ui: {
+      root: path.join('src', 'ui'),
+      styles: path.join('src', 'ui', 'styles'),
+      scripts: path.join('src', 'ui', 'scripts'),
+      html: path.join('src', 'ui', 'index.html')
+    }
+  },
+  cdn: {
+    baseUrl: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist',
+    timeout: 10000,
+    retryDelay: 1000,
+    baseUrl: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist'
+  }
+};
+
+// 构建状态跟踪
+const BUILD_STATE = {
+  startTime: 0,
+  errors: [],
+  warnings: [],
+  stats: {
+    cssSize: 0,
+    jsSize: 0,
+    htmlSize: 0
+  },
+  timers: {}
+};
+
+// 日志工具
+const logger = {
+  log: (message) => console.log(message),
+  info: (message) => console.log(`ℹ️ ${message}`),
+  success: (message) => console.log(`✅ ${message}`),
+  warn: (message) => {
+    console.warn(`⚠️ ${message}`);
+    BUILD_STATE.warnings.push(message);
+  },
+  error: (message, error) => {
+    const errorMessage = error ? `${message}: ${error.message}` : message;
+    console.error(`❌ ${errorMessage}`);
+    BUILD_STATE.errors.push(errorMessage);
+    if (error?.stack) {
+      console.error(error.stack);
+    }
+  }
+};
+
+// 性能监控工具
+const performance = {
+  start(label) {
+    BUILD_STATE.timers = BUILD_STATE.timers || {};
+    BUILD_STATE.timers[label] = Date.now();
+  },
+  end(label) {
+    if (!BUILD_STATE.timers?.[label]) return 0;
+    const duration = Date.now() - BUILD_STATE.timers[label];
+    delete BUILD_STATE.timers[label];
+    return duration;
+  }
+};
+
+// 文件处理工具
+const fileUtils = {
+  // 检查并创建目录
+  ensureDir(dir) {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      logger.info(`创建目录: ${dir}`);
+    }
+  },
+
+  // 清理目录
+  cleanDir(dir) {
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+      logger.info(`清理目录: ${dir}`);
+    }
+    this.ensureDir(dir);
+  },
+
+  // 读取文件
+  readFile(filePath, encoding = 'utf8') {
+    try {
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`文件不存在: ${filePath}`);
+      }
+      const content = fs.readFileSync(filePath, encoding);
+      const stats = fs.statSync(filePath);
+      return {
+        content,
+        size: stats.size,
+        path: filePath
+      };
+    } catch (error) {
+      throw new Error(`读取文件失败 ${filePath}: ${error.message}`);
+    }
+  },
+
+  // 写入文件
+  writeFile(filePath, content) {
+    try {
+      const dir = path.dirname(filePath);
+      this.ensureDir(dir);
+      fs.writeFileSync(filePath, content);
+      const stats = fs.statSync(filePath);
+      logger.success(`文件生成: ${filePath} (${this.formatSize(stats.size)})`);
+      return stats.size;
+    } catch (error) {
+      throw new Error(`写入文件失败 ${filePath}: ${error.message}`);
+    }
+  },
+
+  // 格式化文件大小
+  formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+};
+
+// 构建报告生成器
+const reportBuilder = {
+  generate() {
+    const totalTime = Date.now() - BUILD_STATE.startTime;
+    const report = [
+      '\n📊 构建报告',
+      '===========',
+      `构建时间: ${totalTime}ms`,
+      `CSS大小: ${fileUtils.formatSize(BUILD_STATE.stats.cssSize)}`,
+      `JS大小: ${fileUtils.formatSize(BUILD_STATE.stats.jsSize)}`,
+      `HTML大小: ${fileUtils.formatSize(BUILD_STATE.stats.htmlSize)}`
+    ];
+
+    if (BUILD_STATE.warnings.length > 0) {
+      report.push('\n⚠️ 警告:');
+      BUILD_STATE.warnings.forEach(warn => report.push(`- ${warn}`));
+    }
+
+    if (BUILD_STATE.errors.length > 0) {
+      report.push('\n❌ 错误:');
+      BUILD_STATE.errors.forEach(err => report.push(`- ${err}`));
+    }
+
+    return report.join('\n');
+  }
+};
 
 // 运行系统命令
-function runCommand(command) {
+async function runCommand(command) {
   return new Promise((resolve, reject) => {
     try {
       execSync(command, { stdio: 'inherit' });
       resolve();
     } catch (error) {
-      reject(error);
+      reject(new Error(`命令执行失败: ${command}\n${error.message}`));
     }
   });
 }
@@ -30,485 +191,241 @@ function createContentHeader(type, description) {
 
 // 构建核心库
 async function buildCore() {
-  console.log('🔧 构建核心库...');
-  return runCommand('cd src/core && npm run build');
+  logger.info('构建核心库...');
+  try {
+    await runCommand(`cd ${BUILD_CONFIG.paths.core} && npm run build`);
+    logger.success('核心库构建完成');
+  } catch (error) {
+    throw new Error(`核心库构建失败: ${error.message}`);
+  }
 }
 
 // 构建插件
 async function buildPlugin() {
-  console.log('🔧 构建插件...');
-  return runCommand('npm run build:plugin');
+  logger.info('构建插件...');
+  try {
+    await runCommand('npm run build:plugin');
+    logger.success('插件构建完成');
+  } catch (error) {
+    throw new Error(`插件构建失败: ${error.message}`);
+  }
 }
 
 // 清理构建目录
 function clearDistDirectory() {
-  console.log('🧹 清理构建目录...');
-  if (fs.existsSync('dist')) {
-    fs.rmSync('dist', { recursive: true, force: true });
+  logger.info('清理构建目录...');
+  const distPath = BUILD_CONFIG.paths.dist;
+  
+  try {
+    if (fs.existsSync(distPath)) {
+      fs.rmSync(distPath, { recursive: true, force: true });
+    }
+    fs.mkdirSync(distPath, { recursive: true });
+    logger.success('构建目录已清理');
+  } catch (error) {
+    throw new Error(`清理构建目录失败: ${error.message}`);
   }
-  fs.mkdirSync('dist', { recursive: true });
-  console.log('✅ 构建目录已清理');
 }
 
 // 构建HTML文件
 function buildHTML() {
+  logger.info('开始构建HTML文件...');
+  
   try {
-    console.log('📄 开始构建HTML文件...');
-    
-    // 在函数顶部声明所有变量，避免重复声明
-    let htmlContent = '';
-    let jsContent = '';
+    // 声明所有变量
+    const htmlContent = fileUtils.readFile(BUILD_CONFIG.paths.ui.html).content;
+    let processedHtml = htmlContent;
     let cssContent = '';
+    let jsContent = '';
     
-    // 读取HTML模板
-    try {
-      htmlContent = fs.readFileSync('src/ui/index.html', 'utf8');
-    } catch (error) {
-      throw new Error(`无法读取HTML模板: ${error.message}`);
-    }
-    
-    // 读取并处理CSS文件
+    // 处理CSS文件
     const cssFiles = [
-      'src/ui/styles/base.css',
-      'src/ui/styles/layout.css', 
-      'src/ui/styles/app-new.css',
-      ...glob.sync('src/ui/styles/components/*.css'),
-      ...glob.sync('src/ui/styles/themes/*.css')
+      path.join(BUILD_CONFIG.paths.ui.styles, 'base.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'layout.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'app-new.css'),
+      ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'components', '*.css')),
+      ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'themes', '*.css'))
     ];
-
-    const cssHeader = createContentHeader('CSS', '外联CSS文件，通过CDN加载');
     
     cssFiles.forEach(file => {
-      if (fs.existsSync(file)) {
-        cssContent += fs.readFileSync(file, 'utf8') + '\n';
+      try {
+        cssContent += fileUtils.readFile(file).content + '\n';
+      } catch (error) {
+        logger.warn(`处理CSS文件失败 ${file}: ${error.message}`);
       }
     });
     
-    // 轻量级CSS优化
+    // CSS优化
     cssContent = cssContent
-      .replace(/\/\*\s*===.*?===\s*\*\//g, '') // 移除分隔注释
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // 移除多余空行
+      .replace(/\/\*\s*===.*?===\s*\*\//g, '')
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
     
-    console.log(`✅ CSS合并完成: ${(cssContent.length / 1024).toFixed(1)}KB`);
+    BUILD_STATE.stats.cssSize = cssContent.length;
+    logger.success(`CSS合并完成: ${(cssContent.length / 1024).toFixed(1)}KB`);
     
-    // 生成独立的CSS文件
-    const cssOutputPath = 'dist/styles.min.css';
-    fs.writeFileSync(cssOutputPath, cssContent);
-    console.log(`✅ CSS文件生成: ${cssOutputPath}`);
+    // 生成CSS文件
+    fileUtils.writeFile(
+      path.join(BUILD_CONFIG.paths.dist, 'styles.min.css'),
+      cssContent
+    );
     
-    // 读取并处理JavaScript文件
+    // 处理JavaScript文件
     const jsFiles = [
-      'src/ui/scripts/utility-functions.js',
-      'src/ui/scripts/plugin-communicator.js',
-      'src/ui/scripts/notification-system.js',
-      'src/ui/scripts/theme-manager.js',
-      'src/ui/scripts/file-processor.js',
-      'src/ui/scripts/data-collector.js',
-      'src/ui/scripts/data-manager.js',
-      'src/ui/scripts/channel-manager.js',
-      'src/ui/scripts/image-uploader.js',
-      'src/ui/scripts/image-slice-handler.js',
-      'src/ui/scripts/module-manager.js',
-      'src/ui/scripts/form-resetter.js',
-      'src/ui/scripts/ui-controller.js',
-      'src/ui/scripts/app.js',
-      'src/ui/scripts/global-init.js'
-    ];
+      'utility-functions.js',
+      'plugin-communicator.js',
+      'notification-system.js',
+      'theme-manager.js',
+      'file-processor.js',
+      'data-collector.js',
+      'data-manager.js',
+      'channel-manager.js',
+      'image-uploader.js',
+      'image-slice-handler.js',
+      'module-manager.js',
+      'form-resetter.js',
+      'ui-controller.js',
+      'app.js',
+      'global-init.js'
+    ].map(file => path.join(BUILD_CONFIG.paths.ui.scripts, file));
     
-    const jsHeader = createContentHeader('Scripts', 'JavaScript 文件');
-    
-    console.log(`🔍 准备处理 ${jsFiles.length} 个JS文件`);
-    console.log(`🔍 jsContent当前状态: ${typeof jsContent}, 长度: ${jsContent.length}`);
+    logger.info(`准备处理 ${jsFiles.length} 个JS文件`);
     
     jsFiles.forEach((file, index) => {
       try {
-        console.log(`🔍 处理第 ${index + 1} 个文件: ${file}`);
-        
-        if (fs.existsSync(file)) {
-          const fileContent = fs.readFileSync(file, 'utf8');
-          const fileName = path.basename(file);
-          console.log(`📁 包含文件: ${fileName} (${(fileContent.length / 1024).toFixed(1)}KB)`);
-          
-          // 确保 jsContent 仍然是字符串
-          if (typeof jsContent !== 'string') {
-            console.error(`❌ jsContent 类型异常: ${typeof jsContent}`);
-            jsContent = '';
-          }
-          
-          jsContent += `/* === ${fileName} === */\n${fileContent}\n\n`;
-        } else {
-          console.warn(`⚠️ 文件不存在: ${file}`);
-        }
-      } catch (fileError) {
-        console.error(`❌ 处理文件失败 ${file}:`, fileError.message);
+        const fileContent = fileUtils.readFile(file).content;
+        const fileName = path.basename(file);
+        logger.info(`包含文件: ${fileName} (${(fileContent.length / 1024).toFixed(1)}KB)`);
+        jsContent += `/* === ${fileName} === */\n${fileContent}\n\n`;
+      } catch (error) {
+        logger.warn(`处理JS文件失败 ${file}: ${error.message}`);
       }
     });
-
-    console.log(`✅ JavaScript合并完成: ${(jsContent.length / 1024).toFixed(1)}KB`);
     
-    // 生成独立的JavaScript文件
-    const jsOutputPath = 'dist/scripts.min.js';
-    fs.writeFileSync(jsOutputPath, jsContent);
-    console.log(`✅ JS文件生成: ${jsOutputPath}`);
+    BUILD_STATE.stats.jsSize = jsContent.length;
+    logger.success(`JavaScript合并完成: ${(jsContent.length / 1024).toFixed(1)}KB`);
     
-    // H5Tools 终极CDN加载方案
-    const ultimateCDNLoaderCode = `// H5Tools 终极CDN加载方案
-// 构建时间: ${new Date().toISOString()}
-// 目标：100%可靠的CDN资源加载
-
-console.log('🚀 H5Tools 终极CDN加载器启动...');
-
-// 1. 核心配置
-const CDN_CONFIG = {
-  css: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css',
-  js: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js',
-  timeout: 10000,
-  retryDelay: 1000,
-  maxRetries: 3
-};
-
-// 2. 状态管理
-const LoaderState = {
-  cssLoaded: false,
-  jsLoaded: false,
-  appInitialized: false,
-  retryCount: 0,
-  startTime: Date.now()
-};
-
-// 3. 工具函数
-function logWithTime(message, type = 'log') {
-  const elapsed = Date.now() - LoaderState.startTime;
-  console[type](\`[\${elapsed}ms] \${message}\`);
-}
-
-// 4. 导出Figma API到全局对象
-if (typeof figma !== 'undefined') {
-  window.figma = figma;
-  logWithTime('✅ Figma API已导出到全局对象');
-}
-
-// 5. 创建全局通信桥接器
-window.figmaBridge = {
-  postMessage: function(pluginMessage) {
-    if (typeof parent !== 'undefined' && parent.postMessage) {
-      parent.postMessage({ pluginMessage }, '*');
-      logWithTime(\`📤 通过桥接器发送消息: \${JSON.stringify(pluginMessage).substring(0, 100)}...\`);
-    } else {
-      logWithTime('❌ 无法访问parent对象发送消息', 'error');
-    }
-  },
-  messageHandlers: new Map(),
-  on: function(type, handler) {
-    this.messageHandlers.set(type, handler);
-    logWithTime(\`📝 通过桥接器注册消息处理器: \${type}\`);
-  }
-};
-
-// 6. 设置全局消息监听器
-window.addEventListener('message', function(event) {
-  try {
-    const message = event.data.pluginMessage;
-    if (!message) return;
+    // 生成JS文件
+    fileUtils.writeFile(
+      path.join(BUILD_CONFIG.paths.dist, 'scripts.min.js'),
+      jsContent
+    );
     
-    logWithTime(\`📥 收到插件消息: \${message.type}\`);
+    // 替换HTML中的模板内容
+    processedHtml = processedHtml
+      .replace('{{EXTERNAL_CSS_LINK}}', 
+        `<link id="external-styles" rel="stylesheet" href="${BUILD_CONFIG.cdn.baseUrl}/styles.min.css">`)
+      .replace('{{APP_SCRIPTS}}',
+        `<script>\n${ultimateCDNLoaderCode}\n</script>`);
     
-    if (window.figmaBridge && window.figmaBridge.messageHandlers) {
-      const handler = window.figmaBridge.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message);
-      }
-    }
+    // 生成HTML文件
+    fileUtils.writeFile(
+      path.join(BUILD_CONFIG.paths.dist, 'ui.html'),
+      processedHtml
+    );
     
-    if (window.pluginComm) {
-      const handler = window.pluginComm.messageHandlers && 
-                     window.pluginComm.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message);
-      }
-    }
+    BUILD_STATE.stats.htmlSize = processedHtml.length;
+    
+    return BUILD_STATE.stats;
   } catch (error) {
-    logWithTime(\`❌ 处理消息失败: \${error.message}\`, 'error');
+    throw new Error(`HTML构建失败: ${error.message}`);
   }
-});
+}
 
-// 7. 应急样式
+// CDN加载器代码
+const ultimateCDNLoaderCode = `
+// CDN资源加载器
+async function loadExternalResource(url, type) {
+  return new Promise((resolve, reject) => {
+    const element = type === 'css' 
+      ? document.createElement('link') 
+      : document.createElement('script');
+    
+    if (type === 'css') {
+      element.rel = 'stylesheet';
+      element.href = url;
+    } else {
+      element.src = url;
+    }
+    
+    const timeout = setTimeout(() => {
+      reject(new Error(\`资源加载超时: \${url}\`));
+    }, 10000);
+    
+    element.onload = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    
+    element.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error(\`资源加载失败: \${url}\`));
+    };
+    
+    document.head.appendChild(element);
+  });
+}
+
+// 创建备用样式
 function createFallbackUI() {
   const style = document.createElement('style');
   style.textContent = \`
-    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .fallback-container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .tab-container { display: flex; border-bottom: 1px solid #e0e0e0; margin: 20px 0; }
-    .tab { padding: 12px 20px; cursor: pointer; border: none; background: none; color: #666; border-bottom: 2px solid transparent; }
-    .tab.active { color: #2196f3; border-bottom-color: #2196f3; }
-    .tab-content { display: none; padding: 20px 0; }
-    .tab-content.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-    .form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
-    .create-btn { background: #4caf50; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
-    .create-btn:hover { background: #45a049; }
-    .create-btn:disabled { background: #ccc; cursor: not-allowed; }
+    body { font-family: sans-serif; margin: 0; padding: 20px; }
+    .container { max-width: 400px; margin: 0 auto; }
+    /* 其他基础样式... */
   \`;
   document.head.appendChild(style);
-  logWithTime('✅ 应急样式已加载');
+  console.log('✅ 应急样式已加载');
 }
 
-// 8. 基础标签页切换功能
-function initBasicTabSwitching() {
-  const tabs = document.querySelectorAll('.tab');
-  const contents = document.querySelectorAll('.tab-content');
-  
-  if (tabs.length === 0) {
-    setTimeout(initBasicTabSwitching, 100);
-    return;
-  }
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.classList.remove('active'));
-      
-      tab.classList.add('active');
-      const tabId = tab.getAttribute('data-tab');
-      const content = document.getElementById(\`\${tabId}-content\`);
-      if (content) {
-        content.classList.add('active');
-      }
-      
-      logWithTime(\`✅ 标签页切换: \${tabId}\`);
-    });
-  });
-  
-  logWithTime('✅ 基础标签页切换已激活');
-}
-
-// 9. CSS加载器
-function loadCSS() {
-  return new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = CDN_CONFIG.css;
-    
-    const timeout = setTimeout(() => {
-      reject(new Error('CSS加载超时'));
-    }, CDN_CONFIG.timeout);
-    
-    link.onload = () => {
-      clearTimeout(timeout);
-      LoaderState.cssLoaded = true;
-      logWithTime('✅ CSS加载成功');
-      resolve();
-    };
-    
-    link.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error('CSS加载失败'));
-    };
-    
-    document.head.appendChild(link);
-    logWithTime('🔄 开始加载CSS...');
-  });
-}
-
-// 10. JavaScript加载器
-function loadJS() {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = CDN_CONFIG.js;
-    
-    const timeout = setTimeout(() => {
-      reject(new Error('JavaScript加载超时'));
-    }, CDN_CONFIG.timeout);
-    
-    script.onload = () => {
-      clearTimeout(timeout);
-      LoaderState.jsLoaded = true;
-      logWithTime('✅ JavaScript加载成功');
-      
-      if (!window.pluginComm) {
-        window.pluginComm = {
-          messageHandlers: new Map(),
-          postMessage: function(type, data = {}) {
-            window.figmaBridge.postMessage({ type, ...data });
-          },
-          on: function(type, handler) {
-            window.figmaBridge.on(type, handler);
-          },
-          init: function() {
-            logWithTime('✅ 临时通信器已初始化');
-          }
-        };
-        window.pluginComm.init();
-      }
-      
-      resolve();
-    };
-    
-    script.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error('JavaScript加载失败'));
-    };
-    
-    document.head.appendChild(script);
-    logWithTime('🔄 开始加载JavaScript...');
-  });
-}
-
-// 11. 应用初始化检查
-function checkAppInitialization() {
-  return new Promise((resolve, reject) => {
-    let attempts = 0;
-    const maxAttempts = 20;
-    
-    const check = () => {
-      attempts++;
-      
-      if (window.initializeApp && typeof window.initializeApp === 'function') {
-        LoaderState.appInitialized = true;
-        logWithTime('✅ ');
-        resolve();
-        return;
-      }
-      
-      if (attempts >= maxAttempts) {
-        reject(new Error('应用初始化检查失败'));
-        return;
-      }
-      
-      setTimeout(check, 100);
-    };
-    
-    check();
-  });
-}
-
-// 12. 重试机制
-async function retryLoad() {
-  if (LoaderState.retryCount >= CDN_CONFIG.maxRetries) {
-    logWithTime('❌ 达到最大重试次数，进入应急模式', 'error');
-    createFallbackUI();
-    initBasicTabSwitching();
-    return;
-  }
-  
-  LoaderState.retryCount++;
-  logWithTime(\`🔄 第\${LoaderState.retryCount}次重试...\`);
-  
-  LoaderState.cssLoaded = false;
-  LoaderState.jsLoaded = false;
-  LoaderState.appInitialized = false;
-  
-  setTimeout(startLoad, CDN_CONFIG.retryDelay);
-}
-
-// 13. 主加载流程
-async function startLoad() {
+// 智能资源加载
+async function loadResources() {
   try {
-    logWithTime('🚀 开始加载CDN资源...');
-    
-    await Promise.all([
-      loadCSS().catch(err => {
-        logWithTime(\`⚠️ CSS加载失败: \${err.message}\`, 'warn');
+    await loadExternalResource('${BUILD_CONFIG.cdn.baseUrl}/styles.min.css', 'css')
+      .catch(err => {
+        console.warn(\`⚠️ CSS加载失败: \${err.message}\`);
         createFallbackUI();
-      }),
-      loadJS()
-    ]);
-    
-    await checkAppInitialization();
-    
-    if (window.initializeApp) {
-      logWithTime('🎯 调用应用初始化...');
-      try {
-        window.initializeApp();
-      } catch (error) {
-        logWithTime(\`❌ 应用初始化失败: \${error.message}\`, 'error');
-      }
-    }
-    
-    logWithTime('🎉 H5Tools加载完成！');
-    
+      });
+      
+    await loadExternalResource('${BUILD_CONFIG.cdn.baseUrl}/scripts.min.js', 'js')
+      .catch(err => {
+        console.error(\`❌ JS加载失败: \${err.message}\`);
+        throw err;
+      });
+      
+    console.log('✅ CDN资源加载完成');
   } catch (error) {
-    logWithTime(\`❌ 加载失败: \${error.message}\`, 'error');
-    await retryLoad();
+    console.error(\`❌ 资源加载失败: \${error.message}\`);
   }
 }
 
-// 14. 启动加载
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    logWithTime('📄 DOM已就绪');
-    startLoad();
-    initBasicTabSwitching();
-  });
-} else {
-  logWithTime('📄 DOM已就绪（页面已加载）');
-  startLoad();
-  initBasicTabSwitching();
-}
-
-// 15. 全局错误处理
-window.addEventListener('error', (event) => {
-  logWithTime(\`🚨 全局错误: \${event.error?.message || event.message}\`, 'error');
-});
-
-// 16. 发送UI就绪消息
-setTimeout(() => {
-  if (window.figmaBridge) {
-    window.figmaBridge.postMessage({ type: 'ui-loaded' });
-    logWithTime('📤 发送UI就绪消息');
-  }
-}, 500);
-
-logWithTime('🔧 H5Tools 终极CDN加载器已就绪');`;
-
-    // 替换HTML中的模板内容
-    htmlContent = htmlContent.replace('{{EXTERNAL_CSS_LINK}}', 
-      '<link id="external-styles" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">');
-    
-    htmlContent = htmlContent.replace('{{APP_SCRIPTS}}', 
-      `<script>\n${ultimateCDNLoaderCode}\n</script>`);
-    
-    // 写入HTML文件
-    const htmlOutputPath = 'dist/ui.html';
-    fs.writeFileSync(htmlOutputPath, htmlContent);
-    
-    console.log(`✅ HTML文件生成: ${htmlOutputPath}`);
-    
-    return {
-      cssSize: cssContent.length,
-      jsSize: jsContent.length,
-      htmlSize: htmlContent.length
-    };
-  } catch (error) {
-    console.error('❌ HTML构建失败:', error);
-    throw error;
-  }
-}
+// 初始化加载
+document.addEventListener('DOMContentLoaded', loadResources);
+`;
 
 // 主构建函数
 async function build() {
+  BUILD_STATE.startTime = Date.now();
+  logger.log('🚀 开始H5Tools统一构建...');
+  
   try {
-    console.log('🚀 开始H5Tools统一构建...');
-    const startTime = Date.now();
-    
     clearDistDirectory();
     await buildCore();
     await buildPlugin();
     const buildResult = buildHTML();
     
-    const duration = Date.now() - startTime;
-    console.log(`\n🎉 构建完成! 耗时: ${duration}ms`);
-    console.log('📊 构建统计:');
-    console.log(`   CSS文件: ${(buildResult.cssSize / 1024).toFixed(1)}KB`);
-    console.log(`   JS文件: ${(buildResult.jsSize / 1024).toFixed(1)}KB`); 
-    console.log(`   HTML文件: ${(buildResult.htmlSize / 1024).toFixed(1)}KB`);
+    const duration = Date.now() - BUILD_STATE.startTime;
+    
+    // 输出构建报告
+    logger.log(reportBuilder.generate());
+    
+    logger.log('\n🎉 构建成功!');
     
   } catch (error) {
-    console.error('❌ 构建失败:', error);
+    logger.error('构建失败', error);
     process.exit(1);
   }
 }
 
+// 启动构建
 build();

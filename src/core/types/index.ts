@@ -149,8 +149,7 @@ export interface ChannelImageData {
 // 渠道图片存储接口
 export interface ChannelImages {
   [channel: string]: {
-    eggBreaking?: ChannelImageData;
-    footerStyle?: ChannelImageData;
+    [imageType: string]: ChannelImageData;
   };
 }
 

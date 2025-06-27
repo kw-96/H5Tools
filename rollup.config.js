@@ -1,25 +1,30 @@
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import terser from '@rollup/plugin-terser';
 
 export default {
   input: 'src/plugin/code-standalone.ts',
   output: {
-    file: 'dist/plugin/code-standalone.js',
-    format: 'iife', // 立即执行函数表达式，避免模块系统问题
+    dir: 'dist/plugin',
+    format: 'es',
     sourcemap: true,
+    preserveModules: true,
+    preserveModulesRoot: 'src'
   },
   plugins: [
-    resolve({
-      preferBuiltins: false, // 避免Node.js内置模块
-    }),
-    commonjs(), // 处理CommonJS模块
     typescript({
-      tsconfig: './rollup.tsconfig.json',
-      sourceMap: true,
+      tsconfig: './tsconfig.json'
     }),
+    resolve({
+      browser: true
+    }),
+    commonjs(),
+    json(),
+    terser()
   ],
-  external: ['figma'], // Figma API作为外部依赖
+  external: ['figma'],
   onwarn(warning, warn) {
     // 忽略某些警告
     if (warning.code === 'THIS_IS_UNDEFINED') return;

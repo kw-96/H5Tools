@@ -1,13 +1,21 @@
-"use strict";
 // 渠道美术-H5延展工具 - 核心工具函数
 // 这个文件包含所有的工具函数，将作为独立库发布到GitHub
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidationUtils = exports.FileUtils = exports.ColorUtilsBase = exports.ImageUtils = exports.Utils = void 0;
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // ==================== 基础工具类 ====================
-class Utils {
+export class Utils {
     // 延迟函数，返回一个Promise，在指定的毫秒数后resolve
-    static async delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    static delay(ms) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        });
     }
     // 从ImageInfo或Uint8Array中提取Uint8Array数据
     static extractUint8Array(imageData) {
@@ -115,9 +123,8 @@ class Utils {
         return obj;
     }
 }
-exports.Utils = Utils;
 // ==================== 图片处理工具 ====================
-class ImageUtils {
+export class ImageUtils {
     // 验证图片格式
     static isValidImageType(type) {
         const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
@@ -210,11 +217,10 @@ class ImageUtils {
         return strategy;
     }
 }
-exports.ImageUtils = ImageUtils;
 // ==================== 颜色处理工具 ====================
 // 注意：Figma专用的ColorUtils已移至builders/figma-utils.ts
 // 这里保留基础颜色工具，用于非Figma环境
-class ColorUtilsBase {
+export class ColorUtilsBase {
     // 十六进制转RGB（返回0-255范围）
     static hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -248,9 +254,8 @@ class ColorUtilsBase {
         return ColorUtilsBase.rgbToHex(adjust(rgb.r), adjust(rgb.g), adjust(rgb.b));
     }
 }
-exports.ColorUtilsBase = ColorUtilsBase;
 // ==================== 文件处理工具 ====================
-class FileUtils {
+export class FileUtils {
     // 读取文件为ArrayBuffer
     static readFileAsArrayBuffer(file) {
         return new Promise((resolve, reject) => {
@@ -284,9 +289,8 @@ class FileUtils {
         return file.size <= maxSizeBytes;
     }
 }
-exports.FileUtils = FileUtils;
 // ==================== 验证工具 ====================
-class ValidationUtils {
+export class ValidationUtils {
     // 验证必填字段
     static validateRequired(value, fieldName) {
         if (value === null || value === undefined || value === '') {
@@ -318,7 +322,7 @@ class ValidationUtils {
             new URL(url);
             return true;
         }
-        catch {
+        catch (_a) {
             return false;
         }
     }
@@ -337,5 +341,4 @@ class ValidationUtils {
         return validChannels.includes(channelType);
     }
 }
-exports.ValidationUtils = ValidationUtils;
 //# sourceMappingURL=index.js.map

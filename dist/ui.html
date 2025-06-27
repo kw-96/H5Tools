@@ -1108,315 +1108,75 @@
   </div>
 
   <script>
-// H5Tools 终极CDN加载方案
-// 构建时间: 2025-06-27T11:07:43.698Z
-// 目标：100%可靠的CDN资源加载
 
-console.log('🚀 H5Tools 终极CDN加载器启动...');
-
-// 1. 核心配置
-const CDN_CONFIG = {
-  css: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css',
-  js: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js',
-  timeout: 10000,
-  retryDelay: 1000,
-  maxRetries: 3
-};
-
-// 2. 状态管理
-const LoaderState = {
-  cssLoaded: false,
-  jsLoaded: false,
-  appInitialized: false,
-  retryCount: 0,
-  startTime: Date.now()
-};
-
-// 3. 工具函数
-function logWithTime(message, type = 'log') {
-  const elapsed = Date.now() - LoaderState.startTime;
-  console[type](`[${elapsed}ms] ${message}`);
-}
-
-// 4. 导出Figma API到全局对象
-if (typeof figma !== 'undefined') {
-  window.figma = figma;
-  logWithTime('✅ Figma API已导出到全局对象');
-}
-
-// 5. 创建全局通信桥接器
-window.figmaBridge = {
-  postMessage: function(pluginMessage) {
-    if (typeof parent !== 'undefined' && parent.postMessage) {
-      parent.postMessage({ pluginMessage }, '*');
-      logWithTime(`📤 通过桥接器发送消息: ${JSON.stringify(pluginMessage).substring(0, 100)}...`);
+// CDN资源加载器
+async function loadExternalResource(url, type) {
+  return new Promise((resolve, reject) => {
+    const element = type === 'css' 
+      ? document.createElement('link') 
+      : document.createElement('script');
+    
+    if (type === 'css') {
+      element.rel = 'stylesheet';
+      element.href = url;
     } else {
-      logWithTime('❌ 无法访问parent对象发送消息', 'error');
+      element.src = url;
     }
-  },
-  messageHandlers: new Map(),
-  on: function(type, handler) {
-    this.messageHandlers.set(type, handler);
-    logWithTime(`📝 通过桥接器注册消息处理器: ${type}`);
-  }
-};
+    
+    const timeout = setTimeout(() => {
+      reject(new Error(`资源加载超时: ${url}`));
+    }, 10000);
+    
+    element.onload = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
+    
+    element.onerror = () => {
+      clearTimeout(timeout);
+      reject(new Error(`资源加载失败: ${url}`));
+    };
+    
+    document.head.appendChild(element);
+  });
+}
 
-// 6. 设置全局消息监听器
-window.addEventListener('message', function(event) {
-  try {
-    const message = event.data.pluginMessage;
-    if (!message) return;
-    
-    logWithTime(`📥 收到插件消息: ${message.type}`);
-    
-    if (window.figmaBridge && window.figmaBridge.messageHandlers) {
-      const handler = window.figmaBridge.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message);
-      }
-    }
-    
-    if (window.pluginComm) {
-      const handler = window.pluginComm.messageHandlers && 
-                     window.pluginComm.messageHandlers.get(message.type);
-      if (handler) {
-        handler(message);
-      }
-    }
-  } catch (error) {
-    logWithTime(`❌ 处理消息失败: ${error.message}`, 'error');
-  }
-});
-
-// 7. 应急样式
+// 创建备用样式
 function createFallbackUI() {
   const style = document.createElement('style');
   style.textContent = `
-    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-    .fallback-container { max-width: 400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .tab-container { display: flex; border-bottom: 1px solid #e0e0e0; margin: 20px 0; }
-    .tab { padding: 12px 20px; cursor: pointer; border: none; background: none; color: #666; border-bottom: 2px solid transparent; }
-    .tab.active { color: #2196f3; border-bottom-color: #2196f3; }
-    .tab-content { display: none; padding: 20px 0; }
-    .tab-content.active { display: block; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-    .form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
-    .create-btn { background: #4caf50; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
-    .create-btn:hover { background: #45a049; }
-    .create-btn:disabled { background: #ccc; cursor: not-allowed; }
+    body { font-family: sans-serif; margin: 0; padding: 20px; }
+    .container { max-width: 400px; margin: 0 auto; }
+    /* 其他基础样式... */
   `;
   document.head.appendChild(style);
-  logWithTime('✅ 应急样式已加载');
+  console.log('✅ 应急样式已加载');
 }
 
-// 8. 基础标签页切换功能
-function initBasicTabSwitching() {
-  const tabs = document.querySelectorAll('.tab');
-  const contents = document.querySelectorAll('.tab-content');
-  
-  if (tabs.length === 0) {
-    setTimeout(initBasicTabSwitching, 100);
-    return;
-  }
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.classList.remove('active'));
-      
-      tab.classList.add('active');
-      const tabId = tab.getAttribute('data-tab');
-      const content = document.getElementById(`${tabId}-content`);
-      if (content) {
-        content.classList.add('active');
-      }
-      
-      logWithTime(`✅ 标签页切换: ${tabId}`);
-    });
-  });
-  
-  logWithTime('✅ 基础标签页切换已激活');
-}
-
-// 9. CSS加载器
-function loadCSS() {
-  return new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = CDN_CONFIG.css;
-    
-    const timeout = setTimeout(() => {
-      reject(new Error('CSS加载超时'));
-    }, CDN_CONFIG.timeout);
-    
-    link.onload = () => {
-      clearTimeout(timeout);
-      LoaderState.cssLoaded = true;
-      logWithTime('✅ CSS加载成功');
-      resolve();
-    };
-    
-    link.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error('CSS加载失败'));
-    };
-    
-    document.head.appendChild(link);
-    logWithTime('🔄 开始加载CSS...');
-  });
-}
-
-// 10. JavaScript加载器
-function loadJS() {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = CDN_CONFIG.js;
-    
-    const timeout = setTimeout(() => {
-      reject(new Error('JavaScript加载超时'));
-    }, CDN_CONFIG.timeout);
-    
-    script.onload = () => {
-      clearTimeout(timeout);
-      LoaderState.jsLoaded = true;
-      logWithTime('✅ JavaScript加载成功');
-      
-      if (!window.pluginComm) {
-        window.pluginComm = {
-          messageHandlers: new Map(),
-          postMessage: function(type, data = {}) {
-            window.figmaBridge.postMessage({ type, ...data });
-          },
-          on: function(type, handler) {
-            window.figmaBridge.on(type, handler);
-          },
-          init: function() {
-            logWithTime('✅ 临时通信器已初始化');
-          }
-        };
-        window.pluginComm.init();
-      }
-      
-      resolve();
-    };
-    
-    script.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error('JavaScript加载失败'));
-    };
-    
-    document.head.appendChild(script);
-    logWithTime('🔄 开始加载JavaScript...');
-  });
-}
-
-// 11. 应用初始化检查
-function checkAppInitialization() {
-  return new Promise((resolve, reject) => {
-    let attempts = 0;
-    const maxAttempts = 20;
-    
-    const check = () => {
-      attempts++;
-      
-      if (window.initializeApp && typeof window.initializeApp === 'function') {
-        LoaderState.appInitialized = true;
-        logWithTime('✅ ');
-        resolve();
-        return;
-      }
-      
-      if (attempts >= maxAttempts) {
-        reject(new Error('应用初始化检查失败'));
-        return;
-      }
-      
-      setTimeout(check, 100);
-    };
-    
-    check();
-  });
-}
-
-// 12. 重试机制
-async function retryLoad() {
-  if (LoaderState.retryCount >= CDN_CONFIG.maxRetries) {
-    logWithTime('❌ 达到最大重试次数，进入应急模式', 'error');
-    createFallbackUI();
-    initBasicTabSwitching();
-    return;
-  }
-  
-  LoaderState.retryCount++;
-  logWithTime(`🔄 第${LoaderState.retryCount}次重试...`);
-  
-  LoaderState.cssLoaded = false;
-  LoaderState.jsLoaded = false;
-  LoaderState.appInitialized = false;
-  
-  setTimeout(startLoad, CDN_CONFIG.retryDelay);
-}
-
-// 13. 主加载流程
-async function startLoad() {
+// 智能资源加载
+async function loadResources() {
   try {
-    logWithTime('🚀 开始加载CDN资源...');
-    
-    await Promise.all([
-      loadCSS().catch(err => {
-        logWithTime(`⚠️ CSS加载失败: ${err.message}`, 'warn');
+    await loadExternalResource('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css', 'css')
+      .catch(err => {
+        console.warn(`⚠️ CSS加载失败: ${err.message}`);
         createFallbackUI();
-      }),
-      loadJS()
-    ]);
-    
-    await checkAppInitialization();
-    
-    if (window.initializeApp) {
-      logWithTime('🎯 调用应用初始化...');
-      try {
-        window.initializeApp();
-      } catch (error) {
-        logWithTime(`❌ 应用初始化失败: ${error.message}`, 'error');
-      }
-    }
-    
-    logWithTime('🎉 H5Tools加载完成！');
-    
+      });
+      
+    await loadExternalResource('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js', 'js')
+      .catch(err => {
+        console.error(`❌ JS加载失败: ${err.message}`);
+        throw err;
+      });
+      
+    console.log('✅ CDN资源加载完成');
   } catch (error) {
-    logWithTime(`❌ 加载失败: ${error.message}`, 'error');
-    await retryLoad();
+    console.error(`❌ 资源加载失败: ${error.message}`);
   }
 }
 
-// 14. 启动加载
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    logWithTime('📄 DOM已就绪');
-    startLoad();
-    initBasicTabSwitching();
-  });
-} else {
-  logWithTime('📄 DOM已就绪（页面已加载）');
-  startLoad();
-  initBasicTabSwitching();
-}
+// 初始化加载
+document.addEventListener('DOMContentLoaded', loadResources);
 
-// 15. 全局错误处理
-window.addEventListener('error', (event) => {
-  logWithTime(`🚨 全局错误: ${event.error?.message || event.message}`, 'error');
-});
-
-// 16. 发送UI就绪消息
-setTimeout(() => {
-  if (window.figmaBridge) {
-    window.figmaBridge.postMessage({ type: 'ui-loaded' });
-    logWithTime('📤 发送UI就绪消息');
-  }
-}, 500);
-
-logWithTime('🔧 H5Tools 终极CDN加载器已就绪');
 </script>
 </body>
 </html> 
