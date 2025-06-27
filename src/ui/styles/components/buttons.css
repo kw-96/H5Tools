@@ -33,15 +33,7 @@ button {
   transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
-.collapse-btn svg {
-  color: inherit;
-  fill: currentColor;
-  transition: transform 0.3s ease;
-  display: block;
-  margin: auto;
-}
-
-.chevron-icon {
+.collapse-btn svg, .chevron-icon {
   color: inherit;
   fill: currentColor;
   stroke: currentColor;
@@ -50,6 +42,10 @@ button {
 
 .collapse-btn.collapsed svg,
 .collapse-btn.collapsed .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.collapse-btn.collapsed {
   transform: rotate(180deg);
 }
 
