@@ -1,0 +1,93 @@
+{
+    "mcpServers": {
+        "gitee": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@gitee/mcp-gitee@latest"
+            ],
+            "env": {
+                "GITEE_API_BASE": "https://gitee.com/api/v5",
+                "GITEE_ACCESS_TOKEN": "<your personal access token>"
+            }
+        },
+        "everything-search": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-everything-search"
+            ]
+        },
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp"
+            ],
+            "env": {
+                "DEFAULT_MINIMUM_TOKENS": "6000"
+            }
+        },
+        "time": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-time",
+                "--local-timezone",
+                "Asia/Shanghai"
+            ]
+        },
+        "git": {
+            "command": "uvx",
+            "args": [
+                "mcp-server-git",
+                "--repository",
+                "e:\\KW\\Git\\H5Tools"
+            ]
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "e:\\KW\\Git\\H5Tools",
+                "C:\\Users\\WB02958\\Desktop"
+            ]
+        },
+        "f2c-mcp": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@f2c/mcp"
+            ],
+            "env": {
+                "personalToken": ""
+            }
+        },
+        "github": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-github"
+            ],
+            "env": {
+                "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+            }
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ]
+        },
+        "memory": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-memory"
+            ],
+            "env": {
+                "MEMORY_FILE_PATH": "/path/to/custom/memory.json"
+            }
+        }
+    }
+}

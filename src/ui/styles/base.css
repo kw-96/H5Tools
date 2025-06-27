@@ -126,7 +126,7 @@ body {
   display: none !important;
 }
 
-/* 标签页容器 */
+/* 标签页容器 - 固定在顶部 */
 .tab-container {
   position: fixed;
   top: 0;
@@ -392,19 +392,24 @@ label {
   gap: 16px;
 }
 
-/* 控制按钮 */
+/* 控制按钮 - 统一样式 */
 .control-btn {
   width: 24px;
   height: 24px;
   padding: 0;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
   background: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .control-btn svg {
