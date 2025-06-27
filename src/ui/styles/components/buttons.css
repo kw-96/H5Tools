@@ -34,8 +34,8 @@ button {
 }
 
 .collapse-btn svg, .chevron-icon {
-  width: 12px;
-  height: 7px;
+  width: 10px;
+  height: 6px;
   color: inherit;
   fill: currentColor;
   stroke: currentColor;
