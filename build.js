@@ -240,36 +240,76 @@ function buildHTML() {
     
     // 处理CSS文件
     // 注意：app-new.css 仅供开发入口用，生产构建请勿合并，避免重复内容
+    // 按 app-new.css 的 @import 顺序手动列举所有需要合并的CSS文件，确保顺序和完整性
     const cssFiles = [
       path.join(BUILD_CONFIG.paths.ui.styles, 'base.css'),
       path.join(BUILD_CONFIG.paths.ui.styles, 'layout.css'),
-      // path.join(BUILD_CONFIG.paths.ui.styles, 'app-new.css'), // 仅供开发入口用，勿合并
-      ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'components', '*.css')),
-      ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'themes', '*.css'))
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'notification.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'loading.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'tabs.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'forms.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'buttons.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'upload.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'modules.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'channels.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'themes', 'dark.css')
     ];
-    
+
+    // 输出所有将被合并的CSS文件
+    logger.info('本次将合并以下CSS文件:');
+    cssFiles.forEach(file => logger.info('- ' + file));
+
+    // 合并CSS内容并记录每个文件的第一个选择器或注释
+    const cssFileChecks = [];
     cssFiles.forEach(file => {
       try {
-        cssContent += fileUtils.readFile(file).content + '\n';
+        const content = fileUtils.readFile(file).content;
+        cssContent += content + '\n';
+        // 提取第一个选择器或注释用于校验
+        const match = content.match(/([.#][a-zA-Z0-9_-]+|\/\*.*?\*\/)/);
+        if (match) {
+          cssFileChecks.push({ file, check: match[0] });
+        } else {
+          cssFileChecks.push({ file, check: null });
+        }
       } catch (error) {
         logger.warn(`处理CSS文件失败 ${file}: ${error.message}`);
       }
     });
-    
+
     // CSS优化
     cssContent = cssContent
       .replace(/\/\*\s*===.*?===\s*\*\//g, '')
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
-    
+
     BUILD_STATE.stats.cssSize = cssContent.length;
     logger.success(`CSS合并完成: ${(cssContent.length / 1024).toFixed(1)}KB`);
-    
+
     // 生成CSS文件
     fileUtils.writeFile(
       path.join(BUILD_CONFIG.paths.dist, 'styles.min.css'),
       cssContent
     );
+
+    // 自动校验每个CSS文件内容是否被包含
+    logger.info('开始自动校验CSS内容是否被合并...');
+    let missingCount = 0;
+    cssFileChecks.forEach(({ file, check }) => {
+      if (!check) {
+        logger.warn(`无法提取校验标记，建议检查文件内容: ${file}`);
+        return;
+      }
+      if (!cssContent.includes(check)) {
+        logger.warn(`警告：CSS文件内容可能未被合并: ${file}（未找到标记：${check}）`);
+        missingCount++;
+      }
+    });
+    if (missingCount === 0) {
+      logger.success('所有CSS文件内容均已成功合并！');
+    } else {
+      logger.warn(`有 ${missingCount} 个CSS文件内容未被正确合并，请检查上方警告！`);
+    }
     
     // 处理JavaScript文件
     const jsFiles = [
