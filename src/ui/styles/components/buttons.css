@@ -23,6 +23,7 @@ button {
   cursor: pointer;
   transition: all 0.2s;
   background-color: transparent;
+  position: relative;
 }
 
 .control-btn:hover {
@@ -33,9 +34,23 @@ button {
   transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
-.collapse-btn svg, .chevron-icon {
-  width: 10px;
-  height: 6px;
+.collapse-btn svg {
+  width: 12px;
+  height: 12px;
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+  transition: transform 0.3s ease;
+  display: block;
+  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+}
+
+.chevron-icon {
   color: inherit;
   fill: currentColor;
   stroke: currentColor;
@@ -44,7 +59,7 @@ button {
 
 .collapse-btn.collapsed svg,
 .collapse-btn.collapsed .chevron-icon {
-  transform: rotate(180deg);
+  transform: translate(-50%, -50%) rotate(180deg);
 }
 
 .add-btn {
