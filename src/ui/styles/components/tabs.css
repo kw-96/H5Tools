@@ -1,76 +1,69 @@
 /* 标签页和导航 */
 .tab-container {
-  display: flex;                                /* 使用弹性布局 */
-  width: 100%;                                  /* 宽度占满父容器 */
-  justify-content: space-between;               /* 子元素之间平均分配空间 */
-  background-color: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
-  -webkit-backdrop-filter: blur(20px);          /* Safari浏览器背景模糊效果 */
-  backdrop-filter: blur(20px);                  /* 标准背景模糊效果 */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);  /* 底部添加细边框 */
-  padding: 6px 0;                               /* 上下内边距 */
-
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
-/* 标签样式 */
 .tab {
-  flex: 1;                          /* 平均分配容器空间 */
-  height: 48px;                     /* 固定高度 */
-  display: flex;                    /* 使用弹性布局 */
-  flex-direction: column;           /* 垂直排列子元素 */
-  align-items: center;              /* 水平居中对齐 */
-  justify-content: center;          /* 垂直居中对齐 */
-  gap: 4px;                         /* 子元素间距 */
-  color: rgba(255, 255, 255, 0.5);  /* 半透明白色文字 */
-  cursor: pointer;                  /* 鼠标悬停时显示手型光标 */
-  transition: color 0.2s ease;      /* 颜色过渡动画 */
-  -webkit-user-select: none;
-  user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 25%;
+  padding: 8px 4px;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  cursor: pointer;
+  color: #86868b;
 }
 
-.tab:hover {
-  color: rgba(255, 255, 255, 0.8);
+.tab svg {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+  opacity: 0.8;
 }
 
 .tab.active {
-  color: #FFFFFF;
+  color: #0071e3;
 }
 
-/* 标签图标样式 */
-.tab svg {
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px;
-  min-height: 24px;
-  max-width: 24px;
-  max-height: 24px;
-  display: block;
-  margin: 0 auto;
-  overflow: visible;
-  box-sizing: content-box;
-  background: #f00; /* 临时加背景色方便调试 */
-}
-
-/* 标签文本样式 */
-.tab-label {
-  font-size: 12px;                /* 设置字体大小为12像素 */
-  line-height: 1;                 /* 设置行高为1，即与字体大小相同 */
-  white-space: nowrap;            /* 防止文本换行，保持在一行内显示 */
+.tab:hover {
+  color: #0071e3;
+  background-color: rgba(0, 113, 227, 0.05);
 }
 
 /* 内容区域 */
 .tab-content {
-  display: none;                    /* 初始状态下隐藏内容 */
-  padding: 8px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
-  margin: 0;                        /* 移除外边距 */
-  width: 100%;                      /* 宽度占满父容器 */
-  flex: 1;                          /* 在flex容器中占用剩余空间 */
-  background-color: #ffffff;        /* 设置背景颜色为白色 */
-  overflow-y: auto;                 /* 垂直方向内容溢出时显示滚动条 */
-  overflow-x: hidden;               /* 水平方向内容溢出时隐藏 */
-  box-sizing: border-box;           /* 将padding和border包含在元素的总宽高中 */
+  display: none;
+  padding: 0 16px;
+  margin: 30px auto 0px;
+  width: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .tab-content.active {
   display: block;
   animation: fadeIn 0.3s ease-in-out;
+  position: relative;
 } 
