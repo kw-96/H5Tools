@@ -51,7 +51,8 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@h5tools/core": "file:./src/core"
+    "@h5tools/core": "file:./src/core",
+    "glob": "^11.0.3"
   },
   "figma-plugin": {
     "id": "1506134894807361987",

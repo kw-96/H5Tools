@@ -184,160 +184,694 @@ body {
 
 /* 主题样式 */
 @import './themes/dark.css'; 
-/* 按钮和控件 */
-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+/* 上传和预览组件 */
+.file-upload-btn, 
+.img-upload-wrapper {
+  flex: 1;
+  width: 100%;
 }
 
-/* 控制按钮样式已统一到base.css */
-
-.collapse-btn {
-  transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
+.upload-btn {
+  width: 100%;
+  height: 60px;
+  padding: 0;
+  background-color: #f5f5f7;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  overflow: hidden;
 }
 
-.collapse-btn svg {
+.upload-btn:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.upload-btn .img-preview-inline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+}
+
+.upload-btn .img-preview-inline img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.upload-btn .img-preview-inline .upload-icon-inline {
+  font-size: 20px;
+  color: #86868b;
+}
+
+/* 图片预览 */
+.img-preview-inline, 
+.preview-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.img-preview-inline {
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.img-preview-inline img, 
+.preview-container img, 
+.img-preview-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.img-preview-btn {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.img-preview-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f7;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.img-preview-container:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.upload-icon, .upload-icon-text, .upload-icon-inline {
+  font-size: 20px;
+  color: #86868b;
+}
+
+.upload-icon {
+  position: absolute;
+  z-index: 1;
+}
+
+.upload-icon-text, .upload-icon-inline {
+  font-size: 24px;
+}
+
+/* 图片上传容器 */
+.img-upload-container {
+  display: flex;          /* 使用弹性布局 */
+  flex-direction: column; /* 设置主轴方向为垂直 */
+  align-items: center;    /* 在交叉轴上居中对齐项目 */
+  width: 100%;           /* 确保容器占满父元素宽度 */
+}
+
+/* 网格按钮样式 */
+.grid-btn {
+  width: 100%;                          /* 设置宽度为100% */
+  aspect-ratio: 1/1;                    /* 设置宽高比为1:1，保持正方形 */
+  display: flex;                        /* 使用弹性布局 */
+  align-items: center;                  /* 垂直居中对齐 */
+  justify-content: center;              /* 水平居中对齐 */
+  background-color: #f5f5f7;            /* 设置背景颜色 */
+  border: 1px dashed rgba(0, 0, 0, 0.2);/* 设置虚线边框 */
+  border-radius: 6px;                   /* 设置圆角 */
+  cursor: pointer;                      /* 鼠标悬停时显示手型光标 */
+  position: relative;                   /* 设置相对定位 */
+  overflow: hidden;                     /* 隐藏溢出内容 */
+  padding: 0;                           /* 移除内边距 */
+  transition: all 0.2s;                 /* 添加过渡效果 */
+  box-sizing: border-box;               /* 包含边框在内的盒模型 */
+}
+
+.grid-btn:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+/* 自定义布局下的网格按钮 */
+.prize-grid-custom .grid-btn {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1;
+  max-width: 100%;
+  max-height: none;
+  min-height: 50px;
+} 
+/* 标签页和导航 */
+.tab-container {
+  display: flex;                                /* 使用弹性布局 */
+  width: 100%;                                  /* 宽度占满父容器 */
+  justify-content: space-between;               /* 子元素之间平均分配空间 */
+  background-color: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
+  -webkit-backdrop-filter: blur(20px);          /* Safari浏览器背景模糊效果 */
+  backdrop-filter: blur(20px);                  /* 标准背景模糊效果 */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);  /* 底部添加细边框 */
+  padding: 6px 0;                               /* 上下内边距 */
+
+}
+
+/* 标签样式 */
+.tab {
+  flex: 1;                          /* 平均分配容器空间 */
+  height: 60px;                     /* 固定高度 */
+  display: flex;                    /* 使用弹性布局 */
+  flex-direction: column;           /* 垂直排列子元素 */
+  align-items: center;              /* 水平居中对齐 */
+  justify-content: center;          /* 垂直居中对齐 */
+  gap: 4px;                         /* 子元素间距 */
+  color: rgba(255, 255, 255, 0.5);  /* 半透明白色文字 */
+  cursor: pointer;                  /* 鼠标悬停时显示手型光标 */
+  transition: color 0.2s ease;      /* 颜色过渡动画 */
+  user-select: none;                /* 禁止文本选择 */
+  -webkit-user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
+}
+
+.tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tab.active {
+  color: #FFFFFF;
+}
+
+/* 标签图标样式 */
+.tab svg {
+  width: 20px;                /* 设置图标宽度为20像素 */
+  height: 20px;               /* 设置图标高度为20像素 */
+  display: block;             /* 将图标设置为块级元素 */
+}
+
+/* 标签文本样式 */
+.tab-label {
+  font-size: 16px;                /* 设置字体大小为12像素 */
+  line-height: 1;                 /* 设置行高为1，即与字体大小相同 */
+  white-space: nowrap;            /* 防止文本换行，保持在一行内显示 */
+}
+
+/* 内容区域 */
+.tab-content {
+  display: none;                    /* 初始状态下隐藏内容 */
+  padding: 60px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
+  margin: 0;                        /* 移除外边距 */
+  width: 100%;                      /* 宽度占满父容器 */
+  flex: 1;                          /* 在flex容器中占用剩余空间 */
+  background-color: #ffffff;        /* 设置背景颜色为白色 */
+  overflow-y: auto;                 /* 垂直方向内容溢出时显示滚动条 */
+  overflow-x: hidden;               /* 水平方向内容溢出时隐藏 */
+  box-sizing: border-box;           /* 将padding和border包含在元素的总宽高中 */
+}
+
+.tab-content.active {
   display: block;
-  margin: auto;
+  animation: fadeIn 0.3s ease-in-out;
+} 
+/* 通知样式 */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #333;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
 }
 
-.collapse-btn.collapsed svg {
+.notification.success {
+  background-color: #34c759;
+}
+
+.notification.error {
+  background-color: #ff3b30;
+}
+
+.notification.warning {
+  background-color: #ff9500;
+}
+
+.notification.info {
+  background-color: #0071e3;
+}
+/* 模块管理相关样式 */
+.module-management {
+  margin-bottom: 20px;
+}
+
+/* 模块列表头部样式 */
+.module-list-header {
+  display: flex;                                /* 使用弹性布局 */
+  justify-content: space-between;                /* 两端对齐 */
+  align-items: center;                           /* 垂直居中对齐 */
+  margin: 24px 0 12px 0;                         /* 设置上下外边距 */
+  padding-bottom: 8px;                           /* 底部内边距 */
+  font-weight: 600;                              /* 字体加粗 */
+}
+
+.module-count {
+  font-size: 14px;
+  color: #86868b;
+  font-weight: normal;
+}
+
+.module-action-row {
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.empty-modules-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #86868b;
+  border: 2px dashed rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.empty-modules-message svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-modules-message p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.empty-modules-message .hint-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* 模块相关样式 */
+.module {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: #f5f5f7;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.module-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-right: 4px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.module-content {
+  padding: 16px;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.module-collapsed .module-content {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.module-collapsed .collapse-btn i {
   transform: rotate(180deg);
 }
 
-.add-btn {
-  margin-right: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
+.module-collapsed .collapse-btn svg,
+.module-collapsed .collapse-btn .chevron-icon {
+  transform: rotate(180deg);
 }
 
-.add-btn:hover {
-  background-color: rgba(0, 113, 227, 0.1);
-  border-color: #0071e3;
-  color: #0071e3;
-}
-
-.add-btn[onclick*="removeModule"]:hover {
-  background-color: rgba(255, 59, 48, 0.1);
-  border-color: #ff3b30;
-  color: #ff3b30;
-}
-
-/* 创建按钮 */
-.create-btn-container {
-  display: flex;
-  justify-content: center;
-  padding: 0 0 24px 0;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.button-group {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  justify-content: center;
-  width: 100%;
-  max-width: 320px;
-}
-
-button#create {
-  background-color: #0071e3;
-  color: white;
-  min-width: 120px;
-}
-
-button#create:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
-}
-
-button#reset {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-  min-width: 120px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-button#reset:hover {
-  background-color: #e8e8ed;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-button#cancel {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-button#cancel:hover {
-  background-color: #e8e8ed;
-}
-
-.action-btn {
-  background-color: #0071e3;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-weight: 500;
-  cursor: pointer;
+.option-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
+}
+
+/* 折叠内容区域 */
+.version-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  padding-left: 24px;
+}
+
+.version-content.active {
+  max-height: 800px;
+  opacity: 1;
+  padding-bottom: 15px;
+}
+
+.collapsible-content {
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* 奖品网格 */
+.prize-grid {
+  display: flex;          /* 使用弹性布局 */
+  flex-wrap: wrap;        /* 允许项目换行 */
+  justify-content: space-between; /* 项目之间平均分配空间 */
+  gap: 8px;               /* 设置网格项之间的间隙 */
+  margin-top: 10px;       /* 顶部外边距 */
+}
+
+/* 自定义奖品网格布局 */
+.prize-grid-custom {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  transition: all 0.2s;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
-.action-btn:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.add-module-btn {
-  min-width: 150px;
-}
-
-.wide-btn {
-  width: 100% !important;
-  min-width: 150px;
-}
-
-/* 主题切换按钮 */
-.theme-btn {
-  padding: 8px 16px;
-  background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  color: #1d1d1f;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
+.prize-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  width: 100%;
+  max-width: 100%;
 }
 
-.theme-btn:hover {
-  background-color: rgba(0, 113, 227, 0.1);
-  border-color: #0071e3;
+.prize-row.top-row {
+  /* 第一行：3个奖品，均匀分布 */
+  justify-content: space-between;
 }
 
-.theme-btn.active {
-  background-color: #0071e3;
-  color: #ffffff;
+.prize-row.middle-row {
+  /* 第二行：2个奖品，左右对齐 */
+  justify-content: space-between;
+}
+
+.prize-row.bottom-row {
+  /* 第三行：3个项目，均匀分布 */
+  justify-content: space-between;
+}
+
+/* 网格项样式 */
+.grid-item {
+  flex: 0 0 calc(33.333% - 6px); /* 设置网格项宽度为33.333%（减去间隙），不允许伸缩 */
+}
+
+/* 自定义布局下的网格项 */
+.prize-grid-custom .grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 第一行和第三行的项目：每个占33.33%宽度 */
+.prize-row.top-row .grid-item,
+.prize-row.bottom-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+/* 第二行的项目：每个也占33.33%宽度，但只有两个 */
+.prize-row.middle-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+.prize-label {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #86868b;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+/* 加载遮罩样式 */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.loading-message {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+} 
+/* 表单控件 */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-section {
+  width: 100%;
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.section-title {
+  color: inherit;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.row-layout label {
+  flex: 0 0 auto;
+  margin: 0 16px 0 0;
+  min-width: 70px;
+  width: 25%;
+  max-width: 90px;
+}
+
+.non-interactive-label {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* 输入控件 */
+input[type="number"], 
+input[type="color"], 
+input[type="text"], 
+.text-input, 
+.text-area {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.text-area {
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+input:focus, .text-input:focus, .text-area:focus {
+  outline: none;
   border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+/* 颜色选择器 */
+.color-input-group {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  flex: 1;
+}
+
+input[type="color"] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input.color-value {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #666;
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+/* 下拉选择器 */
+.dropdown-selector {
+  position: relative;
+  min-width: 120px;
+  max-width: 140px;
+  z-index: 10;
+}
+
+.dropdown-selector-wide {
+  position: relative;
+  min-width: 180px;
+  max-width: 200px;
+  z-index: 10;
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.dropdown-selector-wide .section-dropdown {
+  width: 100%;
+}
+
+.section-dropdown {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.section-dropdown:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+.section-dropdown:hover {
+  border-color: rgba(0, 0, 0, 0.2);
 } 
 /* 渠道设置视图样式 */
 .channel-settings-view {
@@ -636,694 +1170,160 @@ button#cancel:hover {
   transform: none;
   box-shadow: none;
 } 
-/* 表单控件 */
-.form-group {
-  margin-bottom: 14px;
-}
-
-.form-section {
-  width: 100%;
-  padding: 16px 0;
-  margin-bottom: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.form-section:last-child {
-  border-bottom: none;
-}
-
-.form-section .form-group:last-child {
-  margin-bottom: 0;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 0 16px 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-}
-
-.section-title {
-  color: inherit;
-}
-
-label {
-  display: block;
+/* 按钮和控件 */
+button {
+  padding: 10px 20px;
   font-size: 14px;
   font-weight: 500;
-  color: #1d1d1f;
-}
-
-.row-layout label {
-  flex: 0 0 auto;
-  margin: 0 16px 0 0;
-  min-width: 70px;
-  width: 25%;
-  max-width: 90px;
-}
-
-.non-interactive-label {
-  pointer-events: none;
-  cursor: default;
-}
-
-/* 输入控件 */
-input[type="number"], 
-input[type="color"], 
-input[type="text"], 
-.text-input, 
-.text-area {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  background-color: #ffffff;
-  transition: all 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.text-area {
-  min-height: 80px;
-  resize: vertical;
-  font-family: inherit;
-  line-height: 1.5;
-}
-
-input:focus, .text-input:focus, .text-area:focus {
-  outline: none;
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
-}
-
-/* 颜色选择器 */
-.color-input-group {
-  display: flex;
-  align-items: center;
-  min-width: 120px;
-  flex: 1;
-}
-
-input[type="color"] {
-  width: 24px;
-  height: 24px;
-  padding: 0;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
-input.color-value {
-  margin-left: 8px;
-  font-size: 13px;
-  color: #666;
-  width: 80px;
-  padding: 4px 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  background-color: #ffffff;
-}
+/* 控制按钮样式已统一到base.css */
 
-/* 下拉选择器 */
-.dropdown-selector {
-  position: relative;
-  min-width: 120px;
-  max-width: 140px;
-  z-index: 10;
-}
-
-.dropdown-selector-wide {
-  position: relative;
-  min-width: 180px;
-  max-width: 200px;
-  z-index: 10;
-  flex: 1;
-  min-width: 200px;
-  max-width: 100%;
-}
-
-.dropdown-selector-wide .section-dropdown {
-  width: 100%;
-}
-
-.section-dropdown {
-  -webkit-appearance: none;
-  appearance: none;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1d1d1f;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: none;
-  min-height: 44px;
-  box-sizing: border-box;
-}
-
-.section-dropdown:focus {
-  outline: none;
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
-}
-
-.section-dropdown:hover {
-  border-color: rgba(0, 0, 0, 0.2);
-} 
-/* 加载遮罩样式 */
-#loadingOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.loading-content {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  min-width: 200px;
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007AFF;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-
-.loading-message {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-} 
-/* 模块管理相关样式 */
-.module-management {
-  margin-bottom: 20px;
-}
-
-/* 模块列表头部样式 */
-.module-list-header {
-  display: flex;                                /* 使用弹性布局 */
-  justify-content: space-between;                /* 两端对齐 */
-  align-items: center;                           /* 垂直居中对齐 */
-  margin: 24px 0 12px 0;                         /* 设置上下外边距 */
-  padding-bottom: 8px;                           /* 底部内边距 */
-  font-weight: 600;                              /* 字体加粗 */
-}
-
-.module-count {
-  font-size: 14px;
-  color: #86868b;
-  font-weight: normal;
-}
-
-.module-action-row {
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.empty-modules-message {
+.collapse-btn {
+  transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  color: #86868b;
-  border: 2px dashed rgba(0,0,0,0.1);
-  border-radius: 10px;
-  margin: 20px 0;
-}
-
-.empty-modules-message svg {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.empty-modules-message p {
-  margin: 5px 0;
-  font-size: 16px;
-}
-
-.empty-modules-message .hint-text {
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-/* 模块相关样式 */
-.module {
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 10px;
-  margin-bottom: 16px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.module-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  background-color: #f5f5f7;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-.module-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: #1d1d1f;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1d1d1f;
-  margin-right: 4px;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.module-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.module-content {
-  padding: 16px;
-  transition: max-height 0.3s ease, opacity 0.2s ease;
-}
-
-.module-collapsed .module-content {
-  max-height: 0;
-  opacity: 0;
-  padding: 0 16px;
-  overflow: hidden;
-}
-
-.module-collapsed .collapse-btn i {
-  transform: rotate(180deg);
-}
-
-.module-collapsed .collapse-btn svg,
-.module-collapsed .collapse-btn .chevron-icon {
-  transform: rotate(180deg);
-}
-
-.option-controls {
-  display: flex;
-  align-items: center;
-}
-
-/* 折叠内容区域 */
-.version-content {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  padding-left: 24px;
-}
-
-.version-content.active {
-  max-height: 800px;
-  opacity: 1;
-  padding-bottom: 15px;
-}
-
-.collapsible-content {
-  max-height: 1000px;
-  opacity: 1;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-}
-
-.collapsible-content.collapsed {
-  max-height: 0;
-  opacity: 0;
-}
-
-/* 奖品网格 */
-.prize-grid {
-  display: flex;          /* 使用弹性布局 */
-  flex-wrap: wrap;        /* 允许项目换行 */
-  justify-content: space-between; /* 项目之间平均分配空间 */
-  gap: 8px;               /* 设置网格项之间的间隙 */
-  margin-top: 10px;       /* 顶部外边距 */
-}
-
-/* 自定义奖品网格布局 */
-.prize-grid-custom {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.prize-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-}
-
-.prize-row.top-row {
-  /* 第一行：3个奖品，均匀分布 */
-  justify-content: space-between;
-}
-
-.prize-row.middle-row {
-  /* 第二行：2个奖品，左右对齐 */
-  justify-content: space-between;
-}
-
-.prize-row.bottom-row {
-  /* 第三行：3个项目，均匀分布 */
-  justify-content: space-between;
-}
-
-/* 网格项样式 */
-.grid-item {
-  flex: 0 0 calc(33.333% - 6px); /* 设置网格项宽度为33.333%（减去间隙），不允许伸缩 */
-}
-
-/* 自定义布局下的网格项 */
-.prize-grid-custom .grid-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* 第一行和第三行的项目：每个占33.33%宽度 */
-.prize-row.top-row .grid-item,
-.prize-row.bottom-row .grid-item {
-  flex: 0 0 calc(33.333% - 4px);
-  max-width: calc(33.333% - 4px);
-}
-
-/* 第二行的项目：每个也占33.33%宽度，但只有两个 */
-.prize-row.middle-row .grid-item {
-  flex: 0 0 calc(33.333% - 4px);
-  max-width: calc(33.333% - 4px);
-}
-
-.prize-label {
-  margin-top: 4px;
-  font-size: 11px;
-  color: #86868b;
-  text-align: center;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
-/* 通知样式 */
-.notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 12px 20px;
-  background-color: #333;
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
-  font-size: 14px;
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.3s ease;
-}
-
-.notification.success {
-  background-color: #34c759;
-}
-
-.notification.error {
-  background-color: #ff3b30;
-}
-
-.notification.warning {
-  background-color: #ff9500;
-}
-
-.notification.info {
-  background-color: #0071e3;
-}
-/* 标签页和导航 */
-.tab-container {
-  display: flex;                                /* 使用弹性布局 */
-  width: 100%;                                  /* 宽度占满父容器 */
-  justify-content: space-between;               /* 子元素之间平均分配空间 */
-  background-color: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
-  -webkit-backdrop-filter: blur(20px);          /* Safari浏览器背景模糊效果 */
-  backdrop-filter: blur(20px);                  /* 标准背景模糊效果 */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);  /* 底部添加细边框 */
-  padding: 6px 0;                               /* 上下内边距 */
-
-}
-
-/* 标签样式 */
-.tab {
-  flex: 1;                          /* 平均分配容器空间 */
-  height: 60px;                     /* 固定高度 */
-  display: flex;                    /* 使用弹性布局 */
-  flex-direction: column;           /* 垂直排列子元素 */
-  align-items: center;              /* 水平居中对齐 */
-  justify-content: center;          /* 垂直居中对齐 */
-  gap: 4px;                         /* 子元素间距 */
-  color: rgba(255, 255, 255, 0.5);  /* 半透明白色文字 */
-  cursor: pointer;                  /* 鼠标悬停时显示手型光标 */
-  transition: color 0.2s ease;      /* 颜色过渡动画 */
-  user-select: none;                /* 禁止文本选择 */
-  -webkit-user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
-}
-
-.tab:hover {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.tab.active {
-  color: #FFFFFF;
-}
-
-/* 标签图标样式 */
-.tab svg {
-  width: 20px;                /* 设置图标宽度为20像素 */
-  height: 20px;               /* 设置图标高度为20像素 */
-  display: block;             /* 将图标设置为块级元素 */
-}
-
-/* 标签文本样式 */
-.tab-label {
-  font-size: 16px;                /* 设置字体大小为12像素 */
-  line-height: 1;                 /* 设置行高为1，即与字体大小相同 */
-  white-space: nowrap;            /* 防止文本换行，保持在一行内显示 */
-}
-
-/* 内容区域 */
-.tab-content {
-  display: none;                    /* 初始状态下隐藏内容 */
-  padding: 60px 16px 16px 16px;      /* 设置内边距，上8px，左右16px，下16px */
-  margin: 0;                        /* 移除外边距 */
-  width: 100%;                      /* 宽度占满父容器 */
-  flex: 1;                          /* 在flex容器中占用剩余空间 */
-  background-color: #ffffff;        /* 设置背景颜色为白色 */
-  overflow-y: auto;                 /* 垂直方向内容溢出时显示滚动条 */
-  overflow-x: hidden;               /* 水平方向内容溢出时隐藏 */
-  box-sizing: border-box;           /* 将padding和border包含在元素的总宽高中 */
-}
-
-.tab-content.active {
-  display: block;
-  animation: fadeIn 0.3s ease-in-out;
-} 
-/* 上传和预览组件 */
-.file-upload-btn, 
-.img-upload-wrapper {
-  flex: 1;
-  width: 100%;
-}
-
-.upload-btn {
-  width: 100%;
-  height: 60px;
   padding: 0;
-  background-color: #f5f5f7;
-  border: 1px dashed rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  color: #666;
-  cursor: pointer;
+}
+
+.collapse-btn svg {
+  display: block;
+  margin: auto;
+}
+
+.collapse-btn.collapsed svg {
+  transform: rotate(180deg);
+}
+
+.add-btn {
+  margin-right: 6px;
   font-size: 14px;
-  text-align: center;
-  transition: all 0.2s;
-  position: relative;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  background-color: rgba(0, 113, 227, 0.1);
+  border-color: #0071e3;
+  color: #0071e3;
+}
+
+.add-btn[onclick*="removeModule"]:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+  border-color: #ff3b30;
+  color: #ff3b30;
+}
+
+/* 创建按钮 */
+.create-btn-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  overflow: hidden;
-}
-
-.upload-btn:hover {
-  background-color: #efefef;
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-.upload-btn .img-preview-inline {
-  position: absolute;
-  top: 0;
-  left: 0;
+  padding: 0 0 24px 0;
   width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
+  margin: 0 auto;
+}
+
+.button-group {
   display: flex;
-  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
   justify-content: center;
-  background-color: #fafafa;
+  width: 100%;
+  max-width: 320px;
 }
 
-.upload-btn .img-preview-inline img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+button#create {
+  background-color: #0071e3;
+  color: white;
+  min-width: 120px;
+}
+
+button#create:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+}
+
+button#reset {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  min-width: 120px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+button#reset:hover {
+  background-color: #e8e8ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button#cancel {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+button#cancel:hover {
+  background-color: #e8e8ed;
+}
+
+.action-btn {
+  background-color: #0071e3;
+  color: white;
+  border: none;
   border-radius: 8px;
-}
-
-.upload-btn .img-preview-inline .upload-icon-inline {
-  font-size: 20px;
-  color: #86868b;
-}
-
-/* 图片预览 */
-.img-preview-inline, 
-.preview-container {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.img-preview-inline {
-  pointer-events: none;
-  border-radius: 8px;
-}
-
-.img-preview-inline img, 
-.preview-container img, 
-.img-preview-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.img-preview-btn {
-  width: 100%;
+  padding: 10px 20px;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
-  justify-content: flex-start;
-}
-
-.img-preview-container {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f7;
-  border: 1px dashed rgba(0, 0, 0, 0.2);
-  position: relative;
-  overflow: hidden;
+  gap: 8px;
   transition: all 0.2s;
 }
 
-.img-preview-container:hover {
-  background-color: #efefef;
-  border-color: rgba(0, 0, 0, 0.3);
+.action-btn:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
 }
 
-.upload-icon, .upload-icon-text, .upload-icon-inline {
-  font-size: 20px;
-  color: #86868b;
+.add-module-btn {
+  min-width: 150px;
 }
 
-.upload-icon {
-  position: absolute;
-  z-index: 1;
+.wide-btn {
+  width: 100% !important;
+  min-width: 150px;
 }
 
-.upload-icon-text, .upload-icon-inline {
-  font-size: 24px;
+/* 主题切换按钮 */
+.theme-btn {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 图片上传容器 */
-.img-upload-container {
-  display: flex;          /* 使用弹性布局 */
-  flex-direction: column; /* 设置主轴方向为垂直 */
-  align-items: center;    /* 在交叉轴上居中对齐项目 */
-  width: 100%;           /* 确保容器占满父元素宽度 */
+.theme-btn:hover {
+  background-color: rgba(0, 113, 227, 0.1);
+  border-color: #0071e3;
 }
 
-/* 网格按钮样式 */
-.grid-btn {
-  width: 100%;                          /* 设置宽度为100% */
-  aspect-ratio: 1/1;                    /* 设置宽高比为1:1，保持正方形 */
-  display: flex;                        /* 使用弹性布局 */
-  align-items: center;                  /* 垂直居中对齐 */
-  justify-content: center;              /* 水平居中对齐 */
-  background-color: #f5f5f7;            /* 设置背景颜色 */
-  border: 1px dashed rgba(0, 0, 0, 0.2);/* 设置虚线边框 */
-  border-radius: 6px;                   /* 设置圆角 */
-  cursor: pointer;                      /* 鼠标悬停时显示手型光标 */
-  position: relative;                   /* 设置相对定位 */
-  overflow: hidden;                     /* 隐藏溢出内容 */
-  padding: 0;                           /* 移除内边距 */
-  transition: all 0.2s;                 /* 添加过渡效果 */
-  box-sizing: border-box;               /* 包含边框在内的盒模型 */
-}
-
-.grid-btn:hover {
-  background-color: #efefef;
-  border-color: rgba(0, 0, 0, 0.3);
-}
-
-/* 自定义布局下的网格按钮 */
-.prize-grid-custom .grid-btn {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1/1;
-  max-width: 100%;
-  max-height: none;
-  min-height: 50px;
+.theme-btn.active {
+  background-color: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
 } 
 /* 深色主题样式 */
 body.dark-theme {
