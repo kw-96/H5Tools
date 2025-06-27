@@ -35,7 +35,8 @@ button {
 }
 
 .collapse-btn svg {
-
+  width: 12px;
+  height: 7px;
   color: inherit;
   fill: currentColor;
   stroke: currentColor;
