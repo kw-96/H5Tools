@@ -14,7 +14,7 @@
 /* 标签样式 */
 .tab {
   flex: 1;                          /* 平均分配容器空间 */
-  height: 60px;                     /* 固定高度 */
+  height: 48px;                     /* 固定高度 */
   display: flex;                    /* 使用弹性布局 */
   flex-direction: column;           /* 垂直排列子元素 */
   align-items: center;              /* 水平居中对齐 */
@@ -52,7 +52,7 @@
 
 /* 标签文本样式 */
 .tab-label {
-  font-size: 16px;                /* 设置字体大小为12像素 */
+  font-size: 12px;                /* 设置字体大小为12像素 */
   line-height: 1;                 /* 设置行高为1，即与字体大小相同 */
   white-space: nowrap;            /* 防止文本换行，保持在一行内显示 */
 }

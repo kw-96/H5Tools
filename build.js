@@ -239,10 +239,11 @@ function buildHTML() {
     let jsContent = '';
     
     // 处理CSS文件
+    // 注意：app-new.css 仅供开发入口用，生产构建请勿合并，避免重复内容
     const cssFiles = [
       path.join(BUILD_CONFIG.paths.ui.styles, 'base.css'),
       path.join(BUILD_CONFIG.paths.ui.styles, 'layout.css'),
-      path.join(BUILD_CONFIG.paths.ui.styles, 'app-new.css'),
+      // path.join(BUILD_CONFIG.paths.ui.styles, 'app-new.css'), // 仅供开发入口用，勿合并
       ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'components', '*.css')),
       ...glob.sync(path.join(BUILD_CONFIG.paths.ui.styles, 'themes', '*.css'))
     ];
