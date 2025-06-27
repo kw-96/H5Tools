@@ -109,7 +109,7 @@ export interface ChannelImages {
         footerStyle?: ChannelImageData;
     };
 }
-export type PluginMessageType = 'create-prototype' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'generate' | 'channel-generate' | 'channel-image-upload' | 'storage-set' | 'storage-delete';
+export type PluginMessageType = 'create-prototype' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'generate' | 'channel-generate' | 'channel-image-upload' | 'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
 export interface BasePluginMessage {
     type: PluginMessageType;
 }
@@ -143,7 +143,13 @@ export interface StorageMessage extends BasePluginMessage {
     key?: string;
     value?: string;
 }
-export type PluginMessage = CreatePrototypeMessage | ConfigMessage | ThemeMessage | ChannelImageMessage | ChannelGenerateMessage | SimpleMessage | StorageMessage;
+export type PluginMessage = {
+    type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'channel-image-upload' | 'channel-generate' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
+    config?: H5Config;
+    theme?: string;
+    message?: string;
+    data?: Record<string, unknown>;
+};
 export interface H5Config {
     pageTitle: string;
     pageBgColor: string;

@@ -5,6 +5,10 @@ class StorageAdapter {
     // 更严格的Figma环境检测
     this.isFigmaEnvironment = this.checkFigmaEnvironment();
     this.cache = new Map(); // 内存缓存
+    this.defaults = {
+      theme: 'light',
+      autoTheme: false
+    };
     
     // 输出环境检测结果
     console.log('StorageAdapter 环境检测:', {
@@ -78,32 +82,49 @@ class StorageAdapter {
 
   async getItem(key) {
     try {
+      // 先检查缓存
+      if (this.cache.has(key)) {
+        console.log('📦 从缓存获取:', key);
+        return this.cache.get(key);
+      }
+
+      let value;
+      
       if (this.isFigmaEnvironment) {
-        // 🚨 重要修复：在Figma UI线程中，优先使用内存缓存
-        // 如果缓存中没有，可以向插件主线程请求数据
-        if (this.cache.has(key)) {
-          console.log(`📦 从缓存获取: ${key}`);
-          return this.cache.get(key);
-        }
-        
-        // 如果缓存中没有，返回undefined，避免异步等待
-        // 实际项目中可以通过消息通信从插件主线程获取
-        console.log(`⚠️ 缓存中没有找到 ${key}，返回默认值`);
-        return undefined;
+        // 发送消息给插件获取存储值
+        window.pluginComm.postMessage('storage-get', { key });
+        value = await new Promise((resolve) => {
+          const handler = (message) => {
+            if (message.type === 'storage-get-response' && message.key === key) {
+              window.pluginComm.off('storage-get-response', handler);
+              resolve(message.value);
+            }
+          };
+          window.pluginComm.on('storage-get-response', handler);
+          // 5秒超时
+          setTimeout(() => resolve(this.defaults[key]), 5000);
+        });
       } else {
-        // 在非Figma环境中，尝试使用localStorage
-        try {
-          const value = localStorage.getItem(key);
-          console.log(`✅ localStorage读取成功: ${key}`);
-          return value;
-        } catch (localStorageError) {
-          console.warn(`localStorage不可用，使用内存存储: ${key}`, localStorageError);
-          return this.cache.get(key);
+        value = localStorage.getItem(key);
+      }
+
+      // 如果值不存在，使用默认值
+      if (value === null || value === undefined) {
+        value = this.defaults[key];
+        if (value === undefined) {
+          console.warn(`⚠️ 缓存中没有找到 ${key}，返回默认值`);
         }
       }
+
+      // 更新缓存
+      if (value !== undefined) {
+        this.cache.set(key, value);
+      }
+
+      return value;
     } catch (error) {
-      console.warn(`存储读取失败 ${key}:`, error);
-      return this.cache.get(key); // 回退到内存存储
+      console.error(`获取存储值失败 ${key}:`, error);
+      return this.defaults[key];
     }
   }
 

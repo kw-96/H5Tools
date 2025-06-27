@@ -51,6 +51,12 @@ class MessageHandler {
         case 'storage-delete':
           await this.handleStorageDelete((msg as any).key);
           break;
+        case 'ui-loaded':
+          console.log('UI界面已加载');
+          break;
+        case 'ui-ready':
+          console.log('UI界面已就绪');
+          break;
         default:
           console.warn('未知消息类型:', msg.type);
       }

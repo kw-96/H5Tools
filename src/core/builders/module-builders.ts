@@ -774,12 +774,21 @@ class ModuleFactory {
     return builder.build();
   }
 
+  /**
+   * 创建轮播模块
+   * @param content 轮播内容数据
+   * @returns 返回创建的轮播模块框架节点
+   */
   private async createCarouselModule(content: CarouselContent): Promise<FrameNode> {
+    // 创建轮播模块的主框架，宽度为H5标准宽度，高度暂定为800
     const frame = NodeUtils.createFrame('轮播模块', CONSTANTS.H5_WIDTH, 800);
     
+    // 实例化轮播模块构建器
     const builder = new CarouselModuleBuilder(frame, content);
+    // 调用构建器的build方法来构建轮播模块
     await builder.build();
     
+    // 返回构建完成的框架
     return frame;
   }
 

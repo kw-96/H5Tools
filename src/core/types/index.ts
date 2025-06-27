@@ -171,7 +171,9 @@ export type PluginMessageType =
   | 'channel-generate'
   | 'channel-image-upload'
   | 'storage-set'
-  | 'storage-delete';
+  | 'storage-delete'
+  | 'ui-loaded'
+  | 'ui-ready';
 
 // 插件消息基础接口
 export interface BasePluginMessage {
@@ -217,14 +219,16 @@ export interface StorageMessage extends BasePluginMessage {
 }
 
 // 联合类型
-export type PluginMessage = 
-  | CreatePrototypeMessage 
-  | ConfigMessage 
-  | ThemeMessage 
-  | ChannelImageMessage 
-  | ChannelGenerateMessage 
-  | SimpleMessage
-  | StorageMessage;
+export type PluginMessage = {
+  type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 
+        'get-theme' | 'save-theme' | 'channel-image-upload' | 'channel-generate' |
+        'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' |
+        'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
+  config?: H5Config;
+  theme?: string;
+  message?: string;
+  data?: Record<string, unknown>;
+};
 
 // ==================== H5配置接口 ====================
 

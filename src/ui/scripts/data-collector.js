@@ -1,6 +1,19 @@
 // ==================== 数据收集器 ====================
 
 class DataCollector {
+  constructor() {
+    this.moduleDataCollectors = {
+      carousel: this.collectCarouselData.bind(this)
+    };
+    
+    // 存储键映射
+    this.storageKeyMap = {
+      'carousel-title-bg-upload': 'titleBgImage',
+      'carousel-image-upload': 'carouselImage',
+      'carousel-image-bg-upload': 'carouselBgImage'
+    };
+  }
+
   // 收集表单数据
   collectFormData() {
     const config = {
@@ -113,7 +126,7 @@ class DataCollector {
       case 'activityContent':
         return this.collectActivityContentData(container, moduleId);
       case 'carousel':
-        return this.collectCarouselData(container, moduleId);
+        return this.collectCarouselData(moduleId);
       default:
         console.warn(`未知的模块类型: ${moduleType}`);
         return null;
@@ -185,24 +198,43 @@ class DataCollector {
   }
   
   // 收集图片轮播数据
-  collectCarouselData(container, moduleId) {
-    const data = {
-      title: container.querySelector('.carousel-title-input')?.value || '',
-      titleBgImage: window.imageManager.getModule(`${moduleId}-title-bg`),
-      carouselImage: window.imageManager.getModule(`${moduleId}-image`),
-      carouselBgImage: window.imageManager.getModule(`${moduleId}-image-bg`)
-    };
-    
-    console.log('🔍 [图片轮播数据收集]', {
-      moduleId,
-      data,
-      标题: data.title,
-      轮播图片: !!data.carouselImage,
-      标题背景: !!data.titleBgImage,
-      轮播背景: !!data.carouselBgImage
-    });
-    
-    return data;
+  collectCarouselData(moduleId) {
+    try {
+      const titleInput = document.querySelector(`#${moduleId} input[name="carousel-title"]`);
+      const titleBgUpload = document.querySelector(`#${moduleId} .carousel-title-bg-upload`);
+      const carouselUpload = document.querySelector(`#${moduleId} .carousel-image-upload`);
+      const carouselBgUpload = document.querySelector(`#${moduleId} .carousel-image-bg-upload`);
+
+      const data = {
+        title: titleInput?.value || '',
+        titleBgImage: titleBgUpload?.dataset.imageData,
+        carouselImage: carouselUpload?.dataset.imageData,
+        carouselBgImage: carouselBgUpload?.dataset.imageData
+      };
+
+      console.log('🔍 [图片轮播数据收集]', {
+        moduleId,
+        data,
+        标题: data.title,
+        轮播图片: !!data.carouselImage,
+        标题背景: !!data.titleBgImage,
+        轮播背景: !!data.carouselBgImage
+      });
+
+      return data;
+    } catch (error) {
+      console.error('收集轮播图数据失败:', error);
+      return null;
+    }
+  }
+  
+  // 获取存储键
+  getStorageKey(className, moduleId) {
+    const baseKey = this.storageKeyMap[className];
+    if (!baseKey) {
+      return null;
+    }
+    return `${moduleId}-${baseKey}`;
   }
   
   // 获取奖品位置

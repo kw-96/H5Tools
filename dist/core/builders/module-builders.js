@@ -637,10 +637,19 @@ class ModuleFactory {
         const builder = new NineGridModuleBuilder(content);
         return builder.build();
     }
+    /**
+     * 创建轮播模块
+     * @param content 轮播内容数据
+     * @returns 返回创建的轮播模块框架节点
+     */
     async createCarouselModule(content) {
+        // 创建轮播模块的主框架，宽度为H5标准宽度，高度暂定为800
         const frame = figma_utils_1.NodeUtils.createFrame('轮播模块', types_1.CONSTANTS.H5_WIDTH, 800);
+        // 实例化轮播模块构建器
         const builder = new CarouselModuleBuilder(frame, content);
+        // 调用构建器的build方法来构建轮播模块
         await builder.build();
+        // 返回构建完成的框架
         return frame;
     }
     async createErrorModule(module, error) {
