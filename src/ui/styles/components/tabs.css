@@ -23,8 +23,8 @@
   color: rgba(255, 255, 255, 0.5);  /* 半透明白色文字 */
   cursor: pointer;                  /* 鼠标悬停时显示手型光标 */
   transition: color 0.2s ease;      /* 颜色过渡动画 */
-  user-select: none;                /* 禁止文本选择 */
-  -webkit-user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
+  -webkit-user-select: none;
+  user-select: none;        /* 针对WebKit浏览器禁止文本选择 */
 }
 
 .tab:hover {
@@ -37,9 +37,13 @@
 
 /* 标签图标样式 */
 .tab svg {
-  width: 20px;                /* 设置图标宽度为20像素 */
-  height: 20px;               /* 设置图标高度为20像素 */
-  display: block;             /* 将图标设置为块级元素 */
+  width: 24px;
+  height: 24px;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: visible;
 }
 
 /* 标签文本样式 */

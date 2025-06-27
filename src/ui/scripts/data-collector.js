@@ -205,23 +205,23 @@ class DataCollector {
       const carouselUpload = document.querySelector(`#${moduleId} .carousel-image-upload`);
       const carouselBgUpload = document.querySelector(`#${moduleId} .carousel-image-bg-upload`);
 
-      const data = {
+    const data = {
         title: titleInput?.value || '',
         titleBgImage: titleBgUpload?.dataset.imageData,
         carouselImage: carouselUpload?.dataset.imageData,
         carouselBgImage: carouselBgUpload?.dataset.imageData
-      };
-
-      console.log('🔍 [图片轮播数据收集]', {
-        moduleId,
-        data,
-        标题: data.title,
-        轮播图片: !!data.carouselImage,
-        标题背景: !!data.titleBgImage,
-        轮播背景: !!data.carouselBgImage
-      });
-
-      return data;
+    };
+    
+    console.log('🔍 [图片轮播数据收集]', {
+      moduleId,
+      data,
+      标题: data.title,
+      轮播图片: !!data.carouselImage,
+      标题背景: !!data.titleBgImage,
+      轮播背景: !!data.carouselBgImage
+    });
+    
+    return data;
     } catch (error) {
       console.error('收集轮播图数据失败:', error);
       return null;

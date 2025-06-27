@@ -119,38 +119,38 @@ window.initializeApp = async function() {
   try {
     // 设置初始化Promise
     AppState.initializationPromise = (async () => {
-      console.log('🚀 开始初始化H5Tools应用...');
-      
-      // 等待所有模块加载完成
-      await waitForModules();
-      
-      // 注册消息处理器
-      registerMessageHandlers();
-      
-      // 🎯 强制显示UI内容 - 修复空白页面问题
-      forceShowUI();
-      
-      // 初始化UI控制器
-      if (window.uiController) {
-        window.uiController.init();
-      } else {
-        console.warn('⚠️ UIController未加载，使用备用初始化');
-        fallbackUIInit();
-      }
-      
-      // 设置全局事件监听器
-      setupEventListeners();
-      
-      // 初始化主题系统（可选）
-      initializeThemeSystem();
-      
-      console.log('✅ H5Tools应用初始化完成');
-      
+    console.log('🚀 开始初始化H5Tools应用...');
+    
+    // 等待所有模块加载完成
+    await waitForModules();
+    
+    // 注册消息处理器
+    registerMessageHandlers();
+    
+    // 🎯 强制显示UI内容 - 修复空白页面问题
+    forceShowUI();
+    
+    // 初始化UI控制器
+    if (window.uiController) {
+    window.uiController.init();
+    } else {
+      console.warn('⚠️ UIController未加载，使用备用初始化');
+      fallbackUIInit();
+    }
+    
+    // 设置全局事件监听器
+    setupEventListeners();
+    
+    // 初始化主题系统（可选）
+    initializeThemeSystem();
+    
+    console.log('✅ H5Tools应用初始化完成');
+    
       // 发送初始化完成消息（确保只发送一次）
       if (window.pluginComm && !AppState.initialized) {
-        window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
-      }
-
+      window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
+    }
+    
       // 标记初始化完成
       AppState.initialized = true;
     })();

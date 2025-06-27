@@ -469,7 +469,7 @@ export class ServiceManager {
       this.theme.getInstance(),
       this.channelImage.clearExpiredChannelImages()
     ]);
-  }
+    }
   
   static async getSystemStatus(): Promise<{
     configLoaded: boolean;
@@ -483,11 +483,11 @@ export class ServiceManager {
     ]);
     
     const theme = await themeInstance.getCurrentTheme();
-    
-    return {
+      
+      return {
       configLoaded: !!config,
-      theme,
-      storageUsage
-    };
+        theme,
+        storageUsage
+      };
   }
 } 
