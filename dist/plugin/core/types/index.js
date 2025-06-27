@@ -1,2 +1,0 @@
-const I={H5_WIDTH:1080,MODULE_WIDTH:950,PADDING:0,GRID_SIZE:3,DEFAULT_SPACING:20};var o,E;!function(I){I.HEADER="header",I.GAME_INFO="gameInfo",I.FOOTER="footer",I.ACTIVITY_CONTENT="activityContent",I.SIGN_IN="signIn",I.COLLECT_CARDS="collectCards",I.NINE_GRID="nineGrid",I.CAROUSEL="carousel",I.RULES="rules",I.CUSTOM="custom"}(o||(o={})),function(I){I.OPPO="oppo",I.VIVO="vivo",I.HUAWEI="huawei",I.XIAOMI="xiaomi"}(E||(E={}));export{I as CONSTANTS,E as ChannelType,o as ModuleType};
-//# sourceMappingURL=index.js.map

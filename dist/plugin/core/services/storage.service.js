@@ -1,2 +1,0 @@
-class t{constructor(){this.storage="undefined"!=typeof window?window.localStorage:null}static getInstance(){return t.instance||(t.instance=new t),t.instance}setItem(t,e){this.storage&&this.storage.setItem(t,e)}getItem(t){return this.storage?this.storage.getItem(t):null}removeItem(t){this.storage&&this.storage.removeItem(t)}clear(){this.storage&&this.storage.clear()}keys(){return this.storage?Object.keys(this.storage):[]}}export{t as StorageService};
-//# sourceMappingURL=storage.service.js.map

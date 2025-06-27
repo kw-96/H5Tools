@@ -7,11 +7,10 @@ import terser from '@rollup/plugin-terser';
 export default {
   input: 'src/plugin/code-standalone.ts',
   output: {
-    dir: 'dist/plugin',
+    file: 'dist/plugin/code-standalone.js',
     format: 'es',
     sourcemap: true,
-    preserveModules: true,
-    preserveModulesRoot: 'src'
+    inlineDynamicImports: true
   },
   plugins: [
     typescript({
