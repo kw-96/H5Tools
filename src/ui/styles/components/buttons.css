@@ -38,13 +38,13 @@ button {
 }
 
 .collapse-btn svg {
-  width: 12px;
-  height: 7px;
+  width: 12px !important;
+  height: 7px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 12px !important;
+  max-height: 7px !important;
   display: block;
-  color: inherit;
-  fill: currentColor;
-  stroke: currentColor;
-  transition: transform 0.3s ease;
   margin: 0;
   padding: 0;
   flex-shrink: 0;
