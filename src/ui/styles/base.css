@@ -34,7 +34,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 0;
   padding-bottom: 40px;
 }
 
@@ -112,12 +111,13 @@ body {
 }
 
 .svg-sprite {
-  position: absolute !important;
   width: 0 !important;
   height: 0 !important;
-  overflow: hidden !important;
-  pointer-events: none !important;
+  position: absolute !important;
   left: -9999px !important;
   top: -9999px !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
   display: block !important;
+  visibility: hidden !important;
 }
