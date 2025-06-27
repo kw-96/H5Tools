@@ -23,7 +23,7 @@ button {
   cursor: pointer;
   transition: all 0.2s;
   background-color: transparent;
-  overflow: hidden;
+  position: relative;
 }
 
 .control-btn:hover {
@@ -41,8 +41,10 @@ button {
   fill: currentColor;
   stroke: currentColor;
   transition: transform 0.3s ease;
-  display: block;
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .chevron-icon {
@@ -54,7 +56,7 @@ button {
 
 .collapse-btn.collapsed svg,
 .collapse-btn.collapsed .chevron-icon {
-  transform: rotate(180deg);
+  transform: translate(-50%, -50%) rotate(180deg);
 }
 
 .add-btn {
