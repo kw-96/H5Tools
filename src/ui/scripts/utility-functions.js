@@ -200,6 +200,7 @@ class StorageAdapter {
   }
 }
 
+
 // 创建全局存储适配器实例
 const storageAdapter = new StorageAdapter();
 
