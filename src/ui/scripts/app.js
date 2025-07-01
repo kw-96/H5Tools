@@ -104,7 +104,7 @@ function registerMessageHandlers() {
 // 初始化应用 (全局函数，供global-init.js调用)
 window.initializeApp = async function() {
   // 防止重复初始化
-  if (AppState.initialized) {
+  if (AppState.initialized || window._h5ToolsInitialized) {
     console.log('⚠️ 应用已经初始化，跳过重复初始化');
     return;
   }
@@ -153,6 +153,8 @@ window.initializeApp = async function() {
     
       // 标记初始化完成
       AppState.initialized = true;
+      window._h5ToolsInitialized = true; // 🔒 设置全局完成标志
+      window._h5ToolsInitializing = false; // 清除正在初始化标志
     })();
 
     await AppState.initializationPromise;
@@ -163,6 +165,7 @@ window.initializeApp = async function() {
     // 重置初始化状态，允许重试
     AppState.initialized = false;
     AppState.initializationPromise = null;
+    window._h5ToolsInitializing = false; // 清除正在初始化标志
   }
 };
 
@@ -240,7 +243,8 @@ function setupEventListeners() {
 function initializeThemeSystem() {
   try {
     if (window.utilityFunctions) {
-    window.utilityFunctions.loadThemePreference();
+    // 注意：已移除主题缓存机制，直接应用系统主题
+    window.utilityFunctions.detectAndApplySystemTheme();
     window.utilityFunctions.setupSystemThemeListener();
     window.utilityFunctions.bindThemeButtonEvents();
     }

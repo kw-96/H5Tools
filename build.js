@@ -1,5 +1,5 @@
-// H5Tools 主构建脚本 - 外部CSS版本
-// 统一构建脚本，包含核心库、插件和外部CSS版本构建
+// H5Tools 主构建脚本 - 内联模式版本
+// 统一构建脚本，包含核心库、插件和内联模式构建
 
 import fs from 'fs';
 import path from 'path';
@@ -26,12 +26,6 @@ const BUILD_CONFIG = {
       scripts: path.join('src', 'ui', 'scripts'),
       html: path.join('src', 'ui', 'index.html')
     }
-  },
-  cdn: {
-    baseUrl: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist',
-    timeout: 10000,
-    retryDelay: 1000,
-    baseUrl: 'https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist'
   }
 };
 
@@ -352,12 +346,16 @@ function buildHTML() {
       jsContent
     );
     
-    // 替换HTML中的模板内容
-    processedHtml = processedHtml
-      .replace('{{EXTERNAL_CSS_LINK}}', 
-        `<link id="external-styles" rel="stylesheet" href="${BUILD_CONFIG.cdn.baseUrl}/styles.min.css">`)
-      .replace('{{APP_SCRIPTS}}',
-        `<script>\n${ultimateCDNLoaderCode}\n</script>`);
+    // 替换CSS链接为内联样式
+    console.log('ℹ️ 内联CSS样式...');
+    const cssLinkRegex = /{{EXTERNAL_CSS_LINK}}/g;
+    processedHtml = processedHtml.replace(cssLinkRegex, `<style>\n${cssContent}\n</style>`);
+
+    // 替换{{APP_SCRIPTS}}为内联的JavaScript代码
+    console.log('ℹ️ 内联JavaScript代码...');
+    const scriptPlaceholderRegex = /{{APP_SCRIPTS}}/g;
+    const inlineScriptBlock = `<script>\n${jsContent}\n</script>`;
+    processedHtml = processedHtml.replace(scriptPlaceholderRegex, inlineScriptBlock);
     
     // 生成HTML文件
     fileUtils.writeFile(
@@ -372,77 +370,6 @@ function buildHTML() {
     throw new Error(`HTML构建失败: ${error.message}`);
   }
 }
-
-// CDN加载器代码
-const ultimateCDNLoaderCode = `
-// CDN资源加载器
-async function loadExternalResource(url, type) {
-  return new Promise((resolve, reject) => {
-    const element = type === 'css' 
-      ? document.createElement('link') 
-      : document.createElement('script');
-    
-    if (type === 'css') {
-      element.rel = 'stylesheet';
-      element.href = url;
-    } else {
-      element.src = url;
-    }
-    
-    const timeout = setTimeout(() => {
-      reject(new Error(\`资源加载超时: \${url}\`));
-    }, 10000);
-    
-    element.onload = () => {
-      clearTimeout(timeout);
-      resolve();
-    };
-    
-    element.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error(\`资源加载失败: \${url}\`));
-    };
-    
-    document.head.appendChild(element);
-  });
-}
-
-// 创建备用样式
-function createFallbackUI() {
-  const style = document.createElement('style');
-  style.textContent = \`
-    body { font-family: sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 400px; margin: 0 auto; }
-    /* 其他基础样式... */
-  \`;
-  document.head.appendChild(style);
-  console.log('✅ 应急样式已加载');
-}
-
-// 智能资源加载
-async function loadResources() {
-  try {
-    await loadExternalResource('${BUILD_CONFIG.cdn.baseUrl}/styles.min.css', 'css')
-      .catch(err => {
-        console.warn(\`⚠️ CSS加载失败: \${err.message}\`);
-        createFallbackUI();
-      });
-      
-    await loadExternalResource('${BUILD_CONFIG.cdn.baseUrl}/scripts.min.js', 'js')
-      .catch(err => {
-        console.error(\`❌ JS加载失败: \${err.message}\`);
-        throw err;
-      });
-      
-    console.log('✅ CDN资源加载完成');
-  } catch (error) {
-    console.error(\`❌ 资源加载失败: \${error.message}\`);
-  }
-}
-
-// 初始化加载
-document.addEventListener('DOMContentLoaded', loadResources);
-`;
 
 // 主构建函数
 async function build() {

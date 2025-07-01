@@ -13,65 +13,23 @@ alwaysApply: false
 
 # 开发最佳实践
 
-## 1. 新增功能模块
-```typescript
-// 1. 在types/index.ts中定义接口
-export interface NewModuleContent {
-  title: string;
-  content: string;
-  config: Record<string, unknown>;
-}
+## TypeScript 开发规范
 
-// 2. 在ModuleType枚举中添加类型
-export enum ModuleType {
-  // ... 现有类型
-  NEW_MODULE = 'newModule'
-}
+### 基本规范
+- **严格模式**: 启用所有严格类型检查，禁止使用`any`
+- **类型覆盖**: 100%类型定义，使用interface定义数据结构
+- **枚举使用**: 使用enum定义常量集合
+- **泛型支持**: 合理使用泛型提高代码复用性
 
-// 3. 在module-builders.ts中实现构建器
-export async function createNewModule(content: NewModuleContent): Promise<FrameNode> {
-  // 实现逻辑
-}
-```
+### 命名约定
+- **类名**: PascalCase (例: `H5PrototypeBuilder`)
+- **方法名**: camelCase (例: `createH5Prototype`)
+- **常量**: UPPER_SNAKE_CASE (例: `H5_WIDTH`)
+- **接口**: PascalCase (例: `H5Config`, `ImageInfo`)
+- **文件命名**: kebab-case (例: `h5-prototype-builder.ts`)
+- **导出方式**: 优先使用命名导出，避免默认导出
 
-## 2. 新增渠道适配
-```typescript
-// 1. 在ChannelType枚举中添加
-export enum ChannelType {
-  // ... 现有渠道
-  NEW_CHANNEL = 'newChannel'
-}
-
-// 2. 在channel-adapter.ts中添加配置
-const CHANNEL_CONFIGS: Record<ChannelType, ChannelConfig> = {
-  // ... 现有配置
-  [ChannelType.NEW_CHANNEL]: {
-    name: '新渠道',
-    maxWidth: 1080,
-    maxHeight: 1920,
-    // ... 其他配置
-  }
-};
-```
-
-## 3. 工具函数开发
-```typescript
-// 工具函数应该是纯函数，无副作用
-export class NewUtils {
-  static processData(input: InputType): OutputType {
-    // 1. 参数验证
-    if (!input) throw new Error('Input is required');
-    
-    // 2. 核心逻辑
-    const result = /* 处理逻辑 */;
-    
-    // 3. 返回结果
-    return result;
-  }
-}
-```
-
-## 4. 错误处理模式
+### 错误处理模式
 ```typescript
 export async function riskyOperation(): Promise<Result> {
   try {
@@ -91,6 +49,262 @@ export async function riskyOperation(): Promise<Result> {
   }
 }
 ```
+
+## 项目架构开发指南
+
+### 1. 新增功能模块
+```typescript
+// 1. 在src/core/types/index.ts中定义接口
+export interface NewModuleContent {
+  title: string;
+  content: string;
+  config: Record<string, unknown>;
+}
+
+// 2. 在ModuleType枚举中添加类型
+export enum ModuleType {
+  HEADER = 'header',
+  GAME_INFO = 'gameInfo',
+  NINE_GRID = 'nineGrid',
+  ACTIVITY_CONTENT = 'activityContent',
+  SIGN_IN = 'signIn',
+  COLLECT_CARDS = 'collectCards',
+  CAROUSEL = 'carousel',
+  VERTICAL_CAROUSEL = 'verticalCarousel',
+  // ... 现有类型
+  NEW_MODULE = 'newModule'  // 新增模块类型
+}
+
+// 3. 在src/core/builders/module-builders.ts中实现构建器
+export class NewModuleBuilder {
+  private frame: FrameNode;
+  private content: NewModuleContent;
+
+  constructor(frame: FrameNode, content: NewModuleContent) {
+    this.frame = frame;
+    this.content = content;
+  }
+
+  async build(): Promise<void> {
+    // 实现模块构建逻辑
+    await this.setupLayout();
+    await this.addContent();
+  }
+
+  private async setupLayout(): Promise<void> {
+    // 设置布局
+  }
+
+  private async addContent(): Promise<void> {
+    // 添加内容
+  }
+}
+
+// 4. 在ModuleFactory中添加模块创建逻辑
+// 位置：src/core/builders/module-builders.ts的ModuleFactory类
+async createModule(module: Module): Promise<FrameNode> {
+  switch (moduleType) {
+    case 'newModule':
+    case ModuleType.NEW_MODULE:
+      moduleFrame = await this.createNewModule(module.content as NewModuleContent);
+      break;
+    // ... 其他模块
+  }
+}
+```
+
+### 2. 新增渠道适配
+```typescript
+// 1. 在src/core/types/index.ts中的ChannelType枚举中添加
+export enum ChannelType {
+  WECHAT = 'wechat',
+  ALIPAY = 'alipay',  
+  DOUYIN = 'douyin',
+  XIAOHONGSHU = 'xiaohongshu',
+  OPPO = 'oppo',
+  VIVO = 'vivo',
+  HUAWEI = 'huawei',
+  XIAOMI = 'xiaomi',
+  // ... 现有渠道
+  NEW_CHANNEL = 'newChannel'  // 新增渠道
+}
+
+// 2. 在src/core/builders/channel-generator.ts中添加样式调整方法
+private async applyNewChannelStyles(moduleFrame: FrameNode): Promise<void> {
+  // 实现新渠道的样式调整逻辑
+  await this.adjustModuleForNewChannel(moduleFrame);
+}
+
+// 3. 在adjustModuleStyles方法中添加渠道判断
+private async adjustModuleStyles(moduleFrame: FrameNode): Promise<void> {
+  switch (this.channel) {
+    case 'oppo':
+      await this.applyOppoStyles(moduleFrame);
+      break;
+    case 'vivo':
+      await this.applyVivoStyles(moduleFrame);
+      break;
+    case 'newChannel':
+      await this.applyNewChannelStyles(moduleFrame);
+      break;
+    // ... 其他渠道
+  }
+}
+
+// 4. 在UI界面中添加渠道选项（src/ui/index.html）
+<option value="newChannel">新渠道</option>
+```
+
+### 3. 工具函数开发
+```typescript
+// 在src/core/utils/index.ts中添加新的工具类
+export class NewUtils {
+  // 工具函数应该是纯函数，无副作用
+  static processData(input: InputType): OutputType {
+    // 1. 参数验证
+    if (!input) throw new Error('Input is required');
+    
+    // 2. 核心逻辑
+    const result = this.transformData(input);
+    
+    // 3. 返回结果
+    return result;
+  }
+
+  private static transformData(input: InputType): OutputType {
+    // 具体处理逻辑
+    return {} as OutputType;
+  }
+}
+
+// ImageUtils已存在于src/core/utils/index.ts中，可以扩展：
+export class ImageUtils {
+  // 现有方法...
+  
+  static async resizeImage(
+    imageData: Uint8Array, 
+    targetWidth: number, 
+    targetHeight: number
+  ): Promise<Uint8Array> {
+    // 图片尺寸调整逻辑
+    return imageData;
+  }
+
+  static validateImageFormat(imageData: Uint8Array): boolean {
+    // 图片格式验证
+    return true;
+  }
+}
+```
+
+### 4. 服务层开发
+```typescript
+// 在src/core/services/index.ts中添加新服务
+export class NewService {
+  private config: ServiceConfig;
+
+  constructor(config: ServiceConfig) {
+    this.config = config;
+  }
+
+  async processRequest(data: RequestData): Promise<ResponseData> {
+    try {
+      // 验证输入
+      this.validateInput(data);
+      
+      // 处理业务逻辑
+      const result = await this.handleBusinessLogic(data);
+      
+      return result;
+    } catch (error) {
+      console.error('Service处理失败:', error);
+      throw error;
+    }
+  }
+
+  private validateInput(data: RequestData): void {
+    if (!data) throw new Error('Data is required');
+  }
+
+  private async handleBusinessLogic(data: RequestData): Promise<ResponseData> {
+    // 业务逻辑实现
+    return {} as ResponseData;
+  }
+}
+```
+
+## Figma插件开发规范
+
+### 节点创建和管理
+```typescript
+// 使用NodeUtils统一创建节点（位于src/core/builders/figma-utils.ts）
+const frame = NodeUtils.createFrame("模块名称", width, height);
+const textNode = await NodeUtils.createText(content, fontSize, fontWeight);
+
+// 安全地添加子节点
+NodeUtils.safeAppendChild(parent, child, '操作描述');
+```
+
+### 图片处理
+```typescript
+// 使用ImageNodeBuilder处理图片（位于src/core/builders/figma-utils.ts）
+const imageNode = await ImageNodeBuilder.insertImage(
+  imageInfo,
+  "图片名称", 
+  width, 
+  height
+);
+
+// 设置图片填充
+await ImageNodeBuilder.setImageFill(node, imageInfo);
+```
+
+### 颜色处理
+```typescript
+// 使用ColorUtils处理颜色（位于src/core/builders/figma-utils.ts）
+const rgb = ColorUtils.hexToRgb('#ff0000');
+const fill = ColorUtils.createSolidFill(rgb);
+node.fills = [fill];
+```
+
+## 性能优化指南
+
+### 内存管理
+- **及时清理**: 清理大型对象引用
+- **按需加载**: 避免不必要的模块导入
+- **缓存策略**: 合理使用Figma clientStorage
+- **异步处理**: 使用Promise和async/await
+
+### 构建优化
+- **模块化设计**: 核心库、插件、UI分离
+- **TypeScript严格模式**: 确保类型安全
+- **代码分割**: 按功能模块组织代码
+- **资源压缩**: 自动压缩CSS和JS
+
+## 代码质量控制
+
+### 开发流程
+```bash
+# 1. 开发前检查
+npm run type-check
+npm run lint
+
+# 2. 开发模式
+npm run dev
+
+# 3. 构建验证
+npm run build
+
+# 4. 代码修复
+npm run lint:fix
+```
+
+### 提交前检查
+- [ ] TypeScript类型检查通过
+- [ ] ESLint规则检查通过
+- [ ] 单元测试通过（如果有）
+- [ ] 构建成功且无警告
+- [ ] 功能验证完成
 
 
 

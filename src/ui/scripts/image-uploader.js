@@ -36,25 +36,24 @@ class ImageUploader {
   }      
   
   bindModuleImageUploaders() {
-    // 使用事件委托处理模块内的图片上传
+    // 🔧 统一使用事件委托处理模块内的图片上传，避免重复绑定
     document.addEventListener('change', (e) => {
       if (e.target.type === 'file' && e.target.accept === 'image/*' && e.target.closest('.module')) {
+        // 防止重复处理
+        if (e.target.dataset.processing === 'true') return;
+        e.target.dataset.processing = 'true';
+        
+        // 异步处理完成后清除标记
+        setTimeout(() => {
+          e.target.dataset.processing = 'false';
+        }, 100);
+        
         window.fileProcessor.handleModuleImageUpload(e);
       }
     });
   }
   
-  bindModuleUploaders(moduleEl, moduleId) {
-    const inputs = moduleEl.querySelectorAll('input[type="file"]');
-    inputs.forEach((input) => {
-      const storageKey = this.getModuleStorageKey(input, moduleId);
-      if (storageKey) {
-        input.addEventListener('change', async (e) => {
-          await this.handleUpload(e.target, storageKey, true);
-        });
-      }
-    });
-  }
+  // 🚨 移除重复的bindModuleUploaders方法，使用统一的事件委托
   
   getModuleStorageKey(input, moduleId) {
     const classMap = {
@@ -73,9 +72,13 @@ class ImageUploader {
       'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
       'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
       'activity-content-image-upload': `${moduleId}-image`,
-      'carousel-title-bg-upload': `${moduleId}-title-bg`,
-      'carousel-image-upload': `${moduleId}-image`,
-      'carousel-image-bg-upload': `${moduleId}-image-bg`
+      'carousel-title-bg-upload': `${moduleId}-carousel-title-bg`,
+      'carousel-image-upload': `${moduleId}-carousel-image`,
+      'carousel-image-bg-upload': `${moduleId}-carousel-image-bg`,
+      'vertical-carousel-title-bg-upload': `${moduleId}-vertical-title-bg`,
+      'vertical-carousel-image-upload-1': `${moduleId}-vertical-image-1`,
+      'vertical-carousel-image-upload-2': `${moduleId}-vertical-image-2`,
+      'vertical-carousel-image-upload-3': `${moduleId}-vertical-image-3`
     };
     
     // 特殊处理奖品图片上传

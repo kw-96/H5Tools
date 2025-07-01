@@ -44,15 +44,6 @@ class MessageHandler {
         case 'load-config':
           await this.handleLoadConfig();
           break;
-        case 'get-theme':
-          await this.handleGetTheme();
-          break;
-        case 'save-theme':
-          if (!msg.theme) {
-            throw new Error('主题信息不能为空');
-          }
-          await this.handleSaveTheme(msg.theme);
-          break;
         case 'channel-image-upload':
           await this.handleChannelImageUpload(msg as ChannelImageMessage);
           break;
@@ -72,6 +63,13 @@ class MessageHandler {
             throw new Error('存储键不能为空');
           }
           await this.handleStorageDelete(deleteMsg.key);
+          break;
+        case 'storage-get':
+          const getMsg = msg as StorageMessage;
+          if (!getMsg.key) {
+            throw new Error('存储键不能为空');
+          }
+          await this.handleStorageGet(getMsg.key, getMsg._messageId);
           break;
         case 'ui-loaded':
           console.log('UI界面已加载');
@@ -147,39 +145,7 @@ class MessageHandler {
     }
   }
 
-  private async handleGetTheme(): Promise<void> {
-    try {
-      const theme = await ThemeService.getCurrentTheme();
-      figma.ui.postMessage({
-        type: 'theme-loaded',
-        theme: theme
-      });
-    } catch (error) {
-      console.error('获取主题失败:', error);
-      figma.ui.postMessage({
-        type: 'error',
-        message: `获取主题失败: ${error instanceof Error ? error.message : String(error)}`
-      });
-      throw error;
-    }
-  }
 
-  private async handleSaveTheme(theme: string): Promise<void> {
-    try {
-      await ThemeService.saveTheme(theme);
-      figma.ui.postMessage({
-        type: 'theme-saved',
-        message: '主题保存成功'
-      });
-    } catch (error) {
-      console.error('保存主题失败:', error);
-      figma.ui.postMessage({
-        type: 'error',
-        message: `保存主题失败: ${error instanceof Error ? error.message : String(error)}`
-      });
-      throw error;
-    }
-  }
 
   private async handleChannelImageUpload(msg: ChannelImageMessage): Promise<void> {
     try {
@@ -242,6 +208,27 @@ class MessageHandler {
       console.error(`Figma存储删除失败 ${key}:`, error);
     }
   }
+
+  private async handleStorageGet(key: string, messageId?: string): Promise<void> {
+    try {
+      const value = await figma.clientStorage.getAsync(key);
+      console.log(`✅ Figma存储获取成功: ${key}`, value);
+      figma.ui.postMessage({
+        type: 'storage-get-response',
+        key: key,
+        value: value,
+        _messageId: messageId
+      });
+    } catch (error) {
+      console.error(`Figma存储获取失败 ${key}:`, error);
+      figma.ui.postMessage({
+        type: 'error',
+        message: `获取存储失败: ${error instanceof Error ? error.message : String(error)}`,
+        key: key,
+        _messageId: messageId
+      });
+    }
+  }
 }
 
 // ==================== 插件入口 ====================
@@ -249,7 +236,7 @@ class MessageHandler {
 const messageHandler = new MessageHandler();
 
 // 显示UI界面
-figma.showUI(__html__, { width: 400, height: 700 });
+figma.showUI(__html__, { width: 360, height: 700 });
 
 // 监听来自UI的消息
 figma.ui.onmessage = async (msg: PluginMessage) => {

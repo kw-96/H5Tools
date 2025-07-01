@@ -1,4 +1,4 @@
-import { H5Config, ImageInfo, ModuleData, NineGridContent, ActivityContentData, SignInContent, CollectCardsContent, CarouselContent } from '../types';
+import { H5Config, ImageInfo, ModuleData, NineGridContent, ActivityContentData, SignInContent, CollectCardsContent, CarouselContent, VerticalCarouselContent } from '../types';
 export declare function createHeaderModule(headerImage: ImageInfo | null, titleUpload: ImageInfo | null): Promise<FrameNode | null>;
 export declare function createGameInfoModule(config: H5Config): Promise<FrameNode>;
 export declare function createCustomModule(module: ModuleData): Promise<FrameNode>;
@@ -71,4 +71,23 @@ export declare class CollectCardsModuleBuilder {
     constructor(frame: FrameNode, content: CollectCardsContent);
     build(): Promise<void>;
     private createCardItem;
+}
+export declare class VerticalCarouselModuleBuilder {
+    private frame;
+    private content;
+    private readonly TITLE_HEIGHT;
+    private readonly CAROUSEL_AREA_HEIGHT;
+    private readonly MAIN_IMAGE_WIDTH;
+    private readonly MAIN_IMAGE_HEIGHT;
+    private readonly SIDE_IMAGE_WIDTH;
+    private readonly SIDE_IMAGE_HEIGHT;
+    private readonly IMAGE_SPACING;
+    private readonly CAROUSEL_BUTTON_HEIGHT;
+    constructor(frame: FrameNode, content: VerticalCarouselContent);
+    build(): Promise<void>;
+    private setupFrameLayout;
+    private addTitleContainer;
+    private addCarouselPreview;
+    private addCarouselLayout;
+    private addCarouselButtons;
 }

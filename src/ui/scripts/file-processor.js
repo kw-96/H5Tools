@@ -98,7 +98,14 @@ class FileProcessor {
       'combine-button-upload': `${moduleId}-combinebtn`,
       'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
       'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
-      'activity-content-image-upload': `${moduleId}-image`
+      'activity-content-image-upload': `${moduleId}-image`,
+      'carousel-title-bg-upload': `${moduleId}-carousel-title-bg`,
+      'carousel-image-upload': `${moduleId}-carousel-image`,
+      'carousel-image-bg-upload': `${moduleId}-carousel-image-bg`,
+      'vertical-carousel-title-bg-upload': `${moduleId}-vertical-title-bg`,
+      'vertical-carousel-image-upload-1': `${moduleId}-vertical-image-1`,
+      'vertical-carousel-image-upload-2': `${moduleId}-vertical-image-2`,
+      'vertical-carousel-image-upload-3': `${moduleId}-vertical-image-3`
     };
     
     // 特殊处理奖品图片上传

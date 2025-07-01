@@ -472,31 +472,20 @@ function previewImage(input, previewElement) {
   }
 }
 
-// 主题系统功能
+// 主题系统功能（简化版 - 仅监听系统主题变化）
 function setupSystemThemeListener() {
   if (window.matchMedia) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const handleThemeChange = async (e) => {
       const isDark = e.matches;
-      console.log('系统主题变化:', isDark ? '深色' : '浅色');
+      const newTheme = isDark ? 'dark' : 'light';
       
-      // 检查是否启用了自动主题
-      if (window.storageAdapter) {
-        try {
-          const autoThemeEnabled = await window.storageAdapter.getItem('autoTheme') === 'true';
-          if (autoThemeEnabled) {
-            applyTheme(isDark ? 'dark' : 'light');
-            
-            // 通知用户主题已自动切换
-            const themeText = isDark ? '深色' : '浅色';
-            console.log(`已自动切换到${themeText}主题`);
-          }
-        } catch (error) {
-          console.warn('检查自动主题设置失败:', error);
-        }
-      } else {
-        console.warn('StorageAdapter不可用，无法检查自动主题设置');
+      // 检查当前主题，避免不必要的切换
+      const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+      if (currentTheme !== newTheme) {
+        applyTheme(newTheme);
+        console.log(`✅ 系统主题变化，已切换到${isDark ? '深色' : '浅色'}主题`);
       }
     };
     
@@ -508,63 +497,37 @@ function setupSystemThemeListener() {
       mediaQuery.addListener(handleThemeChange);
     }
     
-    // 初始检查
-    handleThemeChange(mediaQuery);
+    console.log('✅ 系统主题监听器已设置');
   }
 }
 
-// 加载主题偏好
-async function loadThemePreference() {
-  try {
-    // 确保StorageAdapter已经初始化
-    if (!window.storageAdapter) {
-      console.warn('StorageAdapter未初始化，使用默认主题');
-      applyTheme('light');
-      return;
-    }
+// 注意：主题缓存机制已被移除，不再保存/读取主题偏好
+// 现在直接应用系统主题或默认主题
 
-    console.log('开始加载主题偏好...');
-    
-    const savedTheme = await window.storageAdapter.getItem('theme');
-    const autoTheme = await window.storageAdapter.getItem('autoTheme') === 'true';
-    
-    console.log('主题设置:', { savedTheme, autoTheme });
-    
-    if (autoTheme) {
-      // 自动主题：跟随系统
-      console.log('使用自动主题模式');
-      detectAndApplySystemTheme();
-    } else if (savedTheme) {
-      // 使用保存的主题
-      console.log(`使用保存的主题: ${savedTheme}`);
-      applyTheme(savedTheme);
-    } else {
-      // 默认跟随系统
-      console.log('使用默认系统主题');
-      detectAndApplySystemTheme();
-    }
-  } catch (error) {
-    console.error('加载主题偏好失败:', error);
-    // 降级到默认浅色主题
-    console.log('降级到默认浅色主题');
-    applyTheme('light');
-  }
-}
-
-// 检测并应用系统主题
+// 检测并应用系统主题（防重复调用）
 function detectAndApplySystemTheme() {
+  // 防止重复调用
+  if (window._h5ToolsThemeInitialized) {
+    console.log('⚠️ 主题已经初始化，跳过重复应用');
+    return;
+  }
+  
   try {
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const systemTheme = prefersDark ? 'dark' : 'light';
     applyTheme(systemTheme);
-    console.log('已应用系统主题:', systemTheme);
+    console.log('✅ 已应用系统主题:', systemTheme);
+    
+    // 标记主题已初始化
+    window._h5ToolsThemeInitialized = true;
   } catch (error) {
     console.error('检测系统主题失败:', error);
     applyTheme('light');
+    window._h5ToolsThemeInitialized = true;
   }
 }
 
-// 应用主题
+// 应用主题（简化版）
 async function applyTheme(theme) {
   try {
     // 移除现有主题类
@@ -575,20 +538,6 @@ async function applyTheme(theme) {
     
     // 更新主题按钮状态
     updateThemeButtonsState(theme);
-    
-    // 保存主题偏好（如果存储适配器可用）
-    if (window.storageAdapter) {
-      try {
-        await window.storageAdapter.setItem('theme', theme);
-        console.log(`✅ 主题已保存: ${theme}`);
-      } catch (storageError) {
-        console.warn(`主题保存失败，但已应用到界面: ${theme}`, storageError);
-      }
-    } else {
-      console.warn(`StorageAdapter不可用，主题仅应用到界面: ${theme}`);
-    }
-    
-    console.log('主题已切换到:', theme);
   } catch (error) {
     console.error('应用主题失败:', error);
   }
@@ -614,55 +563,54 @@ function updateThemeButtonsState(activeTheme) {
   }
 }
 
-// 切换主题
+// 切换主题（简化版）
 async function switchTheme(theme) {
   try {
     await applyTheme(theme);
-    
-    // 禁用自动主题（如果存储适配器可用）
-    if (window.storageAdapter) {
-      try {
-        await window.storageAdapter.setItem('autoTheme', 'false');
-        console.log('✅ 自动主题已禁用');
-      } catch (storageError) {
-        console.warn('自动主题设置保存失败:', storageError);
-      }
-    } else {
-      console.warn('StorageAdapter不可用，无法保存自动主题设置');
-    }
-    
-    console.log('手动切换主题到:', theme);
+    console.log(`✅ 手动切换到${theme === 'dark' ? '深色' : '浅色'}主题`);
   } catch (error) {
     console.error('切换主题失败:', error);
   }
 }
 
-// 绑定主题按钮事件
+// 绑定主题按钮事件（防重复绑定）
 function bindThemeButtonEvents() {
+  // 防止重复绑定
+  if (window._h5ToolsThemeEventsInitialized) {
+    console.log('⚠️ 主题按钮事件已经绑定，跳过重复绑定');
+    return;
+  }
+  
   try {
     const lightBtn = document.getElementById('lightTheme');
     const darkBtn = document.getElementById('darkTheme');
     
-    if (lightBtn) {
+    if (lightBtn && !lightBtn._themeEventBound) {
       lightBtn.addEventListener('click', () => switchTheme('light'));
+      lightBtn._themeEventBound = true;
     }
     
-    if (darkBtn) {
+    if (darkBtn && !darkBtn._themeEventBound) {
       darkBtn.addEventListener('click', () => switchTheme('dark'));
+      darkBtn._themeEventBound = true;
     }
     
-    // 可选：添加键盘快捷键支持
-    document.addEventListener('keydown', (e) => {
-      // Ctrl/Cmd + Shift + T 切换主题
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
-        e.preventDefault();
-        const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        switchTheme(newTheme);
-      }
-    });
+    // 可选：添加键盘快捷键支持（防重复绑定）
+    if (!window._h5ToolsKeyboardShortcutBound) {
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + Shift + T 切换主题
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+          e.preventDefault();
+          const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          switchTheme(newTheme);
+        }
+      });
+      window._h5ToolsKeyboardShortcutBound = true;
+    }
     
-    console.log('主题按钮事件已绑定');
+    console.log('✅ 主题按钮事件已绑定');
+    window._h5ToolsThemeEventsInitialized = true;
   } catch (error) {
     console.error('绑定主题按钮事件失败:', error);
   }
@@ -678,12 +626,13 @@ function globalClickHandler(e) {
     }
   }
   
-  // 处理主题按钮点击
-  if (e.target.id === 'lightTheme') {
-    switchTheme('light');
-  } else if (e.target.id === 'darkTheme') {
-    switchTheme('dark');
-  }
+  // 🚨 修复：移除重复的主题按钮处理，避免与bindThemeButtonEvents重复
+  // 主题按钮点击已在bindThemeButtonEvents中单独处理
+  // if (e.target.id === 'lightTheme') {
+  //   switchTheme('light');
+  // } else if (e.target.id === 'darkTheme') {
+  //   switchTheme('dark');
+  // }
   
   // 创建按钮已由UI控制器处理，避免重复绑定
   
@@ -753,7 +702,7 @@ function resetForm() {
   }
 }
 
-// 导出供其他模块使用
+// 导出供其他模块使用（已移除loadThemePreference）
 window.utilityFunctions = {
   switchTab,
   switchButtonVersion,
@@ -762,7 +711,7 @@ window.utilityFunctions = {
   collectModuleData,
   previewImage,
   setupSystemThemeListener,
-  loadThemePreference,
+  detectAndApplySystemTheme,
   applyTheme,
   switchTheme,
   bindThemeButtonEvents,

@@ -3,14 +3,17 @@
 class DataCollector {
   constructor() {
     this.moduleDataCollectors = {
-      carousel: this.collectCarouselData.bind(this)
+      carousel: this.collectCarouselData.bind(this),
+      verticalCarousel: this.collectVerticalCarouselData.bind(this)
     };
     
     // 存储键映射
     this.storageKeyMap = {
       'carousel-title-bg-upload': 'titleBgImage',
       'carousel-image-upload': 'carouselImage',
-      'carousel-image-bg-upload': 'carouselBgImage'
+      'carousel-image-bg-upload': 'carouselBgImage',
+      'vertical-carousel-title-bg-upload': 'titleBackground',
+      'vertical-carousel-image-upload': 'carouselImage'
     };
   }
 
@@ -107,7 +110,8 @@ class DataCollector {
       'signIn': '每日签到',
       'collectCards': '集卡活动',
       'activityContent': '活动详情',
-      'carousel': '图片轮播（横版）'
+      'carousel': '图片轮播（横版）',
+      'verticalCarousel': '图片轮播（竖版）'
     };
     return titleMap[moduleType] || '未知模块';
   }
@@ -127,6 +131,8 @@ class DataCollector {
         return this.collectActivityContentData(container, moduleId);
       case 'carousel':
         return this.collectCarouselData(moduleId);
+      case 'verticalCarousel':
+        return this.collectVerticalCarouselData(moduleId);
       default:
         console.warn(`未知的模块类型: ${moduleType}`);
         return null;
@@ -201,29 +207,59 @@ class DataCollector {
   collectCarouselData(moduleId) {
     try {
       const titleInput = document.querySelector(`#${moduleId} input[name="carousel-title"]`);
-      const titleBgUpload = document.querySelector(`#${moduleId} .carousel-title-bg-upload`);
-      const carouselUpload = document.querySelector(`#${moduleId} .carousel-image-upload`);
-      const carouselBgUpload = document.querySelector(`#${moduleId} .carousel-image-bg-upload`);
 
-    const data = {
+      const data = {
         title: titleInput?.value || '',
-        titleBgImage: titleBgUpload?.dataset.imageData,
-        carouselImage: carouselUpload?.dataset.imageData,
-        carouselBgImage: carouselBgUpload?.dataset.imageData
-    };
+        titleBackground: window.imageManager.getModule(`${moduleId}-carousel-title-bg`),
+        carouselImage: window.imageManager.getModule(`${moduleId}-carousel-image`),
+        carouselBackground: window.imageManager.getModule(`${moduleId}-carousel-image-bg`)
+      };
     
-    console.log('🔍 [图片轮播数据收集]', {
-      moduleId,
-      data,
-      标题: data.title,
-      轮播图片: !!data.carouselImage,
-      标题背景: !!data.titleBgImage,
-      轮播背景: !!data.carouselBgImage
-    });
+      console.log('🔍 [图片轮播数据收集]', {
+        moduleId,
+        data,
+        标题: data.title,
+        轮播图片: !!data.carouselImage,
+        标题背景: !!data.titleBackground,
+        轮播背景: !!data.carouselBackground
+      });
     
-    return data;
+      return data;
     } catch (error) {
       console.error('收集轮播图数据失败:', error);
+      return null;
+    }
+  }
+
+  // 收集图片轮播（竖版）数据
+  collectVerticalCarouselData(moduleId) {
+    try {
+      const titleInput = document.querySelector(`#${moduleId} input[name="vertical-carousel-title"]`);
+
+      // 收集轮播图片数据 - 确保返回3元素元组格式
+      const carouselImages = [
+        window.imageManager.getModule(`${moduleId}-vertical-image-1`) || null,  // 主图
+        window.imageManager.getModule(`${moduleId}-vertical-image-2`) || null,  // 右上图
+        window.imageManager.getModule(`${moduleId}-vertical-image-3`) || null   // 右下图
+      ];
+
+      const data = {
+        title: titleInput?.value || '',
+        titleBackground: window.imageManager.getModule(`${moduleId}-vertical-title-bg`),
+        carouselImages: carouselImages
+      };
+      
+      console.log('🔍 [图片轮播（竖版）数据收集]', {
+        moduleId,
+        data,
+        标题: data.title,
+        轮播图片: `[主图: ${!!carouselImages[0]}, 右上: ${!!carouselImages[1]}, 右下: ${!!carouselImages[2]}]`,
+        标题背景: !!data.titleBackground
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('收集图片轮播（竖版）数据失败:', error);
       return null;
     }
   }
@@ -258,35 +294,27 @@ class DataCollector {
   // 收集九宫格奖品数据（专门处理3-2-3布局）
   collectNineGridPrizes(container, moduleId) {
     const prizes = [];
-    const prizeElements = container.querySelectorAll('.prize-grid-custom .grid-item, .prize-upload');
+    const prizeElements = container.querySelectorAll('.prize-grid-custom .grid-item');
     
     prizeElements.forEach((prizeEl, index) => {
       const prizeLabel = prizeEl.querySelector('.prize-label')?.textContent || `奖品${String(index + 1).padStart(2, '0')}`;
+      
+      console.log(`🔍 [奖品${index}] 标签: "${prizeLabel}"`);
+      
       prizes.push({
         image: window.imageManager.getModule(`${moduleId}-prize-${index}`),
         name: prizeLabel,
-        position: this.getNineGridPosition(index) // 添加位置信息
+        position: index
       });
     });
     
-    return prizes;
-  }
-
-  // 获取九宫格位置（3-2-3布局转换为标准3x3位置）
-  getNineGridPosition(index) {
-    // 3-2-3布局对应的九宫格位置映射
-    const positionMap = {
-      0: 0, // 第一行第一个 -> 位置0
-      1: 1, // 第一行第二个 -> 位置1  
-      2: 2, // 第一行第三个 -> 位置2
-      3: 3, // 第二行第一个 -> 位置3
-      4: 5, // 第二行第二个 -> 位置5（跳过中间的抽奖按钮位置4）
-      5: 6, // 第三行第一个 -> 位置6
-      6: 7, // 第三行第二个 -> 位置7
-      7: 8  // 第三行第三个 -> 位置8
-    };
+    console.log('🔍 [九宫格奖品数据收集完成]', {
+      moduleId,
+      奖品数量: prizes.length,
+      奖品名称: prizes.map(p => p.name)
+    });
     
-    return positionMap[index] || index;
+    return prizes;
   }
   
   // 收集奖品数据（备用方法）

@@ -36,6 +36,31 @@ class PluginCommunicator {
     this.messageHandlers.set(messageType, handler);
   }
   
+  // on方法是registerHandler的别名，提供事件监听器风格的API
+  on(messageType, handler) {
+    return this.registerHandler(messageType, handler);
+  }
+  
+  // 移除消息处理器
+  removeHandler(messageType) {
+    console.log('移除消息处理器:', messageType);
+    return this.messageHandlers.delete(messageType);
+  }
+  
+  // off方法是removeHandler的别名，提供事件监听器风格的API
+  off(messageType, handler) {
+    // 如果提供了具体的handler，进行匹配检查
+    if (handler) {
+      const existingHandler = this.messageHandlers.get(messageType);
+      if (existingHandler === handler) {
+        return this.removeHandler(messageType);
+      }
+      return false;
+    }
+    // 如果没有提供handler，直接移除该类型的所有处理器
+    return this.removeHandler(messageType);
+  }
+  
   // 发送消息到插件
   postMessage(type, data = {}) {
     // 生成消息ID

@@ -6,37 +6,1643 @@
   <title>渠道美术-H5延展工具</title>
   
   <!-- 样式文件 - 外部CDN版本 -->
-  <link id="external-styles" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css">
+  <style>
+/* 基础样式和重置 */
+* {
+  box-sizing: border-box;
+}
+
+/* 隐藏滚动条的跨浏览器兼容方案 */
+* {
+  /* IE/Edge 隐藏滚动条 */
+  -ms-overflow-style: none;
+}
+
+/* WebKit 浏览器滚动条样式 */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  overflow-x: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 46px;
+  padding-bottom: 40px;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 通用工具类 */
+.row-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.empty-state p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.gray-text {
+  color: #999;
+  font-size: 14px;
+}
+
+/* 可访问性优化 */
+.hidden-file-input {
+  display: none !important;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 视觉隐藏但对屏幕阅读器可见 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 空状态图标样式 */
+.empty-icon {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* 隐藏元素 */
+.visually-hidden {
+  display: none !important;
+} 
+/* 布局样式 */
+.page-footer {
+  width: 100%;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+}
+
+.version-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: #86868b;
+  font-size: 13px;
+}
+
+/* 主题切换器 */
+.theme-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.theme-buttons {
+  display: flex;
+  gap: 8px;
+} 
+/* 通知样式 */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #333;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
+}
+
+.notification.success {
+  background-color: #34c759;
+}
+
+.notification.error {
+  background-color: #ff3b30;
+}
+
+.notification.warning {
+  background-color: #ff9500;
+}
+
+.notification.info {
+  background-color: #0071e3;
+}
+/* 加载遮罩样式 */
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.loading-message {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+} 
+/* 标签页和导航 */
+.tab-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 25%;
+  padding: 8px 4px;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  cursor: pointer;
+  color: #86868b;
+}
+
+.tab svg {
+  width: 24px !important;
+  height: 24px !important;
+  margin-bottom: 4px;
+}
+
+.tab-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+  opacity: 0.8;
+}
+
+.tab.active {
+  color: #0071e3;
+}
+
+.tab:hover {
+  color: #0071e3;
+  background-color: rgba(0, 113, 227, 0.05);
+}
+
+/* 内容区域 */
+.tab-content {
+  display: none;
+  padding: 0 16px;
+  margin: 30px auto 0px;
+  width: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+  position: relative;
+} 
+/* 表单控件 */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-section {
+  width: 100%;
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.section-title {
+  color: inherit;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.row-layout label {
+  flex: 0 0 auto;
+  margin: 0 16px 0 0;
+  min-width: 70px;
+  width: 25%;
+  max-width: 90px;
+}
+
+.non-interactive-label {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* 输入控件 */
+input[type="number"], 
+input[type="color"], 
+input[type="text"], 
+.text-input, 
+.text-area {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.text-area {
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+input:focus, .text-input:focus, .text-area:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+/* 颜色选择器 */
+.color-input-group {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+  flex: 1;
+}
+
+input[type="color"] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input.color-value {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #666;
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+/* 下拉选择器 */
+.dropdown-selector {
+  position: relative;
+  min-width: 120px;
+  max-width: 140px;
+  z-index: 10;
+}
+
+.dropdown-selector-wide {
+  position: relative;
+  min-width: 180px;
+  max-width: 200px;
+  z-index: 10;
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.dropdown-selector-wide .section-dropdown {
+  width: 100%;
+}
+
+.section-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.section-dropdown:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+.section-dropdown:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+} 
+/* 按钮和控件 */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  color: #86868b;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: transparent;
+}
+
+.control-btn:hover {
+  background-color: #f5f5f7;
+}
+
+.collapse-btn {
+  transition: transform 0.3s ease, background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.collapse-btn svg, .chevron-icon {
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+  transition: transform 0.3s ease;
+}
+
+.collapse-btn.collapsed svg,
+.collapse-btn.collapsed .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.collapse-btn.collapsed {
+  transform: rotate(180deg);
+}
+
+.add-btn {
+  margin-right: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  background-color: rgba(0, 113, 227, 0.1);
+  border-color: #0071e3;
+  color: #0071e3;
+}
+
+.add-btn[onclick*="removeModule"]:hover {
+  background-color: rgba(255, 59, 48, 0.1);
+  border-color: #ff3b30;
+  color: #ff3b30;
+}
+
+/* 创建按钮 */
+.create-btn-container {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 24px 0;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+button#create {
+  background-color: #0071e3;
+  color: white;
+  min-width: 120px;
+}
+
+button#create:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+}
+
+button#reset {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  min-width: 120px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+button#reset:hover {
+  background-color: #e8e8ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button#cancel {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+button#cancel:hover {
+  background-color: #e8e8ed;
+}
+
+.action-btn {
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.add-module-btn {
+  min-width: 150px;
+}
+
+.wide-btn {
+  width: 100% !important;
+  min-width: 150px;
+}
+
+/* 主题切换按钮 */
+.theme-btn {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-btn:hover {
+  background-color: rgba(0, 113, 227, 0.1);
+  border-color: #0071e3;
+}
+
+.theme-btn.active {
+  background-color: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+} 
+/* 上传和预览组件 */
+.file-upload-btn, 
+.img-upload-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.upload-btn {
+  width: 100%;
+  height: 60px;
+  padding: 0;
+  background-color: #f5f5f7;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.upload-btn:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.upload-btn .img-preview-inline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+}
+
+.upload-btn .img-preview-inline img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.upload-btn .img-preview-inline .upload-icon-inline {
+  font-size: 20px;
+  color: #86868b;
+}
+
+/* 图片预览 */
+.img-preview-inline, 
+.preview-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.img-preview-inline {
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.img-preview-inline img, 
+.preview-container img, 
+.img-preview-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.img-preview-btn {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.img-preview-container {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f7;
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.img-preview-container:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.upload-icon, .upload-icon-text, .upload-icon-inline {
+  font-size: 20px;
+  color: #86868b;
+}
+
+.upload-icon {
+  position: absolute;
+  z-index: 1;
+}
+
+.upload-icon-text, .upload-icon-inline {
+  font-size: 24px;
+}
+
+/* 图片上传容器 */
+.img-upload-container {
+  display: flex;          /* 使用弹性布局 */
+  flex-direction: column; /* 设置主轴方向为垂直 */
+  align-items: center;    /* 在交叉轴上居中对齐项目 */
+  width: 100%;           /* 确保容器占满父元素宽度 */
+}
+
+/* 网格按钮样式 */
+.grid-btn {
+  width: 100%;                          /* 设置宽度为100% */
+  aspect-ratio: 1/1;                    /* 设置宽高比为1:1，保持正方形 */
+  display: flex;                        /* 使用弹性布局 */
+  align-items: center;                  /* 垂直居中对齐 */
+  justify-content: center;              /* 水平居中对齐 */
+  background-color: #f5f5f7;            /* 设置背景颜色 */
+  border: 1px dashed rgba(0, 0, 0, 0.2);/* 设置虚线边框 */
+  border-radius: 6px;                   /* 设置圆角 */
+  cursor: pointer;                      /* 鼠标悬停时显示手型光标 */
+  position: relative;                   /* 设置相对定位 */
+  overflow: hidden;                     /* 隐藏溢出内容 */
+  padding: 0;                           /* 移除内边距 */
+  transition: all 0.2s;                 /* 添加过渡效果 */
+  box-sizing: border-box;               /* 包含边框在内的盒模型 */
+}
+
+.grid-btn:hover {
+  background-color: #efefef;
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+/* 自定义布局下的网格按钮 */
+.prize-grid-custom .grid-btn {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1;
+  max-width: 100%;
+  max-height: none;
+  min-height: 50px;
+} 
+/* 模块管理相关样式 */
+.module-management {
+  margin-bottom: 20px;
+}
+
+/* 模块列表头部样式 */
+.module-list-header {
+  display: flex;                                /* 使用弹性布局 */
+  justify-content: space-between;                /* 两端对齐 */
+  align-items: center;                           /* 垂直居中对齐 */
+  margin: 24px 0 12px 0;                         /* 设置上下外边距 */
+  padding-bottom: 8px;                           /* 底部内边距 */
+  font-weight: 600;                              /* 字体加粗 */
+}
+
+.module-count {
+  font-size: 14px;
+  color: #86868b;
+  font-weight: normal;
+}
+
+.module-action-row {
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.empty-modules-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #86868b;
+  border: 2px dashed rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.empty-modules-message svg {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-modules-message p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.empty-modules-message .hint-text {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* 模块相关样式 */
+.module {
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background-color: #f5f5f7;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.module-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-right: 4px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.module-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.module-content {
+  padding: 16px;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.module-collapsed .module-content {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.module-collapsed .collapse-btn i {
+  transform: rotate(180deg);
+}
+
+.module-collapsed .collapse-btn svg,
+.module-collapsed .collapse-btn .chevron-icon {
+  transform: rotate(180deg);
+}
+
+.option-controls {
+  display: flex;
+  align-items: center;
+}
+
+/* 折叠内容区域 */
+.version-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  padding-left: 24px;
+}
+
+.version-content.active {
+  max-height: 800px;
+  opacity: 1;
+  padding-bottom: 15px;
+}
+
+.collapsible-content {
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* 奖品网格 */
+.prize-grid {
+  display: flex;          /* 使用弹性布局 */
+  flex-wrap: wrap;        /* 允许项目换行 */
+  justify-content: space-between; /* 项目之间平均分配空间 */
+  gap: 8px;               /* 设置网格项之间的间隙 */
+  margin-top: 10px;       /* 顶部外边距 */
+}
+
+/* 自定义奖品网格布局 */
+.prize-grid-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.prize-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+.prize-row.top-row {
+  /* 第一行：3个奖品，均匀分布 */
+  justify-content: space-between;
+}
+
+.prize-row.middle-row {
+  /* 第二行：2个奖品，左右对齐 */
+  justify-content: space-between;
+}
+
+.prize-row.bottom-row {
+  /* 第三行：3个项目，均匀分布 */
+  justify-content: space-between;
+}
+
+/* 网格项样式 */
+.grid-item {
+  flex: 0 0 calc(33.333% - 6px); /* 设置网格项宽度为33.333%（减去间隙），不允许伸缩 */
+}
+
+/* 自定义布局下的网格项 */
+.prize-grid-custom .grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 第一行和第三行的项目：每个占33.33%宽度 */
+.prize-row.top-row .grid-item,
+.prize-row.bottom-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+/* 第二行的项目：每个也占33.33%宽度，但只有两个 */
+.prize-row.middle-row .grid-item {
+  flex: 0 0 calc(33.333% - 4px);
+  max-width: calc(33.333% - 4px);
+}
+
+.prize-label {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #86868b;
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+/* 渠道设置视图样式 */
+.channel-settings-view {
+  padding: 20px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.settings-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.settings-content {
+  max-width: 600px;
+}
+
+.setting-group {
+  margin-bottom: 32px;
+}
+
+.setting-group:last-child {
+  margin-bottom: 0;
+}
+
+.setting-group-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 8px;
+}
+
+.setting-item {
+  margin-bottom: 20px;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.setting-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+  transition: all 0.2s;
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+}
+
+.setting-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.setting-upload-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-upload-btn {
+  padding: 10px 16px;
+  background-color: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  color: #1d1d1f;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.setting-upload-btn:hover {
+  background-color: #e8e8ed;
+}
+
+.setting-preview {
+  width: 60px;
+  height: 60px;
+  border: 2px dashed rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  overflow: hidden;
+}
+
+.setting-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.setting-preview-placeholder {
+  font-size: 12px;
+  color: #86868b;
+  text-align: center;
+}
+
+.setting-description {
+  font-size: 12px;
+  color: #86868b;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 渠道容器样式 */
+.channels-container {
+  padding: 16 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.channel-section {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.channel-section:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.channel-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  flex: 1;
+}
+
+.channel-settings-btn {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin-left: 12px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.channel-settings-btn:hover {
+  background-color: #f5f5f7;
+  border-color: #0071e3;
+  color: #0071e3;
+  transform: scale(1.05);
+}
+
+.channel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.channel-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.channel-preview-area {
+  width: 100%;
+  height: 140px;
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f7;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.channel-preview-area:hover {
+  border-color: rgba(0, 0, 0, 0.2);
+  background-color: #efefef;
+}
+
+.channel-preview-placeholder {
+  color: #86868b;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.channel-preview-btn {
+  background-color: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1d1d1f;
+  transition: all 0.2s;
+}
+
+.channel-preview-btn:hover {
+  background-color: #e8e8ed;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.channel-generate-btn {
+  background-color: #0071e3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.channel-generate-btn:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 113, 227, 0.2);
+}
+
+.channel-generate-btn:disabled {
+  background-color: #86868b;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+} 
+/* 深色主题样式 */
+body.dark-theme {
+  color: #f5f5f7;
+  background-color: #1d1d1f;
+}
+
+/* 标签页深色主题 */
+body.dark-theme .tab-container {
+  background-color: rgba(30, 30, 32, 0.72);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .tab:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .tab-content {
+  background-color: #1d1d1f;
+}
+
+/* 表单深色主题 */
+body.dark-theme .form-section,
+body.dark-theme .module {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .section-header,
+body.dark-theme .section-title,
+body.dark-theme label,
+body.dark-theme .module-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme input[type="number"],
+body.dark-theme input[type="text"],
+body.dark-theme .text-input,
+body.dark-theme .text-area {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme input:focus,
+body.dark-theme .text-input:focus,
+body.dark-theme .text-area:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .section-dropdown {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .section-dropdown:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .section-dropdown:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 上传组件深色主题 */
+body.dark-theme .upload-btn,
+body.dark-theme .grid-btn,
+body.dark-theme .img-preview-container,
+body.dark-theme .add-btn,
+body.dark-theme .theme-btn:not(.active),
+body.dark-theme button#cancel {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .upload-btn:hover,
+body.dark-theme .grid-btn:hover,
+body.dark-theme .img-preview-container:hover,
+body.dark-theme .theme-btn:hover:not(.active),
+body.dark-theme button#cancel:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .upload-btn .img-preview-inline {
+  background-color: #1c1c1e;
+}
+
+body.dark-theme .upload-btn .img-preview-inline .upload-icon-inline {
+  color: #a1a1a6;
+}
+
+/* 控件深色主题 */
+body.dark-theme .control-btn {
+  border-color: #3a3a3c;
+  color: #a1a1a6;
+}
+
+body.dark-theme .control-btn:hover {
+  background-color: #2c2c2e;
+}
+
+body.dark-theme .add-btn:hover {
+  background-color: rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+  color: #0071e3;
+}
+
+body.dark-theme .add-btn[onclick*="removeModule"]:hover {
+  background-color: rgba(255, 69, 58, 0.1);
+  border-color: #ff453a;
+  color: #ff453a;
+}
+
+body.dark-theme button#reset {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme button#reset:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 模块管理深色主题 */
+body.dark-theme .module {
+  background-color: #1d1d1f;
+  border-color: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .module-header {
+  background-color: #2c2c2e;
+  border-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .module-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme .empty-modules-message {
+  border-color: rgba(255,255,255,0.1);
+  color: #a1a1a6;
+}
+
+/* 布局深色主题 */
+body.dark-theme .page-footer {
+  background-color: rgba(30, 30, 32, 0.72);
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .theme-switcher {
+  background-color: #2c2c2e;
+}
+
+body.dark-theme .theme-switcher label {
+  color: #f5f5f7;
+}
+
+body.dark-theme .theme-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .theme-btn:hover {
+  background-color: rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+}
+
+body.dark-theme .theme-btn.active {
+  background-color: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+
+/* 渠道深色主题 */
+body.dark-theme .channel-section {
+  background-color: #1d1d1f;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-title {
+  color: #f5f5f7;
+}
+
+body.dark-theme .channel-settings-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #a1a1a6;
+}
+
+body.dark-theme .channel-settings-btn:hover {
+  background-color: #2c2c2e;
+  border-color: #0071e3;
+  color: #0071e3;
+  transform: scale(1.05);
+}
+
+body.dark-theme .channel-preview-area {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .channel-preview-area:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .channel-preview-placeholder {
+  color: #a1a1a6;
+}
+
+body.dark-theme .channel-preview-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .channel-preview-btn:hover {
+  background-color: #3a3a3c;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .channel-generate-btn:disabled {
+  background-color: #48484a;
+  color: #a1a1a6;
+}
+
+/* 渠道设置深色主题 */
+body.dark-theme .settings-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .back-btn {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .settings-title,
+body.dark-theme .setting-group-title,
+body.dark-theme .setting-label {
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-group-title {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .setting-input {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-input:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+
+body.dark-theme .setting-upload-btn {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f5f5f7;
+}
+
+body.dark-theme .setting-upload-btn:hover {
+  background-color: #3a3a3c;
+}
+
+body.dark-theme .setting-preview {
+  background-color: #2c2c2e;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .setting-description {
+  color: #a1a1a6;
+}
+
+/* 空状态深色主题 */
+body.dark-theme .empty-state {
+  color: #a1a1a6;
+}
+
+body.dark-theme .empty-state h3 {
+  color: #f5f5f7;
+}
+
+body.dark-theme .gray-text {
+  color: #86868b;
+}
+
+/* 其他元素深色主题 */
+body.dark-theme .prize-label,
+body.dark-theme .upload-icon,
+body.dark-theme .upload-icon-text,
+body.dark-theme .upload-icon-inline {
+  color: #a1a1a6;
+}
+</style>
 </head>
 <body>
-  <!-- SVG Sprite定义 -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
-
-    <!-- 模块控制图标 -->
-    <symbol id="icon-move-up" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+  <!-- SVG Sprite 定义 -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-chevron" viewBox="0 0 16 11">
+      <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+    </symbol>
+    <symbol id="icon-move-up" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
     </symbol>
-
-    <symbol id="icon-move-down" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <symbol id="icon-move-down" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
     </symbol>
-
-    <symbol id="icon-collapse" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-    </symbol>
-
-    <symbol id="icon-delete" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <symbol id="icon-delete" viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
       <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-    </symbol>
-
-    <!-- 其他图标 -->
-    <symbol id="icon-back" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M10 12l-4-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </symbol>
-
-    <symbol id="icon-chevron" width="12" height="7" fill="currentColor" viewBox="0 0 16 11" >
-      <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z" fill="currentColor"/>
     </symbol>
   </svg>
 
@@ -151,7 +1757,9 @@
           </div>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="buttonVersionContent" title="折叠/展开游戏信息板块" aria-label="折叠/展开游戏信息板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -325,6 +1933,7 @@
               <option value="collectModule">集卡模块</option>
               <option value="activityContentModule">活动详情</option>
               <option value="carouselModule">图片轮播（横版）</option>
+              <option value="verticalCarouselModule">图片轮播（竖版）</option>
             </select>
             </div>
           </div>
@@ -361,16 +1970,24 @@
             <div class="module-title">九宫格抽奖</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -539,16 +2156,24 @@
             <div class="module-title">图片轮播（横版）</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -556,14 +2181,14 @@
             <!-- 标题文案 -->
             <div class="form-group row-layout">
               <label>标题</label>
-              <input type="text" class="carousel-title-input text-input" placeholder="请输入标题文本">
+              <input type="text" name="carousel-title" class="carousel-title-input text-input" placeholder="请输入标题文本">
             </div>
             
             <!-- 标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-title-bg-upload hidden-file-input" accept="image/*" title="选择标题背景图片" aria-label="标题背景图片上传">
+                <input type="file" class="carousel-title-bg-upload" data-storage-key="carousel-title-bg" accept="image/*" style="display:none">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -576,8 +2201,8 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">轮播图</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-image-upload hidden-file-input" accept="image/*" title="选择轮播图片" aria-label="轮播图片上传">
-                <button class="upload-btn carousel-image-upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="carousel-image-upload" data-storage-key="carousel-image" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -589,8 +2214,57 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">轮播图背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-image-bg-upload hidden-file-input" accept="image/*" title="选择轮播图背景图片" aria-label="轮播图背景图片上传">
-                <button class="upload-btn carousel-image-bg-upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="carousel-image-bg-upload" data-storage-key="carousel-image-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 固定模块-图片轮播（竖版）模板 -->
+        <div class="module-template" id="verticalCarouselModuleTemplate">
+          <div class="module-header">
+            <div class="module-title">图片轮播（竖版）</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="module-content">
+            <!-- 标题文案 -->
+            <div class="form-group row-layout">
+              <label>标题</label>
+              <input type="text" name="vertical-carousel-title" class="vertical-carousel-title-input text-input" placeholder="请输入标题文本">
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" class="vertical-carousel-title-bg-upload" data-storage-key="vertical-title-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -598,6 +2272,44 @@
               </div>
             </div>
 
+            <!-- 轮播图01 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图01</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-1" data-storage-key="vertical-image-1" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 轮播图02 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图02</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-2" data-storage-key="vertical-image-2" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 轮播图03 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图03</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-3" data-storage-key="vertical-image-3" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -608,16 +2320,24 @@
             <div class="module-title">每日签到</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -688,16 +2408,24 @@
             <div class="module-title">集卡活动</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -787,16 +2515,24 @@
             <div class="module-title">活动详情</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -869,7 +2605,9 @@
           <span class="section-title">活动规则</span>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="rulesContent" title="折叠/展开活动规则板块" aria-label="折叠/展开活动规则板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -912,7 +2650,9 @@
           <span class="section-title">尾版</span>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="footerAreaContent" title="折叠/展开尾版板块" aria-label="折叠/展开尾版板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -1105,74 +2845,3934 @@
   </div>
 
   <script>
-
-// CDN资源加载器
-async function loadExternalResource(url, type) {
-  return new Promise((resolve, reject) => {
-    const element = type === 'css' 
-      ? document.createElement('link') 
-      : document.createElement('script');
+/* === utility-functions.js === */
+// ==================== 存储适配器 ====================
+// 解决Figma插件沙盒环境中localStorage被禁用的问题
+class StorageAdapter {
+  constructor() {
+    // 更严格的Figma环境检测
+    this.isFigmaEnvironment = this.checkFigmaEnvironment();
+    this.cache = new Map(); // 内存缓存
+    this.defaults = {
+      theme: 'light',
+      autoTheme: false
+    };
     
-    if (type === 'css') {
-      element.rel = 'stylesheet';
-      element.href = url;
-    } else {
-      element.src = url;
+    // 输出环境检测结果
+    console.log('StorageAdapter 环境检测:', {
+      isFigmaEnvironment: this.isFigmaEnvironment,
+      hasFigma: typeof figma !== 'undefined',
+      hasClientStorage: typeof figma !== 'undefined' && !!figma.clientStorage,
+      isDataURL: window.location.protocol === 'data:',
+      userAgent: navigator.userAgent.includes('Figma')
+    });
+  }
+
+  // 检测是否在Figma环境中
+  checkFigmaEnvironment() {
+    // 关键修复：在Figma插件UI中，figma对象不可用！
+    // 我们需要通过其他方式检测Figma环境
+    const isDataURL = window.location.protocol === 'data:';
+    const isFigmaUA = navigator.userAgent.includes('Figma') || window.location.href.includes('figma');
+    const hasFigmaParent = window.parent !== window; // 插件运行在iframe中
+    
+    // 🚨 重要修复：在Figma插件UI线程中，figma对象是undefined！
+    // 但我们仍在Figma环境中，需要使用data:协议作为主要判断依据
+    const result = isDataURL || isFigmaUA;
+    
+    console.log('🔧 Figma环境检测详情:', {
+      isDataURL,
+      isFigmaUA,
+      hasFigmaParent,
+      protocol: window.location.protocol,
+      href: window.location.href,
+      userAgent: navigator.userAgent,
+      result: result ? '✅ Figma环境' : '❌ 非Figma环境'
+    });
+    
+    return result;
+  }
+
+  async setItem(key, value) {
+    try {
+      if (this.isFigmaEnvironment) {
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 需要通过postMessage与插件主线程通信
+        console.log(`📤 向插件发送存储设置请求: ${key}`);
+        
+        // 发送消息到插件主线程
+        window.parent.postMessage({
+          pluginMessage: {
+            type: 'storage-set',
+            key: key,
+            value: value
+          }
+        }, '*');
+        
+        // 同时保存到内存缓存
+        this.cache.set(key, value);
+        console.log(`✅ 缓存设置成功: ${key}`);
+      } else {
+        // 在非Figma环境中，尝试使用localStorage
+        try {
+          localStorage.setItem(key, value);
+          console.log(`✅ localStorage设置成功: ${key}`);
+        } catch (localStorageError) {
+          console.warn(`localStorage不可用，使用内存存储: ${key}`, localStorageError);
+          this.cache.set(key, value);
+        }
+      }
+    } catch (error) {
+      console.warn(`存储设置失败 ${key}:`, error);
+      this.cache.set(key, value); // 回退到内存存储
     }
-    
-    const timeout = setTimeout(() => {
-      reject(new Error(`资源加载超时: ${url}`));
-    }, 10000);
-    
-    element.onload = () => {
-      clearTimeout(timeout);
-      resolve();
-    };
-    
-    element.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error(`资源加载失败: ${url}`));
-    };
-    
-    document.head.appendChild(element);
-  });
-}
+  }
 
-// 创建备用样式
-function createFallbackUI() {
-  const style = document.createElement('style');
-  style.textContent = `
-    body { font-family: sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 400px; margin: 0 auto; }
-    /* 其他基础样式... */
-  `;
-  document.head.appendChild(style);
-  console.log('✅ 应急样式已加载');
-}
+  async getItem(key) {
+    try {
+      // 先检查缓存
+      if (this.cache.has(key)) {
+        console.log('📦 从缓存获取:', key);
+        return this.cache.get(key);
+      }
 
-// 智能资源加载
-async function loadResources() {
-  try {
-    await loadExternalResource('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css', 'css')
-      .catch(err => {
-        console.warn(`⚠️ CSS加载失败: ${err.message}`);
-        createFallbackUI();
-      });
+      let value;
       
-    await loadExternalResource('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/scripts.min.js', 'js')
-      .catch(err => {
-        console.error(`❌ JS加载失败: ${err.message}`);
-        throw err;
-      });
-      
-    console.log('✅ CDN资源加载完成');
-  } catch (error) {
-    console.error(`❌ 资源加载失败: ${error.message}`);
+      if (this.isFigmaEnvironment) {
+        // 发送消息给插件获取存储值
+        window.pluginComm.postMessage('storage-get', { key });
+        value = await new Promise((resolve) => {
+          const handler = (message) => {
+            if (message.type === 'storage-get-response' && message.key === key) {
+              window.pluginComm.off('storage-get-response', handler);
+              resolve(message.value);
+            }
+          };
+          window.pluginComm.on('storage-get-response', handler);
+          // 5秒超时
+          setTimeout(() => resolve(this.defaults[key]), 5000);
+        });
+      } else {
+        value = localStorage.getItem(key);
+      }
+
+      // 如果值不存在，使用默认值
+      if (value === null || value === undefined) {
+        value = this.defaults[key];
+        if (value === undefined) {
+          console.warn(`⚠️ 缓存中没有找到 ${key}，返回默认值`);
+        }
+      }
+
+      // 更新缓存
+      if (value !== undefined) {
+        this.cache.set(key, value);
+      }
+
+      return value;
+    } catch (error) {
+      console.error(`获取存储值失败 ${key}:`, error);
+      return this.defaults[key];
+    }
+  }
+
+  async removeItem(key) {
+    try {
+      if (this.isFigmaEnvironment) {
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 需要通过postMessage与插件主线程通信
+        console.log(`📤 向插件发送存储删除请求: ${key}`);
+        
+        // 发送消息到插件主线程
+        window.parent.postMessage({
+          pluginMessage: {
+            type: 'storage-delete',
+            key: key
+          }
+        }, '*');
+        
+        // 同时从内存缓存中删除
+        this.cache.delete(key);
+        console.log(`✅ 缓存删除成功: ${key}`);
+      } else {
+        // 在非Figma环境中，检测localStorage是否可用
+        // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
+        if (window.location.protocol === 'data:') {
+          console.warn(`检测到data:协议，跳过localStorage，使用内存存储: ${key}`);
+          this.cache.delete(key);
+          return;
+        }
+        
+        try {
+          localStorage.removeItem(key);
+          console.log(`✅ localStorage删除成功: ${key}`);
+        } catch (localStorageError) {
+          console.warn(`localStorage不可用，使用内存存储: ${key}`, localStorageError);
+          this.cache.delete(key);
+        }
+      }
+    } catch (error) {
+      console.warn(`存储删除失败 ${key}:`, error);
+      this.cache.delete(key); // 回退到内存存储
+    }
+  }
+
+  async getAllKeys() {
+    try {
+      if (this.isFigmaEnvironment) {
+        // 🚨 重要修复：在Figma UI线程中，不能直接访问figma.clientStorage
+        // 优先返回内存缓存的键，避免复杂的异步通信
+        console.log(`📦 返回缓存中的存储键`);
+        return Array.from(this.cache.keys());
+      } else {
+        // 在非Figma环境中，检测localStorage是否可用
+        // 添加额外的data:协议检查，防止在Figma沙盒中误调用localStorage
+        if (window.location.protocol === 'data:') {
+          console.warn(`检测到data:协议，跳过localStorage，使用内存存储`);
+          return Array.from(this.cache.keys());
+        }
+        
+        try {
+          const keys = Object.keys(localStorage);
+          console.log(`✅ localStorage键获取成功: ${keys.length}个`);
+          return keys;
+        } catch (localStorageError) {
+          console.warn(`localStorage不可用，使用内存存储`, localStorageError);
+          return Array.from(this.cache.keys());
+        }
+      }
+    } catch (error) {
+      console.warn('获取存储键失败:', error);
+      return Array.from(this.cache.keys()); // 回退到内存存储
+    }
   }
 }
 
-// 初始化加载
-document.addEventListener('DOMContentLoaded', loadResources);
+
+// 创建全局存储适配器实例
+const storageAdapter = new StorageAdapter();
+
+// 导出到全局
+window.storageAdapter = storageAdapter;
+
+// ==================== 工具函数模块 ====================
+
+// 标签页切换功能
+function switchTab(tabName) {
+  // 移除所有标签页的激活状态
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // 隐藏所有标签页内容
+  const tabContents = document.querySelectorAll('.tab-content');
+  tabContents.forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  // 激活目标标签页
+  const targetTab = document.querySelector(`[data-tab="${tabName}"]`);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+  
+  // 显示目标标签页内容
+  const targetContent = document.getElementById(`${tabName}-content`);
+  if (targetContent) {
+    targetContent.classList.add('active');
+  }
+}
+
+// 按钮版本切换功能
+function switchButtonVersion() {
+  const selector = document.getElementById('buttonVersionSelect');
+  if (!selector) return;
+  
+  // 隐藏所有版本内容
+  const contents = document.querySelectorAll('#buttonVersionContent .version-content');
+  contents.forEach(content => content.classList.remove('active'));
+  
+  // 显示选中的版本内容
+  const selectedValue = selector.value;
+  const targetContent = document.getElementById(`${selectedValue}Content`);
+  if (targetContent) {
+    targetContent.classList.add('active');
+  }
+}
+
+// 创建原型功能
+function createPrototype() {
+  try {
+    console.log('开始创建原型...');
+    
+    // 收集表单数据
+    const config = window.dataCollector.collectFormData();
+    
+    // 发送到插件主线程
+    window.pluginComm.postMessage('create-prototype', { config });
+    
+  } catch (error) {
+    console.error('创建原型失败:', error);
+    window.notificationSystem.show(`创建失败: ${error.message}`, 'error');
+  }
+}
+
+// 获取图片数据
+async function getImageData(inputId) {
+  try {
+    const input = document.getElementById(inputId);
+    if (!input || !input.files || input.files.length === 0) {
+      return null;
+    }
+    
+    const file = input.files[0];
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    
+  } catch (error) {
+    console.error(`获取图片数据失败 (${inputId}):`, error);
+    return null;
+  }
+}
+
+// 收集模块数据
+function collectModuleData() {
+  const modules = document.querySelectorAll('#modulesContainer .module');
+  const moduleData = [];
+  
+  modules.forEach(moduleEl => {
+    const moduleType = moduleEl.dataset.moduleType;
+    const moduleId = moduleEl.id;
+    
+    if (moduleType && moduleId) {
+      const moduleContent = collectModuleContent(moduleEl, moduleType);
+      if (moduleContent) {
+        moduleData.push({
+          id: moduleId,
+          type: moduleType,
+          content: moduleContent
+        });
+      }
+    }
+  });
+  
+  return moduleData;
+}
+
+// 收集模块内容
+function collectModuleContent(container, moduleType) {
+  switch (moduleType) {
+    case 'nineGrid':
+      return collectNineGridData(container);
+    case 'signIn':
+      return collectSignInData(container, container.id);
+    case 'collectCards':
+      return collectCardsData(container, container.id);
+    case 'activityContent':
+      return collectActivityContentData(container, container.id);
+    default:
+      console.warn(`未知的模块类型: ${moduleType}`);
+      return null;
+  }
+}
+
+// 收集九宫格数据
+function collectNineGridData(container) {
+  const data = {
+    prizes: []
+  };
+  
+  // 收集奖品信息
+  const prizeElements = container.querySelectorAll('.prize-item');
+  prizeElements.forEach((prizeEl, index) => {
+    const nameInput = prizeEl.querySelector('.prize-name');
+    const imageInput = prizeEl.querySelector('.prize-upload');
+    
+    if (nameInput || imageInput) {
+      const prize = {
+        position: getPrizePosition(index),
+        name: nameInput ? nameInput.value : '',
+        image: imageInput && imageInput.files[0] ? imageInput.files[0] : null
+      };
+      data.prizes.push(prize);
+    }
+  });
+  
+  return data;
+}
+
+// 收集签到数据
+function collectSignInData(container, moduleId) {
+  const data = {};
+  
+  // 收集基本信息
+  const titleInput = container.querySelector('.sign-in-title');
+  if (titleInput) data.title = titleInput.value;
+  
+  const descInput = container.querySelector('.sign-in-description');
+  if (descInput) data.description = descInput.value;
+  
+  // 收集图片
+  const images = ['title', 'bg', 'dayicon', 'signbtn'];
+  images.forEach(imageType => {
+    const imageData = window.imageManager.getModule(`${moduleId}-${imageType}`);
+    if (imageData) {
+      data[`${imageType}Image`] = imageData;
+    }
+  });
+  
+  return data;
+}
+
+// 收集集卡数据
+function collectCardsData(container, moduleId) {
+  const data = {};
+  
+  // 收集基本信息
+  const titleInput = container.querySelector('.collect-title');
+  if (titleInput) data.title = titleInput.value;
+  
+  const descInput = container.querySelector('.collect-description');
+  if (descInput) data.description = descInput.value;
+  
+  // 收集图片
+  const images = ['title', 'bg', 'cardbg', 'combinebtn'];
+  images.forEach(imageType => {
+    const imageData = window.imageManager.getModule(`${moduleId}-${imageType}`);
+    if (imageData) {
+      data[`${imageType}Image`] = imageData;
+    }
+  });
+  
+  return data;
+}
+
+// 收集活动内容数据
+function collectActivityContentData(container, moduleId) {
+  const data = {};
+  
+  // 收集文本内容
+  const mainTitleInput = container.querySelector('.activity-main-title');
+  if (mainTitleInput) data.mainTitle = mainTitleInput.value;
+  
+  const subTitleInput = container.querySelector('.activity-sub-title');
+  if (subTitleInput) data.subTitle = subTitleInput.value;
+  
+  const contentInput = container.querySelector('.activity-content-text');
+  if (contentInput) data.content = contentInput.value;
+  
+  // 收集图片
+  const images = ['main-title-bg', 'sub-title-bg', 'image'];
+  images.forEach(imageType => {
+    const imageData = window.imageManager.getModule(`${moduleId}-${imageType}`);
+    if (imageData) {
+      data[`${imageType.replace('-', '')}Image`] = imageData;
+    }
+  });
+  
+  return data;
+}
+
+// 获取奖品位置
+function getPrizePosition(index) {
+  // 九宫格位置映射 (3x3网格)
+  const positions = [
+    { row: 0, col: 0 }, // 位置0: 左上
+    { row: 0, col: 1 }, // 位置1: 上中
+    { row: 0, col: 2 }, // 位置2: 右上
+    { row: 1, col: 2 }, // 位置3: 右中
+    { row: 2, col: 2 }, // 位置4: 右下
+    { row: 2, col: 1 }, // 位置5: 下中
+    { row: 2, col: 0 }, // 位置6: 左下
+    { row: 1, col: 0 }, // 位置7: 左中
+    { row: 1, col: 1 }  // 位置8: 中心(抽奖按钮位置)
+  ];
+  
+  return positions[index] || { row: 0, col: 0 };
+}
+
+// 通用图片预览函数
+function previewImage(input, previewElement) {
+  if (!input.files || input.files.length === 0) return;
+  
+  const file = input.files[0];
+  if (!file.type.startsWith('image/')) {
+    alert('请选择有效的图片文件');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    if (previewElement) {
+      previewElement.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain;">`;
+    }
+  };
+  reader.readAsDataURL(file);
+  
+  // 处理模块图片上传
+  if (input.closest('.module')) {
+    window.fileProcessor.handleModuleImageUpload({ target: input });
+  }
+}
+
+// 主题系统功能（简化版 - 仅监听系统主题变化）
+function setupSystemThemeListener() {
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleThemeChange = async (e) => {
+      const isDark = e.matches;
+      const newTheme = isDark ? 'dark' : 'light';
+      
+      // 检查当前主题，避免不必要的切换
+      const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+      if (currentTheme !== newTheme) {
+        applyTheme(newTheme);
+        console.log(`✅ 系统主题变化，已切换到${isDark ? '深色' : '浅色'}主题`);
+      }
+    };
+    
+    // 监听系统主题变化
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleThemeChange);
+    } else {
+      // 兼容旧版浏览器
+      mediaQuery.addListener(handleThemeChange);
+    }
+    
+    console.log('✅ 系统主题监听器已设置');
+  }
+}
+
+// 注意：主题缓存机制已被移除，不再保存/读取主题偏好
+// 现在直接应用系统主题或默认主题
+
+// 检测并应用系统主题（防重复调用）
+function detectAndApplySystemTheme() {
+  // 防止重复调用
+  if (window._h5ToolsThemeInitialized) {
+    console.log('⚠️ 主题已经初始化，跳过重复应用');
+    return;
+  }
+  
+  try {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const systemTheme = prefersDark ? 'dark' : 'light';
+    applyTheme(systemTheme);
+    console.log('✅ 已应用系统主题:', systemTheme);
+    
+    // 标记主题已初始化
+    window._h5ToolsThemeInitialized = true;
+  } catch (error) {
+    console.error('检测系统主题失败:', error);
+    applyTheme('light');
+    window._h5ToolsThemeInitialized = true;
+  }
+}
+
+// 应用主题（简化版）
+async function applyTheme(theme) {
+  try {
+    // 移除现有主题类
+    document.body.classList.remove('light-theme', 'dark-theme');
+    
+    // 应用新主题
+    document.body.classList.add(`${theme}-theme`);
+    
+    // 更新主题按钮状态
+    updateThemeButtonsState(theme);
+  } catch (error) {
+    console.error('应用主题失败:', error);
+  }
+}
+
+// 更新主题按钮状态
+function updateThemeButtonsState(activeTheme) {
+  try {
+    const lightBtn = document.getElementById('lightTheme');
+    const darkBtn = document.getElementById('darkTheme');
+    
+    if (lightBtn && darkBtn) {
+      // 更新按钮状态
+      lightBtn.classList.toggle('active', activeTheme === 'light');
+      darkBtn.classList.toggle('active', activeTheme === 'dark');
+      
+      // 更新按钮文本或图标（如果需要）
+      // lightBtn.setAttribute('aria-pressed', activeTheme === 'light');
+      // darkBtn.setAttribute('aria-pressed', activeTheme === 'dark');
+    }
+  } catch (error) {
+    console.error('更新主题按钮状态失败:', error);
+  }
+}
+
+// 切换主题（简化版）
+async function switchTheme(theme) {
+  try {
+    await applyTheme(theme);
+    console.log(`✅ 手动切换到${theme === 'dark' ? '深色' : '浅色'}主题`);
+  } catch (error) {
+    console.error('切换主题失败:', error);
+  }
+}
+
+// 绑定主题按钮事件（防重复绑定）
+function bindThemeButtonEvents() {
+  // 防止重复绑定
+  if (window._h5ToolsThemeEventsInitialized) {
+    console.log('⚠️ 主题按钮事件已经绑定，跳过重复绑定');
+    return;
+  }
+  
+  try {
+    const lightBtn = document.getElementById('lightTheme');
+    const darkBtn = document.getElementById('darkTheme');
+    
+    if (lightBtn && !lightBtn._themeEventBound) {
+      lightBtn.addEventListener('click', () => switchTheme('light'));
+      lightBtn._themeEventBound = true;
+    }
+    
+    if (darkBtn && !darkBtn._themeEventBound) {
+      darkBtn.addEventListener('click', () => switchTheme('dark'));
+      darkBtn._themeEventBound = true;
+    }
+    
+    // 可选：添加键盘快捷键支持（防重复绑定）
+    if (!window._h5ToolsKeyboardShortcutBound) {
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + Shift + T 切换主题
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+          e.preventDefault();
+          const currentTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          switchTheme(newTheme);
+        }
+      });
+      window._h5ToolsKeyboardShortcutBound = true;
+    }
+    
+    console.log('✅ 主题按钮事件已绑定');
+    window._h5ToolsThemeEventsInitialized = true;
+  } catch (error) {
+    console.error('绑定主题按钮事件失败:', error);
+  }
+}
+
+// 全局点击处理器
+function globalClickHandler(e) {
+  // 处理标签页点击
+  if (e.target.classList.contains('tab')) {
+    const tabName = e.target.dataset.tab;
+    if (tabName) {
+      switchTab(tabName);
+    }
+  }
+  
+  // 🚨 修复：移除重复的主题按钮处理，避免与bindThemeButtonEvents重复
+  // 主题按钮点击已在bindThemeButtonEvents中单独处理
+  // if (e.target.id === 'lightTheme') {
+  //   switchTheme('light');
+  // } else if (e.target.id === 'darkTheme') {
+  //   switchTheme('dark');
+  // }
+  
+  // 创建按钮已由UI控制器处理，避免重复绑定
+  
+  // 处理重置按钮点击
+  if (e.target.id === 'reset') {
+    if (confirm('确定要重置所有设置吗？此操作无法撤销。')) {
+      window.formResetter.resetAll();
+    }
+  }
+}
+
+// 全局change处理器
+function globalChangeHandler(e) {
+  // 处理按钮版本选择器
+  if (e.target.id === 'buttonVersionSelect') {
+    switchButtonVersion();
+  }
+  
+  // 处理文件上传
+  if (e.target.type === 'file') {
+    handleFileUpload(e.target);
+  }
+}
+
+// 全局input处理器
+function globalInputHandler(e) {
+  // 处理颜色输入同步
+  if (e.target.type === 'color') {
+    const textInput = e.target.nextElementSibling;
+    if (textInput && textInput.classList.contains('color-value')) {
+      textInput.value = e.target.value.toUpperCase();
+    }
+  }
+  
+  // 处理颜色文本输入
+  if (e.target.classList.contains('color-value')) {
+    const colorInput = e.target.previousElementSibling;
+    if (colorInput && colorInput.type === 'color' && /^#[0-9A-F]{6}$/i.test(e.target.value)) {
+      colorInput.value = e.target.value;
+    }
+  }
+}
+
+// 处理文件上传
+function handleFileUpload(input) {
+  if (!input.files || input.files.length === 0) return;
+  
+  // 查找预览容器
+  const previewContainer = input.nextElementSibling?.querySelector('.img-preview-inline, .preview-container');
+  if (previewContainer) {
+    previewImage(input, previewContainer);
+  }
+  
+  // 特殊处理游戏图标
+  if (input.id === 'gameIconUpload') {
+    const gameIconPreview = document.getElementById('gameIconPreview');
+    if (gameIconPreview) {
+      previewImage(input, gameIconPreview);
+    }
+  }
+}
+
+// 重置表单
+function resetForm() {
+  if (window.formResetter) {
+    window.formResetter.resetAll();
+  }
+}
+
+// 导出供其他模块使用（已移除loadThemePreference）
+window.utilityFunctions = {
+  switchTab,
+  switchButtonVersion,
+  createPrototype,
+  getImageData,
+  collectModuleData,
+  previewImage,
+  setupSystemThemeListener,
+  detectAndApplySystemTheme,
+  applyTheme,
+  switchTheme,
+  bindThemeButtonEvents,
+  globalClickHandler,
+  globalChangeHandler,
+  globalInputHandler,
+  handleFileUpload,
+  resetForm
+};
+
+
+/* === plugin-communicator.js === */
+// ==================== 插件通信管理 ====================
+
+class PluginCommunicator {
+  constructor() {
+    console.log('🔧 准备创建PluginCommunicator实例...');
+    
+    // 初始化消息处理器映射
+    this.messageHandlers = new Map();
+    
+    // 消息状态跟踪
+    this.messageStatus = new Map();
+    
+    // 初始化事件监听器
+    this.initEventListener();
+    
+    // 标记初始化完成
+    this.initialized = true;
+    console.log('插件通信器已初始化');
+  }
+  
+  initEventListener() {
+    window.onmessage = (event) => {
+      const pluginMessage = event.data.pluginMessage;
+      if (!pluginMessage) return;
+      
+      const handler = this.messageHandlers.get(pluginMessage.type);
+      if (handler) {
+        handler(pluginMessage);
+      }
+    };
+  }
+  
+  // 注册消息处理器
+  registerHandler(messageType, handler) {
+    console.log('注册消息处理器:', messageType);
+    this.messageHandlers.set(messageType, handler);
+  }
+  
+  // on方法是registerHandler的别名，提供事件监听器风格的API
+  on(messageType, handler) {
+    return this.registerHandler(messageType, handler);
+  }
+  
+  // 移除消息处理器
+  removeHandler(messageType) {
+    console.log('移除消息处理器:', messageType);
+    return this.messageHandlers.delete(messageType);
+  }
+  
+  // off方法是removeHandler的别名，提供事件监听器风格的API
+  off(messageType, handler) {
+    // 如果提供了具体的handler，进行匹配检查
+    if (handler) {
+      const existingHandler = this.messageHandlers.get(messageType);
+      if (existingHandler === handler) {
+        return this.removeHandler(messageType);
+      }
+      return false;
+    }
+    // 如果没有提供handler，直接移除该类型的所有处理器
+    return this.removeHandler(messageType);
+  }
+  
+  // 发送消息到插件
+  postMessage(type, data = {}) {
+    // 生成消息ID
+    const messageId = `${type}-${Date.now()}`;
+    
+    // 检查是否是状态类消息（如ui-loaded, ui-ready）
+    if (type.startsWith('ui-')) {
+      // 检查是否已经发送过
+      const lastStatus = this.messageStatus.get(type);
+      if (lastStatus) {
+        const timeSinceLastMessage = Date.now() - lastStatus.timestamp;
+        // 如果距离上次发送不到1秒，则跳过
+        if (timeSinceLastMessage < 1000) {
+          console.log(`⚠️ 跳过重复的${type}消息，距上次发送: ${timeSinceLastMessage}ms`);
+          return;
+        }
+      }
+      
+      // 更新消息状态
+      this.messageStatus.set(type, {
+        timestamp: Date.now(),
+        data: data
+      });
+    }
+    
+    // 构建消息对象
+    const message = {
+      type,
+      ...data,
+      _messageId: messageId,
+      _timestamp: Date.now()
+    };
+    
+    console.log('发送消息到插件:', type, message);
+    
+    // 发送消息
+    parent.postMessage({ pluginMessage: message }, '*');
+  }
+  
+  // 清理消息状态
+  clearMessageStatus(type) {
+    this.messageStatus.delete(type);
+  }
+  
+  // 测试通信连接
+  testConnection() {
+    this.postMessage('ping', { timestamp: Date.now() });
+  }
+}
+
+// 创建全局实例
+try {
+  const success = window.pluginComm = new PluginCommunicator();
+  console.log('✅ PluginCommunicator实例创建成功:', !!success);
+} catch (error) {
+  console.error('❌ PluginCommunicator创建失败:', error);
+}
+
+// 注册图片切片消息处理器
+window.pluginComm.registerHandler('slice-large-image', async (message) => {
+  try {
+    console.log('收到图片切片请求:', message.imageData?.name);
+    await window.imageSliceHandler.handleSliceRequest(message);
+  } catch (error) {
+    console.error('处理图片切片请求失败:', error);
+    // 发送失败响应
+    window.pluginComm.postMessage('slice-image-response', {
+      success: false,
+      imageName: message.imageData?.name || '未知图片',
+      error: error.message
+    });
+  }
+}); 
+
+/* === notification-system.js === */
+// ==================== UI 通知系统 ====================
+
+class NotificationSystem {
+  constructor() {
+    this.notifications = new Set();
+    this.loadingElement = null;
+    this.init();
+  }
+  
+  init() {
+    // 创建加载状态元素
+    this.createLoadingElement();
+  }
+  
+  createLoadingElement() {
+    if (document.getElementById('loadingOverlay')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.id = 'loadingOverlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    `;
+    
+    const spinner = document.createElement('div');
+    spinner.style.cssText = `
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    `;
+    
+    // 添加旋转动画
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    overlay.appendChild(spinner);
+    document.body.appendChild(overlay);
+    this.loadingElement = overlay;
+  }
+  
+  show(message, type = 'info', duration = 5000) {
+    const notification = this.createElement(message, type);
+    this.notifications.add(notification);
+    
+    document.body.appendChild(notification);
+    
+    // 使用 requestAnimationFrame 确保平滑动画
+    requestAnimationFrame(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateY(0)';
+    });
+    
+    // 自动移除
+    setTimeout(() => this.hide(notification), duration);
+    
+    return notification;
+  }
+  
+  createElement(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-20px)';
+    return notification;
+  }
+  
+  hide(notification) {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-20px)';
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+      this.notifications.delete(notification);
+    }, 300);
+  }
+  
+  clear() {
+    this.notifications.forEach(notification => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    });
+    this.notifications.clear();
+  }
+  
+  showLoading() {
+    if (this.loadingElement) {
+      this.loadingElement.style.display = 'flex';
+    }
+  }
+  
+  hideLoading() {
+    if (this.loadingElement) {
+      this.loadingElement.style.display = 'none';
+    }
+  }
+}
+
+// 创建全局通知系统实例并挂载到window对象
+window.notificationSystem = new NotificationSystem();
+
+// ==================== 加载状态管理 ====================
+
+// 显示加载状态 - 供其他模块使用
+window.showLoading = function(message = '正在处理...') {
+  window.notificationSystem.showLoading();
+  console.log('显示加载状态:', message);
+};
+
+// 隐藏加载状态 - 供其他模块使用
+window.hideLoading = function() {
+  window.notificationSystem.hideLoading();
+  console.log('隐藏加载状态');
+};
+
+// 兼容函数 - 供其他模块使用
+window.showNotification = function(message, type) {
+  window.notificationSystem.show(message, type);
+}; 
+
+/* === theme-manager.js === */
+// ==================== 主题管理器模块 ====================
+
+class ThemeManager {
+  init() {
+    this.checkSystemTheme();
+    this.bindThemeButtons();
+    this.watchSystemTheme();
+  }
+  
+  checkSystemTheme() {
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    this.applyTheme(prefersDark ? 'dark' : 'light');
+  }
+  
+  applyTheme(theme) {
+    document.body.className = document.body.className.replace(/\b(light|dark)-theme\b/g, '');
+    document.body.classList.add(`${theme}-theme`);
+    
+    this.updateThemeButtons(theme);
+  }
+  
+  updateThemeButtons(theme) {
+    const lightBtn = document.getElementById('lightTheme');
+    const darkBtn = document.getElementById('darkTheme');
+    
+    if (lightBtn && darkBtn) {
+      lightBtn.classList.toggle('active', theme === 'light');
+      darkBtn.classList.toggle('active', theme === 'dark');
+    }
+  }
+  
+  bindThemeButtons() {
+    const lightBtn = document.getElementById('lightTheme');
+    const darkBtn = document.getElementById('darkTheme');
+    
+    if (lightBtn) {
+      lightBtn.addEventListener('click', () => this.applyTheme('light'));
+    }
+    
+    if (darkBtn) {
+      darkBtn.addEventListener('click', () => this.applyTheme('dark'));
+    }
+  }
+  
+  watchSystemTheme() {
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', () => this.checkSystemTheme());
+    }
+  }
+}
+
+// 创建全局主题管理器实例
+const themeManager = new ThemeManager();
+
+// 导出供其他模块使用
+window.themeManager = themeManager; 
+
+/* === file-processor.js === */
+// ==================== 文件处理器 ====================
+
+class FileProcessor {
+  // 处理图片文件上传
+  async processImageFile(file, storageKey, isModule = false) {
+    if (!this.isValidImageFile(file)) {
+      throw new Error('请上传有效的图片文件');
+    }
+    
+    try {
+      const uint8Array = await this.fileToUint8Array(file);
+      
+      // 获取图片尺寸
+      const imageDimensions = await this.getImageDimensions(file);
+      console.log(`图片上传成功: ${storageKey}, 大小: ${uint8Array.length} bytes, 尺寸: ${imageDimensions.width}x${imageDimensions.height}`);
+      
+      // 存储图片数据和尺寸信息
+      const imageData = {
+        data: uint8Array,
+        width: imageDimensions.width,
+        height: imageDimensions.height,
+        name: file.name,
+        type: file.type
+      };
+      
+      if (isModule) {
+        window.imageManager.setModule(storageKey, imageData);
+      } else {
+        window.imageManager.set(storageKey, imageData);
+      }
+      
+      return imageData;
+    } catch (error) {
+      console.error(`图片处理失败: ${storageKey}`, error);
+      throw new Error(`图片处理失败: ${error.message}`);
+    }
+  }
+
+  async handleImageUpload(e, storageKey) {
+    try {
+      await this.handleUpload(e.target, storageKey, false);
+    } catch (error) {
+      console.error(`基础图片上传失败 ${storageKey}:`, error);
+      window.notificationSystem.show(`上传失败: ${error.message}`, 'error');
+    }
+  }
+  
+  async handleUpload(input, storageKey, isModule = false) {
+    if (!input.files?.[0]) return;
+    
+    console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
+    
+    try {
+      await this.processImageFile(input.files[0], storageKey, isModule);
+      
+      // 验证图片是否正确存储
+      const storedData = isModule ? window.imageManager.getModule(storageKey) : window.imageManager.get(storageKey);
+      console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
+      
+      window.notificationSystem.show('图片上传成功', 'success');
+    } catch (error) {
+      console.error(`图片上传失败 ${storageKey}:`, error);
+      window.notificationSystem.show(`上传失败: ${error.message}`, 'error');
+    }
+  }
+
+  async handleModuleImageUpload(e) {
+    try {
+      const input = e.target;
+      const moduleEl = input.closest('.module');
+      if (!moduleEl) return;
+      
+      const moduleId = moduleEl.id;
+      const storageKey = this.getModuleStorageKey(input, moduleId);
+      
+      if (storageKey) {
+        await this.handleUpload(input, storageKey, true);
+      }
+    } catch (error) {
+      console.error('模块图片上传失败:', error);
+      window.notificationSystem.show(`模块图片上传失败: ${error.message}`, 'error');
+    }
+  }
+  
+  getModuleStorageKey(input, moduleId) {
+    const classMap = {
+      'derived-item-upload': `${moduleId}-titlebg`,
+      'nine-grid-bg': `${moduleId}-gridbg`,
+      'draw-btn': `${moduleId}-drawbtn`,
+      'prize-bg': `${moduleId}-prizebg`,
+      'sign-in-title-upload': `${moduleId}-title`,
+      'sign-in-bg-upload': `${moduleId}-bg`,
+      'day-icon-upload': `${moduleId}-dayicon`,
+      'sign-in-btn-upload': `${moduleId}-signbtn`,
+      'collect-title-upload': `${moduleId}-title`,
+      'collect-bg-upload': `${moduleId}-bg`,
+      'card-bg-upload': `${moduleId}-cardbg`,
+      'combine-button-upload': `${moduleId}-combinebtn`,
+      'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
+      'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
+      'activity-content-image-upload': `${moduleId}-image`,
+      'carousel-title-bg-upload': `${moduleId}-carousel-title-bg`,
+      'carousel-image-upload': `${moduleId}-carousel-image`,
+      'carousel-image-bg-upload': `${moduleId}-carousel-image-bg`,
+      'vertical-carousel-title-bg-upload': `${moduleId}-vertical-title-bg`,
+      'vertical-carousel-image-upload-1': `${moduleId}-vertical-image-1`,
+      'vertical-carousel-image-upload-2': `${moduleId}-vertical-image-2`,
+      'vertical-carousel-image-upload-3': `${moduleId}-vertical-image-3`
+    };
+    
+    // 特殊处理奖品图片上传
+    if (input.classList.contains('prize-upload')) {
+      const prizeIndex = this.getPrizeIndex(input);
+      return `${moduleId}-prize-${prizeIndex}`;
+    }
+    
+    // 检查所有可能的类名匹配
+    for (const [className, key] of Object.entries(classMap)) {
+      if (input.classList.contains(className)) {
+        return key;
+      }
+    }
+    
+    // 调试信息
+    console.log(`未找到匹配的存储键，输入类名:`, input.className, `模块ID: ${moduleId}`);
+    return null;
+  }
+  
+  // 获取奖品在九宫格中的索引
+  getPrizeIndex(input) {
+    const moduleEl = input.closest('.module');
+    if (!moduleEl) return 0;
+    
+    const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
+    return prizeInputs.indexOf(input);
+  }
+
+  // 获取图片尺寸
+  async getImageDimensions(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight
+        });
+        // 清理URL对象
+        URL.revokeObjectURL(img.src);
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        reject(new Error('无法读取图片尺寸'));
+      };
+      
+      // 创建临时URL
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  
+  // 验证是否为有效图片文件
+  isValidImageFile(file) {
+    return file && file.type.startsWith('image/');
+  }
+  
+  // 将文件转换为 Uint8Array
+  fileToUint8Array(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const arrayBuffer = e.target.result;
+        const uint8Array = new Uint8Array(arrayBuffer);
+        resolve(uint8Array);
+      };
+      reader.onerror = () => reject(new Error('文件读取失败'));
+      reader.readAsArrayBuffer(file);
+    });
+  }
+  
+  // 切片大图方法 - 使用智能切片策略
+  async sliceLargeImage(imageData, sliceWidth = null, sliceHeight = null) {
+    try {
+      console.log(`开始切片图片: ${imageData.name || '未知图片'}`);
+      
+      // 🚨 修复：使用传入的切片策略，如果没有则使用智能策略
+      let finalSliceWidth = sliceWidth;
+      let finalSliceHeight = sliceHeight;
+      
+      // 如果没有指定切片尺寸，使用智能策略计算
+      if (!sliceWidth || !sliceHeight) {
+        const tempImg = new Image();
+        const tempBlob = new Blob([new Uint8Array(imageData.bytes || imageData.data)], { type: imageData.type });
+        const tempUrl = URL.createObjectURL(tempBlob);
+        
+        await new Promise((resolve, reject) => {
+          tempImg.onload = resolve;
+          tempImg.onerror = reject;
+          tempImg.src = tempUrl;
+        });
+        
+        // 使用智能策略计算切片尺寸
+        const strategy = this.calculateSliceStrategy(tempImg.width, tempImg.height, 4096);
+        finalSliceWidth = strategy.sliceWidth;
+        finalSliceHeight = strategy.sliceHeight;
+        
+        console.log(`智能策略: ${strategy.description}`);
+        console.log(`计算得出切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
+        
+        URL.revokeObjectURL(tempUrl);
+      }
+      
+      console.log(`目标切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
+      
+      // 🚨 修复：确保图片数据格式正确
+      let uint8ArrayData;
+      if (imageData.bytes && Array.isArray(imageData.bytes)) {
+        // 从插件传来的是Array格式，需要转换为Uint8Array
+        console.log('检测到Array格式的图片数据，正在转换为Uint8Array...');
+        uint8ArrayData = new Uint8Array(imageData.bytes);
+      } else if (imageData.data instanceof Uint8Array) {
+        // 已经是Uint8Array格式
+        uint8ArrayData = imageData.data;
+      } else if (imageData.data && Array.isArray(imageData.data)) {
+        // data字段是Array格式
+        console.log('检测到data字段为Array格式，正在转换为Uint8Array...');
+        uint8ArrayData = new Uint8Array(imageData.data);
+      } else {
+        throw new Error('图片数据格式不正确，无法处理');
+      }
+      
+      // 验证数据完整性
+      if (!uint8ArrayData || uint8ArrayData.length === 0) {
+        throw new Error('图片数据为空或损坏');
+      }
+      
+      console.log(`图片数据大小: ${uint8ArrayData.length} bytes`);
+      
+      // 创建画布来处理图片
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error('无法创建 Canvas 上下文');
+      }
+      
+      // 从 Uint8Array 创建图片
+      const blob = new Blob([uint8ArrayData], { type: imageData.type || 'image/png' });
+      const img = new Image();
+      const imgUrl = URL.createObjectURL(blob);
+      
+      console.log(`创建图片URL: ${imgUrl}`);
+      console.log(`图片类型: ${imageData.type || 'image/png'}`);
+      
+      return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          URL.revokeObjectURL(imgUrl);
+          reject(new Error('图片加载超时'));
+        }, 30000); // 30秒超时
+        
+        img.onload = () => {
+          console.log('图片加载成功');
+          clearTimeout(timeoutId);
+          
+          try {
+            const originalWidth = img.width;
+            const originalHeight = img.height;
+            
+            console.log(`原图尺寸: ${originalWidth}x${originalHeight}`);
+            console.log(`切片尺寸: ${finalSliceWidth}x${finalSliceHeight}`);
+            
+            // 计算需要切片的数量
+            const cols = Math.ceil(originalWidth / finalSliceWidth);
+            const rows = Math.ceil(originalHeight / finalSliceHeight);
+            const totalSlices = cols * rows;
+            
+            console.log(`切片数量: ${cols}列 x ${rows}行 = ${totalSlices}片`);
+            
+            const slices = [];
+            let completedSlices = 0;
+            
+            // 处理完成检查函数
+            const checkCompletion = () => {
+              if (completedSlices === totalSlices) {
+                // 按行列顺序排序
+                slices.sort((a, b) => {
+                  if (a.row !== b.row) return a.row - b.row;
+                  return a.col - b.col;
+                });
+                
+                URL.revokeObjectURL(imgUrl);
+                console.log(`图片切片完成，共 ${slices.length} 片`);
+                
+                resolve({
+                  slices: slices,
+                  originalWidth: originalWidth,
+                  originalHeight: originalHeight,
+                  sliceWidth: finalSliceWidth,
+                  sliceHeight: finalSliceHeight,
+                  cols: cols,
+                  rows: rows
+                });
+              }
+            };
+            
+            // 生成每个切片
+            for (let row = 0; row < rows; row++) {
+              for (let col = 0; col < cols; col++) {
+                // 计算当前切片的位置和尺寸
+                  const x = col * finalSliceWidth;
+                  const y = row * finalSliceHeight;
+                  const currentSliceWidth = Math.min(finalSliceWidth, originalWidth - x);
+                  const currentSliceHeight = Math.min(finalSliceHeight, originalHeight - y);
+                
+                // 设置画布尺寸
+                canvas.width = currentSliceWidth;
+                canvas.height = currentSliceHeight;
+                
+                // 清空画布
+                ctx.clearRect(0, 0, currentSliceWidth, currentSliceHeight);
+                
+                // 绘制图片的对应部分
+                ctx.drawImage(
+                  img,
+                  x, y, currentSliceWidth, currentSliceHeight,
+                  0, 0, currentSliceWidth, currentSliceHeight
+                );
+                
+                // 转换为 Uint8Array（使用立即执行函数保持作用域）
+                ((currentRow, currentCol, sliceX, sliceY, width, height) => {
+                  canvas.toBlob((blob) => {
+                    if (!blob) {
+                      completedSlices++;
+                      console.warn(`切片 ${currentRow}_${currentCol} 创建失败`);
+                      checkCompletion();
+                      return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                      try {
+                        const sliceData = new Uint8Array(e.target.result);
+                        slices.push({
+                          data: sliceData,
+                          width: width,
+                          height: height,
+                          row: currentRow,
+                          col: currentCol,
+                          x: sliceX,
+                          y: sliceY,
+                          name: `slice_${currentRow}_${currentCol}.png`
+                        });
+                        
+                        completedSlices++;
+                        console.log(`切片进度: ${completedSlices}/${totalSlices}`);
+                        checkCompletion();
+                      } catch (sliceError) {
+                        console.error(`切片 ${currentRow}_${currentCol} 处理失败:`, sliceError);
+                        completedSlices++;
+                        checkCompletion();
+                      }
+                    };
+                    
+                    reader.onerror = () => {
+                      console.error(`切片 ${currentRow}_${currentCol} 读取失败`);
+                      completedSlices++;
+                      checkCompletion();
+                    };
+                    
+                    reader.readAsArrayBuffer(blob);
+                  }, 'image/png', 0.9); // 添加质量参数
+                })(row, col, x, y, currentSliceWidth, currentSliceHeight);
+              }
+            }
+            
+          } catch (error) {
+            clearTimeout(timeoutId);
+            URL.revokeObjectURL(imgUrl);
+            reject(error);
+          }
+        };
+        
+        img.onerror = (errorEvent) => {
+          console.error('图片加载失败事件:', errorEvent);
+          console.error('图片URL:', imgUrl);
+          console.error('图片类型:', imageData.type);
+          console.error('Blob大小:', blob.size);
+          clearTimeout(timeoutId);
+          URL.revokeObjectURL(imgUrl);
+          reject(new Error('图片加载失败'));
+        };
+        
+        img.src = imgUrl;
+      });
+    } catch (error) {
+      console.error('图片切片失败:', error);
+      throw error;
+    }
+  }
+
+  // 🚨 新增：智能切片策略计算方法（与核心库保持一致）
+  calculateSliceStrategy(width, height, maxSize = 4096) {
+    const strategy = {
+      direction: 'none',
+      sliceWidth: width,
+      sliceHeight: height,
+      slicesCount: 1,
+      description: '',
+      cols: 1,
+      rows: 1,
+      totalSlices: 1
+    };
+
+    const widthExceeds = width > maxSize;
+    const heightExceeds = height > maxSize;
+
+    if (!widthExceeds && !heightExceeds) {
+      // 不需要切割
+      strategy.description = '图片尺寸正常，无需切割';
+      return strategy;
+    }
+
+    if (widthExceeds && !heightExceeds) {
+      // 只有宽度超限：垂直切割（保持高度）
+      strategy.direction = 'vertical';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.sliceHeight = height;
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = 1;
+      strategy.slicesCount = strategy.cols;
+      strategy.totalSlices = strategy.cols;
+      strategy.description = `宽度超限，垂直切割为${strategy.slicesCount}片，每片${strategy.sliceWidth}×${height}`;
+    } else if (!widthExceeds && heightExceeds) {
+      // 只有高度超限：水平切割（保持宽度）
+      strategy.direction = 'horizontal';
+      strategy.sliceWidth = width;
+      strategy.sliceHeight = Math.floor(maxSize * 0.9); // 留10%安全边距
+      strategy.cols = 1;
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.rows;
+      strategy.totalSlices = strategy.rows;
+      strategy.description = `高度超限，水平切割为${strategy.slicesCount}片，每片${width}×${strategy.sliceHeight}`;
+    } else {
+      // 宽度和高度都超限：网格切割
+      strategy.direction = 'both';
+      strategy.sliceWidth = Math.floor(maxSize * 0.9);
+      strategy.sliceHeight = Math.floor(maxSize * 0.9);
+      strategy.cols = Math.ceil(width / strategy.sliceWidth);
+      strategy.rows = Math.ceil(height / strategy.sliceHeight);
+      strategy.slicesCount = strategy.cols * strategy.rows;
+      strategy.totalSlices = strategy.cols * strategy.rows;
+      strategy.description = `宽高都超限，网格切割为${strategy.cols}×${strategy.rows}=${strategy.slicesCount}片`;
+    }
+
+    return strategy;
+  }
+}
+
+// 创建文件处理器实例并挂载到window对象
+window.fileProcessor = new FileProcessor(); 
+
+/* === data-collector.js === */
+// ==================== 数据收集器 ====================
+
+class DataCollector {
+  constructor() {
+    this.moduleDataCollectors = {
+      carousel: this.collectCarouselData.bind(this),
+      verticalCarousel: this.collectVerticalCarouselData.bind(this)
+    };
+    
+    // 存储键映射
+    this.storageKeyMap = {
+      'carousel-title-bg-upload': 'titleBgImage',
+      'carousel-image-upload': 'carouselImage',
+      'carousel-image-bg-upload': 'carouselBgImage',
+      'vertical-carousel-title-bg-upload': 'titleBackground',
+      'vertical-carousel-image-upload': 'carouselImage'
+    };
+  }
+
+  // 收集表单数据
+  collectFormData() {
+    const config = {
+      // 页面基础设置
+      pageBgColor: document.getElementById('pageColor')?.value || '#FFFFFF',
+      pageBgImage: window.imageManager.get('pageBackground'),
+      headerImage: window.imageManager.get('headerImage'),
+      titleUpload: window.imageManager.get('titleUpload'),
+      gameIcon: window.imageManager.get('gameIcon'),
+      
+      // 游戏信息
+      buttonVersion: document.getElementById('buttonVersionSelect')?.value || 'imageButton',
+      
+      // 游戏信息 - 带icon版
+      gameName: document.getElementById('gameNameInput')?.value || '',
+      gameDesc: document.getElementById('gameCopyInput')?.value || '',
+      gameTextColor: document.getElementById('gameCopyTextColor')?.value || '#FFFFFF',
+      iconButtonText: document.getElementById('iconButtonText')?.value || '立即下载',
+      iconButtonTextColor: document.getElementById('iconButtonTextColor')?.value || '#FFFFFF',
+      iconButtonBg: window.imageManager.get('iconButtonBg'),
+      
+      // 游戏信息 - 单按钮版
+      singleButtonText: document.getElementById('singleButtonText')?.value || '立即下载',
+      singleButtonTextColor: document.getElementById('singleButtonTextColor')?.value || '#FFFFFF',
+      singleButtonBg: window.imageManager.get('singleButtonBg'),
+      
+      // 游戏信息 - 双按钮版
+      leftButtonText: document.getElementById('leftButtonText')?.value || '左侧按钮',
+      leftButtonBg: window.imageManager.get('leftButtonBg'),
+      leftButtonTextColor: document.getElementById('leftButtonTextColor')?.value || '#FFFFFF',
+      rightButtonText: document.getElementById('rightButtonText')?.value || '右侧按钮',
+      rightButtonBg: window.imageManager.get('rightButtonBg'),
+      rightButtonTextColor: document.getElementById('rightButtonTextColor')?.value || '#FFFFFF',
+      btnSpacing: parseInt(document.getElementById('btnSpacing')?.value) || 10,
+      
+      // 活动规则
+      rulesTitle: document.getElementById('rulesTitle')?.value || '',
+      rulesBgImage: window.imageManager.get('rulesBg'),
+      rulesContent: document.getElementById('rulesContent')?.value || '',
+      footerLogo: window.imageManager.get('footerLogo'),
+      footerBg: window.imageManager.get('footerBg'),
+      
+      // 模块数据
+      modules: this.collectModuleData()
+    };
+    
+    console.log('收集到的表单数据:', config);
+    return config;
+  }
+  
+  // 收集模块数据
+  collectModuleData() {
+    const modules = document.querySelectorAll('#modulesContainer .module');
+    const moduleData = [];
+    
+    modules.forEach(moduleEl => {
+      const moduleType = moduleEl.dataset.moduleType;
+      const moduleId = moduleEl.id;
+      
+      if (moduleType && moduleId) {
+        const moduleContent = this.collectModuleContent(moduleEl, moduleType, moduleId);
+        if (moduleContent) {
+          // 获取模块标题
+          const moduleTitle = this.getModuleTitle(moduleType);
+          
+          moduleData.push({
+            id: moduleId,
+            type: moduleType,  // 保持字符串格式，在后端处理类型转换
+            title: moduleTitle, // 添加标题字段
+            content: moduleContent
+          });
+          
+          console.log('📊 [模块数据收集]', {
+            moduleId,
+            moduleType,
+            moduleTitle,
+            收集内容: moduleContent
+          });
+        }
+      }
+    });
+    
+    console.log('🎯 [所有模块数据收集完成]', moduleData);
+    return moduleData;
+  }
+  
+  // 获取模块标题
+  getModuleTitle(moduleType) {
+    const titleMap = {
+      'nineGrid': '九宫格抽奖',
+      'signIn': '每日签到',
+      'collectCards': '集卡活动',
+      'activityContent': '活动详情',
+      'carousel': '图片轮播（横版）',
+      'verticalCarousel': '图片轮播（竖版）'
+    };
+    return titleMap[moduleType] || '未知模块';
+  }
+  
+  // 收集模块内容
+  collectModuleContent(container, moduleType, moduleId) {
+    switch (moduleType) {
+      case 'nineGrid':
+        return this.collectLotteryData(container, moduleId);
+      case 'lotteryModule':
+        return this.collectLotteryData(container, moduleId);
+      case 'signInModule':
+        return this.collectSignInData(container, moduleId);
+      case 'collectModule':
+        return this.collectCardsData(container, moduleId);
+      case 'activityContent':
+        return this.collectActivityContentData(container, moduleId);
+      case 'carousel':
+        return this.collectCarouselData(moduleId);
+      case 'verticalCarousel':
+        return this.collectVerticalCarouselData(moduleId);
+      default:
+        console.warn(`未知的模块类型: ${moduleType}`);
+        return null;
+    }
+  }
+  
+  // 收集九宫格抽奖数据
+  collectLotteryData(container, moduleId) {
+    const data = {
+      mainTitle: container.querySelector('.big-title-input')?.value || "抽奖活动",
+      titleBgImage: window.imageManager.getModule(`${moduleId}-titlebg`),
+      gridBgImage: window.imageManager.getModule(`${moduleId}-gridbg`),
+      drawButtonImage: window.imageManager.getModule(`${moduleId}-drawbtn`),
+      prizeBgImage: window.imageManager.getModule(`${moduleId}-prizebg`),
+      prizes: this.collectNineGridPrizes(container, moduleId)
+    };
+    
+    return data;
+  }
+  
+  // 收集签到数据
+  collectSignInData(container, moduleId) {
+    const data = {
+      titleImage: window.imageManager.getModule(`${moduleId}-title`),
+      bgImage: window.imageManager.getModule(`${moduleId}-bg`),
+      daysCount: parseInt(container.querySelector('.days-count')?.value) || 7,
+      dayIcon: window.imageManager.getModule(`${moduleId}-dayicon`),
+      signButton: window.imageManager.getModule(`${moduleId}-signbtn`)
+    };
+    
+    return data;
+  }
+  
+  // 收集集卡数据
+  collectCardsData(container, moduleId) {
+    const data = {
+      titleImage: window.imageManager.getModule(`${moduleId}-title`),
+      bgImage: window.imageManager.getModule(`${moduleId}-bg`),
+      cardsCount: parseInt(container.querySelector('.cards-count')?.value) || 5,
+      cardStyle: container.querySelector('input[name="cardStyle"]:checked')?.value || 'style1',
+      cardBg: window.imageManager.getModule(`${moduleId}-cardbg`),
+      combineButton: window.imageManager.getModule(`${moduleId}-combinebtn`)
+    };
+    
+    return data;
+  }
+  
+  // 收集活动内容数据
+  collectActivityContentData(container, moduleId) {
+    const data = {
+      mainTitle: container.querySelector('.activity-content-main-title-input')?.value || '',
+      mainTitleBg: window.imageManager.getModule(`${moduleId}-main-title-bg`),
+      subTitle: container.querySelector('.activity-content-sub-title-input')?.value || '',
+      subTitleBg: window.imageManager.getModule(`${moduleId}-sub-title-bg`),
+      text: container.querySelector('.activity-content-text-input')?.value || '',
+      image: window.imageManager.getModule(`${moduleId}-image`)
+    };
+    
+    console.log('🔍 [活动内容数据收集]', {
+      moduleId,
+      data,
+      主标题: data.mainTitle,
+      副标题: data.subTitle,
+      正文: data.text,
+      图片: !!data.image
+    });
+    
+    return data;
+  }
+  
+  // 收集图片轮播数据
+  collectCarouselData(moduleId) {
+    try {
+      const titleInput = document.querySelector(`#${moduleId} input[name="carousel-title"]`);
+
+      const data = {
+        title: titleInput?.value || '',
+        titleBackground: window.imageManager.getModule(`${moduleId}-carousel-title-bg`),
+        carouselImage: window.imageManager.getModule(`${moduleId}-carousel-image`),
+        carouselBackground: window.imageManager.getModule(`${moduleId}-carousel-image-bg`)
+      };
+    
+      console.log('🔍 [图片轮播数据收集]', {
+        moduleId,
+        data,
+        标题: data.title,
+        轮播图片: !!data.carouselImage,
+        标题背景: !!data.titleBackground,
+        轮播背景: !!data.carouselBackground
+      });
+    
+      return data;
+    } catch (error) {
+      console.error('收集轮播图数据失败:', error);
+      return null;
+    }
+  }
+
+  // 收集图片轮播（竖版）数据
+  collectVerticalCarouselData(moduleId) {
+    try {
+      const titleInput = document.querySelector(`#${moduleId} input[name="vertical-carousel-title"]`);
+
+      // 收集轮播图片数据 - 确保返回3元素元组格式
+      const carouselImages = [
+        window.imageManager.getModule(`${moduleId}-vertical-image-1`) || null,  // 主图
+        window.imageManager.getModule(`${moduleId}-vertical-image-2`) || null,  // 右上图
+        window.imageManager.getModule(`${moduleId}-vertical-image-3`) || null   // 右下图
+      ];
+
+      const data = {
+        title: titleInput?.value || '',
+        titleBackground: window.imageManager.getModule(`${moduleId}-vertical-title-bg`),
+        carouselImages: carouselImages
+      };
+      
+      console.log('🔍 [图片轮播（竖版）数据收集]', {
+        moduleId,
+        data,
+        标题: data.title,
+        轮播图片: `[主图: ${!!carouselImages[0]}, 右上: ${!!carouselImages[1]}, 右下: ${!!carouselImages[2]}]`,
+        标题背景: !!data.titleBackground
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('收集图片轮播（竖版）数据失败:', error);
+      return null;
+    }
+  }
+  
+  // 获取存储键
+  getStorageKey(className, moduleId) {
+    const baseKey = this.storageKeyMap[className];
+    if (!baseKey) {
+      return null;
+    }
+    return `${moduleId}-${baseKey}`;
+  }
+  
+  // 获取奖品位置
+  getPrizePosition(index) {
+    // 九宫格位置映射 (3x3网格)
+    const positions = [
+      { row: 0, col: 0 }, // 位置0: 左上
+      { row: 0, col: 1 }, // 位置1: 上中
+      { row: 0, col: 2 }, // 位置2: 右上
+      { row: 1, col: 2 }, // 位置3: 右中
+      { row: 2, col: 2 }, // 位置4: 右下
+      { row: 2, col: 1 }, // 位置5: 下中
+      { row: 2, col: 0 }, // 位置6: 左下
+      { row: 1, col: 0 }, // 位置7: 左中
+      { row: 1, col: 1 }  // 位置8: 中心(抽奖按钮位置)
+    ];
+    
+    return positions[index] || { row: 0, col: 0 };
+  }
+  
+  // 收集九宫格奖品数据（专门处理3-2-3布局）
+  collectNineGridPrizes(container, moduleId) {
+    const prizes = [];
+    const prizeElements = container.querySelectorAll('.prize-grid-custom .grid-item');
+    
+    prizeElements.forEach((prizeEl, index) => {
+      const prizeLabel = prizeEl.querySelector('.prize-label')?.textContent || `奖品${String(index + 1).padStart(2, '0')}`;
+      
+      console.log(`🔍 [奖品${index}] 标签: "${prizeLabel}"`);
+      
+      prizes.push({
+        image: window.imageManager.getModule(`${moduleId}-prize-${index}`),
+        name: prizeLabel,
+        position: index
+      });
+    });
+    
+    console.log('🔍 [九宫格奖品数据收集完成]', {
+      moduleId,
+      奖品数量: prizes.length,
+      奖品名称: prizes.map(p => p.name)
+    });
+    
+    return prizes;
+  }
+  
+  // 收集奖品数据（备用方法）
+  collectPrizeData(container, moduleId) {
+    const prizes = [];
+    const prizeElements = container.querySelectorAll('.grid-item');
+    
+    prizeElements.forEach((prizeEl, index) => {
+      const prize = {
+        position: this.getPrizePosition(index),
+        image: window.imageManager.getModule(`${moduleId}-prize-${index}`),
+      };
+      prizes.push(prize);
+    });
+    
+    return prizes;
+  }
+  
+  // 验证收集的数据
+  validateData(config) {
+    const errors = [];
+    
+    // 基础验证
+    if (!config.pageBgColor) {
+      errors.push('页面颜色不能为空');
+    }
+    
+    // 按钮版本验证
+    if (!config.buttonVersion) {
+      errors.push('必须选择按钮版本');
+    }
+    
+    return errors;
+  }
+}
+
+// 创建全局数据收集器实例并挂载到window对象
+window.dataCollector = new DataCollector(); 
+
+/* === data-manager.js === */
+// ==================== 核心数据管理 ====================
+
+// 图片数据存储管理
+class ImageDataManager {
+    constructor() {
+      this.data = {
+        pageBackground: null,
+        headerImage: null,
+        titleUpload: null,
+        gameIcon: null,
+        btnImage: null,
+        footerLogo: null,
+        footerBg: null,
+        rulesBg: null
+      };
+      this.moduleData = {};
+    }
+    
+    set(key, value) {
+      this.data[key] = value;
+    }
+    
+    get(key) {
+      return this.data[key];
+    }
+    
+    setModule(key, value) {
+      this.moduleData[key] = value;
+    }
+    
+    getModule(key) {
+      return this.moduleData[key];
+    }
+    
+    clear() {
+      // 重置为初始状态，保持数据结构
+      this.data = {
+        pageBackground: null,
+        headerImage: null,
+        titleUpload: null,
+        gameIcon: null,
+        btnImage: null,
+        footerLogo: null,
+        footerBg: null,
+        rulesBg: null
+      };
+      this.moduleData = {};
+      console.log('图片管理器已清理');
+    }
+  }
+  
+  // 注意：实例创建现在在global-init.js中统一管理 
+
+/* === channel-manager.js === */
+// ==================== 渠道管理器模块 ====================
+
+// 使用全局存储适配器（已在utility-functions.js中声明）
+// 注意：不要重复声明storageAdapter，避免Figma沙盒环境中的重复声明错误
+
+class ChannelManager {
+  constructor() {
+    this.channelImages = {};
+  }
+
+  // 渠道预览功能
+  previewChannel(channel) {
+    const previewArea = document.getElementById(`${channel}-preview`);
+    
+    // 显示加载状态
+    previewArea.innerHTML = `
+      <div class="preview-placeholder">
+        <span>正在生成预览...</span>
+      </div>
+    `;
+
+    // 模拟预览生成过程（后续完善）
+    setTimeout(() => {
+      previewArea.innerHTML = `
+        <div class="preview-placeholder">
+          <span>${channel.toUpperCase()} 版本预览</span>
+          <div style="margin-top: 8px; font-size: 12px; color: #666;">
+            预览功能正在开发中
+          </div>
+        </div>
+      `;
+    }, 1000);
+  }
+
+  // 渠道生成功能
+  generateChannel(channel) {
+    try {
+      // 显示加载状态
+      window.notificationSystem.showLoading();
+      
+      // 发送消息到插件主线程
+      parent.postMessage({
+        pluginMessage: {
+          type: 'channel-generate',
+          channel: channel
+        }
+      }, '*');
+      
+    } catch (error) {
+      console.error('生成渠道版本失败:', error);
+              window.notificationSystem.hideLoading();
+        window.notificationSystem.show(`生成 ${channel.toUpperCase()} 版本失败`, 'error');
+    }
+  }
+
+  // 渠道设置功能
+  showChannelSettings(channel) {
+    try {
+      console.log(`打开 ${channel.toUpperCase()} 渠道设置`);
+      
+      // 隐藏主视图，显示设置视图
+      const mainView = document.getElementById('channelsMainView');
+      const settingsView = document.getElementById('channelSettingsView');
+      
+      if (mainView) {
+        mainView.style.display = 'none';
+      }
+      
+      if (settingsView) {
+        // 🔧 关键修复：移除hidden类并确保显示
+        settingsView.classList.remove('hidden');
+        settingsView.style.display = 'block';
+        settingsView.style.visibility = 'visible';
+        console.log('🔧 设置视图显示状态已更新');
+      } else {
+        console.error('❌ 找不到channelSettingsView元素');
+        return;
+      }
+      
+      // 更新设置标题
+      const settingsTitle = document.getElementById('settingsTitle');
+      if (settingsTitle) {
+        settingsTitle.textContent = `${this.getChannelDisplayName(channel)} 设置`;
+      }
+      
+      // 生成设置内容
+      this.generateChannelSettingsContent(channel);
+      
+      // 滚动到页面顶部 - 针对Figma插件环境
+      requestAnimationFrame(() => {
+        try {
+          // 查找并滚动所有可能的滚动容器
+          const scrollableContainers = [
+            document.documentElement,
+            document.body,
+            document.querySelector('.container'),
+            document.querySelector('.main-content'),
+            document.querySelector('#app'),
+            document.getElementById('channelSettingsView')
+          ].filter(Boolean);
+          
+          scrollableContainers.forEach(container => {
+            if (container) {
+              container.scrollTop = 0;
+              // 也尝试scrollLeft以防万一
+              if (container.scrollLeft !== undefined) {
+                container.scrollLeft = 0;
+              }
+            }
+          });
+          
+          // 尝试将设置标题滚动到视图中
+          const settingsTitle = document.getElementById('settingsTitle');
+          if (settingsTitle) {
+            settingsTitle.scrollIntoView({
+              behavior: 'auto',
+              block: 'start'
+            });
+          }
+          
+          console.log('已尝试滚动到顶部');
+        } catch (scrollError) {
+          console.warn('滚动操作失败:', scrollError);
+        }
+      });
+      
+      // 显示成功提示
+      if (window.notificationSystem) {
+        window.notificationSystem.show(`已进入 ${this.getChannelDisplayName(channel)} 设置页面`, 'info');
+      }
+      
+    } catch (error) {
+      console.error('打开渠道设置失败:', error);
+      if (window.notificationSystem) {
+        window.notificationSystem.show(`打开 ${this.getChannelDisplayName(channel)} 设置失败`, 'error');
+      }
+    }
+  }
+
+  // 返回渠道列表
+  backToChannelsList() {
+    const mainView = document.getElementById('channelsMainView');
+    const settingsView = document.getElementById('channelSettingsView');
+    
+    if (settingsView) {
+      settingsView.style.display = 'none';
+      settingsView.classList.add('hidden');
+    }
+    
+    if (mainView) {
+      mainView.style.display = 'block';
+    }
+  }
+
+  // 获取渠道显示名称
+  getChannelDisplayName(channel) {
+    const channelNames = {
+      'oppo': 'OPPO',
+      'vivo': 'VIVO', 
+      'huawei': '华为',
+      'xiaomi': '小米'
+    };
+    return channelNames[channel] || channel.toUpperCase();
+  }
+
+  // 生成渠道设置内容
+  generateChannelSettingsContent(channel) {
+    console.log(`🔍 开始生成 ${channel} 渠道设置内容`);
+    
+    const settingsContainer = document.getElementById('settingsContent');
+    console.log('🔍 settingsContainer 元素:', settingsContainer);
+    
+    if (!settingsContainer) {
+      console.error('❌ 找不到settingsContent元素');
+      return;
+    }
+    
+    const config = this.getChannelSettingsConfig(channel);
+    console.log(`🔍 ${channel} 渠道配置:`, config);
+    
+    let html = '';
+    config.forEach((item, index) => {
+      const itemHTML = this.generateSettingItemHTML(item, channel);
+      console.log(`🔍 生成第${index + 1}个设置项:`, item, 'HTML:', itemHTML);
+      html += itemHTML;
+    });
+    
+    console.log(`🔍 最终生成的HTML长度: ${html.length}字符`);
+    console.log('🔍 最终生成的HTML:', html);
+    
+    settingsContainer.innerHTML = html;
+    console.log('✅ HTML已设置到settingsContainer');
+    
+    // 验证HTML是否正确设置
+    console.log('🔍 设置后的settingsContainer内容:', settingsContainer.innerHTML);
+    console.log('🔍 设置后的settingsContainer子元素数量:', settingsContainer.children.length);
+    
+    // 🔧 新增：CSS样式调试
+    const settingsView = document.getElementById('channelSettingsView');
+    const settingsContent = document.getElementById('settingsContent');
+    
+    console.log('🎨 CSS调试信息:');
+    console.log('- 设置视图显示:', settingsView ? window.getComputedStyle(settingsView).display : '元素不存在');
+    console.log('- 设置视图可见:', settingsView ? window.getComputedStyle(settingsView).visibility : '元素不存在');
+    console.log('- 设置内容显示:', settingsContent ? window.getComputedStyle(settingsContent).display : '元素不存在');
+    console.log('- 设置内容高度:', settingsContent ? window.getComputedStyle(settingsContent).height : '元素不存在');
+    
+    // 检查第一个设置项
+    const firstItem = settingsContainer.querySelector('.setting-item');
+    if (firstItem) {
+      console.log('- 第一个设置项显示:', window.getComputedStyle(firstItem).display);
+      console.log('- 第一个设置项高度:', window.getComputedStyle(firstItem).height);
+      console.log('- 第一个设置项边距:', window.getComputedStyle(firstItem).marginBottom);
+    } else {
+      console.log('- ❌ 找不到第一个设置项');
+    }
+    
+    // 绑定事件
+    this.bindSettingsEvents(channel);
+    
+    // 加载已保存的图片
+    this.loadSavedChannelImages(channel);
+    
+    console.log('✅ 渠道设置内容生成完成');
+  }
+
+  // 获取渠道设置配置
+  getChannelSettingsConfig(channel) {
+    const configs = {
+      'oppo': [
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+      ],
+      'vivo': [
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+      ],
+      'huawei': [
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+      ],
+      'xiaomi': [
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+      ]
+    };
+    
+    return configs[channel] || [];
+  }
+
+  // 生成设置项HTML
+  generateSettingItemHTML(item, channel) {
+    const { type, key, label, placeholder, description } = item;
+    
+    let inputHTML = '';
+    
+    if (type === 'text') {
+      inputHTML = `<input type="text" class="setting-input" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}">`;
+    } else if (type === 'textarea') {
+      inputHTML = `<textarea class="setting-input setting-textarea" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}"></textarea>`;
+    } else if (type === 'image') {
+      inputHTML = `
+        <div class="setting-upload-group">
+          <input type="file" accept="image/*" style="display:none" id="${channel}-${key}-input" data-key="${key}">
+          <button type="button" class="setting-upload-btn" onclick="document.getElementById('${channel}-${key}-input').click()">选择图片</button>
+          <div class="setting-preview" id="${channel}-${key}-preview">
+            <div class="setting-preview-placeholder">预览</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    return `
+      <div class="setting-item">
+        <label class="setting-label">${label}</label>
+        ${inputHTML}
+        ${description ? `<div class="setting-description">${description}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // 绑定设置事件
+  bindSettingsEvents(channel) {
+    // 绑定文本输入事件
+    const textInputs = document.querySelectorAll(`#settingsContent input[type="text"], #settingsContent textarea`);
+    textInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        const key = e.target.dataset.key;
+        const value = e.target.value;
+        this.saveChannelSetting(channel, key, value);
+      });
+    });
+
+    // 绑定图片上传事件
+    const imageInputs = document.querySelectorAll(`#settingsContent input[type="file"]`);
+    imageInputs.forEach(input => {
+      input.addEventListener('change', async (e) => {
+        const key = e.target.dataset.key;
+        const file = e.target.files[0];
+        if (file) {
+          try {
+            // 处理图片文件并保存到图片管理器
+            const storageKey = `${channel}-${key}`;
+            const imageData = await window.fileProcessor.processImageFile(file, storageKey, true);
+            
+            // 更新预览
+            this.updateImagePreview(channel, key, file);
+            
+            // 保存到本地存储
+            this.saveChannelImageToLocal(channel, key, imageData);
+            
+            // 通知主程序图片已上传
+            window.pluginComm.postMessage('channel-image-uploaded', {
+              channel: channel,
+              imageType: key,
+              imageData: {
+                data: Array.from(imageData.data), // 转换为数组以便传输
+                width: imageData.width,
+                height: imageData.height,
+                name: imageData.name,
+                type: imageData.type
+              }
+            });
+            
+            window.notificationSystem.show(`${key === 'eggBreaking' ? '砸蛋样式' : '尾版样式'}上传成功`, 'success');
+          } catch (error) {
+            console.error(`${channel}-${key} 图片上传失败:`, error);
+            window.notificationSystem.show(`图片上传失败: ${error.message}`, 'error');
+          }
+        }
+      });
+    });
+    
+    // 加载已保存的图片
+    this.loadSavedChannelImages(channel);
+  }
+
+  // 更新图片预览
+  updateImagePreview(channel, key, file) {
+    const previewElement = document.getElementById(`${channel}-${key}-preview`);
+    if (previewElement && file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewElement.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // 保存渠道设置
+  async saveChannelSetting(channel, key, value) {
+    try {
+      const storageKey = `channel-settings-${channel}`;
+      let settings = {};
+      
+      try {
+        const stored = await window.storageAdapter.getItem(storageKey);
+        if (stored) {
+          settings = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.warn('读取渠道设置失败，使用默认设置');
+      }
+      
+      settings[key] = value;
+      await window.storageAdapter.setItem(storageKey, JSON.stringify(settings));
+      
+      console.log(`${channel} 渠道设置已保存:`, { [key]: value });
+      
+    } catch (error) {
+      console.error('保存渠道设置失败:', error);
+      if (window.notificationSystem) {
+        window.notificationSystem.show('设置保存失败', 'error');
+      }
+    }
+  }
+
+  // 保存渠道图片到本地存储
+  async saveChannelImageToLocal(channel, imageType, imageData) {
+    const storageKey = `channel-image-${channel}-${imageType}`;
+    const imageInfo = {
+      data: Array.from(imageData.data),
+      width: imageData.width,
+      height: imageData.height,
+      name: imageData.name,
+      type: imageData.type,
+      timestamp: Date.now()
+    };
+    
+    try {
+      await window.storageAdapter.setItem(storageKey, JSON.stringify(imageInfo));
+      console.log(`${channel} ${imageType} 图片已保存到本地`);
+      
+      // 更新内存中的图片数据
+      if (!this.channelImages[channel]) {
+        this.channelImages[channel] = {};
+      }
+      this.channelImages[channel][imageType] = imageData;
+      
+      // 清理旧的图片数据（避免存储空间过满）
+      this.clearOldChannelImages();
+      
+    } catch (error) {
+      console.error('保存图片到本地失败:', error);
+      // 如果存储空间不足，尝试清理旧数据
+      if (error.name === 'QuotaExceededError') {
+        try {
+          await this.clearOldChannelImages();
+          await window.storageAdapter.setItem(storageKey, JSON.stringify(imageInfo));
+          console.log('清理后重新保存图片成功');
+        } catch (retryError) {
+          console.error('清理后仍然保存失败:', retryError);
+          if (window.notificationSystem) {
+            window.notificationSystem.show('存储空间不足，请清理浏览器缓存', 'error');
+          }
+        }
+      } else {
+        if (window.notificationSystem) {
+          window.notificationSystem.show('图片保存失败', 'error');
+        }
+      }
+    }
+  }
+
+  // 加载已保存的渠道图片
+  async loadSavedChannelImages(channel) {
+    const imageTypes = ['eggBreaking', 'footerStyle'];
+    
+    for (const imageType of imageTypes) {
+      try {
+        const storageKey = `channel-image-${channel}-${imageType}`;
+        const saved = await window.storageAdapter.getItem(storageKey);
+        
+        if (saved) {
+          const imageInfo = JSON.parse(saved);
+          const imageData = {
+            data: new Uint8Array(imageInfo.data),
+            width: imageInfo.width,
+            height: imageInfo.height,
+            name: imageInfo.name,
+            type: imageInfo.type
+          };
+          
+          // 保存到图片管理器
+          const managerKey = `${channel}-${imageType}`;
+          if (window.imageManager) {
+            window.imageManager.setModule(managerKey, imageData);
+          }
+          
+          // 更新预览
+          this.updateImagePreviewFromData(channel, imageType, imageData);
+          
+          // 更新内存中的图片数据
+          if (!this.channelImages[channel]) {
+            this.channelImages[channel] = {};
+          }
+          this.channelImages[channel][imageType] = imageData;
+          
+          console.log(`已加载 ${channel} ${imageType} 图片`);
+        }
+      } catch (error) {
+        console.error(`加载 ${channel} ${imageType} 图片失败:`, error);
+      }
+    }
+  }
+
+  // 清理旧的渠道图片数据
+  async clearOldChannelImages() {
+    try {
+      const MAX_STORAGE_SIZE = 50 * 1024 * 1024; // 50MB存储限制
+      const MAX_IMAGES_PER_CHANNEL_TYPE = 1; // 每个渠道每种类型最多保留1张图片
+      
+      const keys = await window.storageAdapter.getAllKeys();
+      const channelImageKeys = keys.filter(key => key.startsWith('channel-image-'));
+      
+      // 计算当前存储使用量
+      let totalSize = 0;
+      const allImageData = [];
+      
+      for (const key of channelImageKeys) {
+        try {
+          const data = await window.storageAdapter.getItem(key);
+          if (data) {
+            const parsed = JSON.parse(data);
+            const size = JSON.stringify(parsed).length * 2; // 估算字节大小
+            totalSize += size;
+            
+            allImageData.push({
+              key,
+              timestamp: parsed.timestamp || 0,
+              size,
+              channel: parsed.channel || 'unknown',
+              imageType: parsed.imageType || 'unknown'
+            });
+          }
+        } catch (error) {
+          console.warn(`解析图片数据失败: ${key}`, error);
+          // 删除损坏的数据
+          await window.storageAdapter.removeItem(key);
+        }
+      }
+      
+      console.log(`当前渠道图片存储使用量: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+      
+      let imagesToDelete = [];
+      
+      // 1. 基于渠道类型数量的清理：每个渠道每种类型只保留1张最新的
+      const channelTypeGroups = {};
+      
+      for (const imageData of allImageData) {
+        const groupKey = `${imageData.channel}-${imageData.imageType}`;
+        if (!channelTypeGroups[groupKey]) {
+          channelTypeGroups[groupKey] = [];
+        }
+        channelTypeGroups[groupKey].push(imageData);
+      }
+      
+      // 对每个组按时间戳排序，保留最新的1张，其余标记删除
+      for (const [groupKey, images] of Object.entries(channelTypeGroups)) {
+        if (images.length > MAX_IMAGES_PER_CHANNEL_TYPE) {
+          // 按时间戳降序排序（最新的在前）
+          images.sort((a, b) => b.timestamp - a.timestamp);
+          
+          // 保留最新的1张，其余删除
+          const toDelete = images.slice(MAX_IMAGES_PER_CHANNEL_TYPE);
+          imagesToDelete.push(...toDelete);
+          
+          console.log(`渠道类型 ${groupKey}: 保留1张最新图片，删除${toDelete.length}张旧图片`);
+        }
+      }
+      
+      // 2. 基于存储容量的清理：如果总容量超过限制，继续删除最旧的图片
+      if (totalSize > MAX_STORAGE_SIZE) {
+        const remainingImages = allImageData.filter(img => 
+          !imagesToDelete.some(delImg => delImg.key === img.key)
+        );
+        
+        // 按时间戳升序排序（最旧的在前）
+        remainingImages.sort((a, b) => a.timestamp - b.timestamp);
+        
+        let currentSize = totalSize - imagesToDelete.reduce((sum, img) => sum + img.size, 0);
+        
+        for (const imageData of remainingImages) {
+          if (currentSize <= MAX_STORAGE_SIZE) break;
+          
+          imagesToDelete.push(imageData);
+          currentSize -= imageData.size;
+          console.log(`容量清理: 删除图片 ${imageData.key} (${(imageData.size / 1024).toFixed(1)}KB)`);
+        }
+      }
+      
+      // 执行删除操作
+      let deletedCount = 0;
+      let deletedSize = 0;
+      
+      for (const imageData of imagesToDelete) {
+        try {
+          await window.storageAdapter.removeItem(imageData.key);
+          deletedCount++;
+          deletedSize += imageData.size;
+          console.log(`已删除旧图片: ${imageData.key}`);
+        } catch (error) {
+          console.error(`删除图片失败: ${imageData.key}`, error);
+        }
+      }
+      
+      const finalSize = totalSize - deletedSize;
+      console.log(`清理完成: 删除${deletedCount}张图片，释放${(deletedSize / 1024 / 1024).toFixed(2)}MB空间`);
+      console.log(`当前存储使用量: ${(finalSize / 1024 / 1024).toFixed(2)}MB`);
+      
+      return {
+        deletedCount,
+        deletedSize,
+        finalSize,
+        success: true
+      };
+      
+    } catch (error) {
+      console.error('清理旧图片失败:', error);
+      return {
+        deletedCount: 0,
+        deletedSize: 0,
+        finalSize: 0,
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // 从图片数据更新预览
+  updateImagePreviewFromData(channel, imageType, imageData) {
+    try {
+      const preview = document.getElementById(`${channel}-${imageType}-preview`);
+      if (preview && imageData) {
+        const blob = new Blob([imageData.data], { type: imageData.type });
+        const url = URL.createObjectURL(blob);
+        
+        preview.innerHTML = `<img src="${url}" alt="预览" onload="URL.revokeObjectURL(this.src)">`;
+      }
+    } catch (error) {
+      console.error('更新图片预览失败:', error);
+    }
+  }
+}
+
+// 创建全局渠道管理器实例
+const channelManager = new ChannelManager();
+
+// 导出供其他模块使用
+window.channelManager = channelManager;
+
+// 兼容性函数 - 供HTML onclick事件使用
+window.previewChannel = function(channel) {
+  channelManager.previewChannel(channel);
+};
+
+window.generateChannel = function(channel) {
+  channelManager.generateChannel(channel);
+};
+
+window.showChannelSettings = function(channel) {
+  channelManager.showChannelSettings(channel);
+};
+
+window.backToChannelsList = function() {
+  channelManager.backToChannelsList();
+}; 
+
+/* === image-uploader.js === */
+// ==================== 图片上传管理器模块 ====================
+
+// 图片上传处理类
+class ImageUploader {
+  init() {
+    this.bindImageUploaders();
+    this.bindModuleImageUploaders();
+  }
+  
+  bindImageUploaders() {
+    // 绑定基础图片上传
+    const uploaders = [
+      { id: 'pageBackground', key: 'pageBackground' },
+      { id: 'headerImage', key: 'headerImage' },
+      { id: 'titleUpload', key: 'titleUpload' },
+      { id: 'gameIconUpload', key: 'gameIcon' },
+      { id: 'iconButtonBgUpload', key: 'iconButtonBg' },
+      { id: 'singleButtonBgUpload', key: 'singleButtonBg' },
+      { id: 'leftButtonBgUpload', key: 'leftButtonBg' },
+      { id: 'rightButtonBgUpload', key: 'rightButtonBg' },
+      { id: 'footerLogoUpload', key: 'footerLogo' },
+      { id: 'footerBgUpload', key: 'footerBg' },
+      { id: 'rulesBgUpload', key: 'rulesBgImage' }
+    ];
+    
+    uploaders.forEach(uploader => {
+      const input = document.getElementById(uploader.id);
+      if (input) {
+        input.addEventListener('change', (e) => this.handleImageUpload(e, uploader.key));
+      }
+    });
+  }
+
+  handleImageUpload(e, storageKey) {
+    this.handleUpload(e.target, storageKey, false);
+  }      
+  
+  bindModuleImageUploaders() {
+    // 🔧 统一使用事件委托处理模块内的图片上传，避免重复绑定
+    document.addEventListener('change', (e) => {
+      if (e.target.type === 'file' && e.target.accept === 'image/*' && e.target.closest('.module')) {
+        // 防止重复处理
+        if (e.target.dataset.processing === 'true') return;
+        e.target.dataset.processing = 'true';
+        
+        // 异步处理完成后清除标记
+        setTimeout(() => {
+          e.target.dataset.processing = 'false';
+        }, 100);
+        
+        window.fileProcessor.handleModuleImageUpload(e);
+      }
+    });
+  }
+  
+  // 🚨 移除重复的bindModuleUploaders方法，使用统一的事件委托
+  
+  getModuleStorageKey(input, moduleId) {
+    const classMap = {
+      'derived-item-upload': `${moduleId}-titlebg`,
+      'nine-grid-bg': `${moduleId}-gridbg`,
+      'draw-btn': `${moduleId}-drawbtn`,
+      'prize-bg': `${moduleId}-prizebg`,
+      'sign-in-title-upload': `${moduleId}-title`,
+      'sign-in-bg-upload': `${moduleId}-bg`,
+      'day-icon-upload': `${moduleId}-dayicon`,
+      'sign-in-btn-upload': `${moduleId}-signbtn`,
+      'collect-title-upload': `${moduleId}-title`,
+      'collect-bg-upload': `${moduleId}-bg`,
+      'card-bg-upload': `${moduleId}-cardbg`,
+      'combine-button-upload': `${moduleId}-combinebtn`,
+      'activity-content-main-title-bg-upload': `${moduleId}-main-title-bg`,
+      'activity-content-sub-title-bg-upload': `${moduleId}-sub-title-bg`,
+      'activity-content-image-upload': `${moduleId}-image`,
+      'carousel-title-bg-upload': `${moduleId}-carousel-title-bg`,
+      'carousel-image-upload': `${moduleId}-carousel-image`,
+      'carousel-image-bg-upload': `${moduleId}-carousel-image-bg`,
+      'vertical-carousel-title-bg-upload': `${moduleId}-vertical-title-bg`,
+      'vertical-carousel-image-upload-1': `${moduleId}-vertical-image-1`,
+      'vertical-carousel-image-upload-2': `${moduleId}-vertical-image-2`,
+      'vertical-carousel-image-upload-3': `${moduleId}-vertical-image-3`
+    };
+    
+    // 特殊处理奖品图片上传
+    if (input.classList.contains('prize-upload')) {
+      const prizeIndex = this.getPrizeIndex(input);
+      return `${moduleId}-prize-${prizeIndex}`;
+    }
+    
+    for (const [className, key] of Object.entries(classMap)) {
+      if (input.classList.contains(className)) {
+        return key;
+      }
+    }
+    return null;
+  }
+  
+  // 获取奖品在九宫格中的索引
+  getPrizeIndex(input) {
+    const moduleEl = input.closest('.module');
+    if (!moduleEl) return 0;
+    
+    const prizeInputs = Array.from(moduleEl.querySelectorAll('.prize-upload'));
+    return prizeInputs.indexOf(input);
+  }
+  
+  async handleUpload(input, storageKey, isModule = false) {
+    if (!input.files?.[0]) return;
+    
+    console.log(`开始处理图片上传: ${storageKey}, 文件:`, input.files[0].name);
+    
+    try {
+      await window.fileProcessor.processImageFile(input.files[0], storageKey, isModule);
+      
+      // 更新预览
+      this.updatePreview(input, storageKey);
+      
+      // 验证图片是否正确存储
+      const storedData = isModule ? window.imageManager.getModule(storageKey) : window.imageManager.get(storageKey);
+      console.log(`图片存储验证 ${storageKey}:`, storedData ? '成功' : '失败');
+      
+      window.notificationSystem.show('图片上传成功', 'success');
+    } catch (error) {
+      console.error(`图片上传失败 ${storageKey}:`, error);
+      window.notificationSystem.show(`上传失败: ${error.message}`, 'error');
+    }
+  }
+  
+  updatePreview(input, storageKey) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewContainer = this.findPreviewContainer(input, storageKey);
+      if (previewContainer) {
+        this.renderPreview(previewContainer, e.target.result, storageKey);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+  
+  findPreviewContainer(input, storageKey) {
+    // 特殊处理游戏icon预览
+    if (storageKey === 'gameIcon') {
+      return document.getElementById('gameIconPreview');
+    }
+    
+    const uploadBtn = input.nextElementSibling;
+    if (!uploadBtn) return null;
+    
+    if (input.classList.contains('prize-upload')) {
+      return uploadBtn.querySelector('.preview-container');
+    }
+    
+    return uploadBtn.querySelector('.img-preview-inline');
+  }
+  
+  renderPreview(container, src, storageKey) {
+    container.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = "Preview";
+    
+    // 游戏icon使用特殊样式
+    if (storageKey === 'gameIcon') {
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:8px';
+      container.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+    } else {
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:8px';
+    }
+    
+    container.appendChild(img);
+    
+    // 更新按钮样式
+    const btn = container.closest('.upload-btn, .grid-btn');
+    if (btn) {
+      btn.style.border = '1px solid rgba(0, 113, 227, 0.5)';
+    }
+  }
+}
+
+// 创建全局图片上传管理器实例
+const imageUploader = new ImageUploader();
+
+// 导出供其他模块使用
+window.imageUploader = imageUploader; 
+
+/* === image-slice-handler.js === */
+// ==================== 图片切片处理器 ====================
+
+class ImageSliceHandler {
+  async handleSliceRequest(message) {
+    try {
+      const { imageData, sliceWidth, sliceHeight, sliceStrategy } = message;
+      
+      if (!imageData) {
+        throw new Error('缺少图片数据');
+      }
+      
+      console.log(`开始处理图片切片: ${imageData.name}`);
+      if (sliceStrategy) {
+        console.log(`使用智能切片策略: ${sliceStrategy.description}`);
+      }
+      
+      // 执行切片操作 - 传递策略计算的尺寸
+      const result = await window.fileProcessor.sliceLargeImage(imageData, sliceWidth, sliceHeight);
+      
+      if (!result || !result.slices || result.slices.length === 0) {
+        throw new Error('图片切片失败，未生成切片数据');
+      }
+      
+      console.log(`图片切片完成: ${imageData.name}, 生成 ${result.slices.length} 个切片`);
+      
+      // 🚨 修复：转换切片数据格式为插件可处理的格式
+      const processedSlices = result.slices.map((slice, index) => {
+        try {
+          return {
+            bytes: Array.from(slice.data), // 转换Uint8Array为Array
+            width: slice.width,
+            height: slice.height,
+            x: slice.x,
+            y: slice.y,
+            row: slice.row,
+            col: slice.col,
+            name: slice.name || `slice_${index}.png`
+          };
+        } catch (error) {
+          console.error(`处理切片 ${index} 数据时出错:`, error);
+          return null;
+        }
+      }).filter(slice => slice !== null); // 过滤掉处理失败的切片
+      
+      console.log(`成功处理 ${processedSlices.length}/${result.slices.length} 个切片`);
+      
+      // 发送成功响应
+      window.pluginComm.postMessage('slice-image-response', {
+        success: true,
+        imageName: imageData.name,
+        slices: processedSlices,
+        originalWidth: result.originalWidth,
+        originalHeight: result.originalHeight,
+        sliceWidth: result.sliceWidth,
+        sliceHeight: result.sliceHeight,
+        cols: result.cols,
+        rows: result.rows
+      });
+      
+    } catch (error) {
+      console.error('图片切片处理失败:', error);
+      
+      // 发送失败响应
+      window.pluginComm.postMessage('slice-image-response', {
+        success: false,
+        imageName: message.imageData?.name || '未知图片',
+        error: error.message
+      });
+    }
+  }
+}
+
+// 创建全局图片切片处理器实例并挂载到window对象
+window.imageSliceHandler = new ImageSliceHandler(); 
+
+/* === module-manager.js === */
+// ==================== 模块管理器模块 ====================
+
+class ModuleManager {
+  constructor() {
+    this.moduleCounter = 0;
+  }
+  
+  init() {
+    this.bindAddModuleEvent();
+    this.updateModuleCount();
+  }
+  
+  bindAddModuleEvent() {
+    const addBtn = document.getElementById('addModuleBtn');
+    const typeSelect = document.getElementById('moduleTypeSelect');
+    
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        const moduleType = typeSelect?.value;
+        if (moduleType) {
+          this.addModule(moduleType);
+        }
+      });
+    }
+  }
+  
+  addModule(moduleType) {
+    // 统一使用 moduleType + "Template" 的命名规则
+    const templateId = `${moduleType}Template`;
+    const template = document.getElementById(templateId);
+    
+    if (!template) {
+      console.error(`找不到模板: ${templateId}`);
+      window.notificationSystem.show(`模板 ${templateId} 不存在`, 'error');
+      return;
+    }
+    
+    // 创建新模块
+    this.moduleCounter++;
+    const moduleId = `module-${this.moduleCounter}`;
+    const newModule = template.cloneNode(true);
+    
+    newModule.id = moduleId;
+    newModule.className = 'module';
+    newModule.style.display = 'block';
+    
+    // 统一模块类型标识符
+    const moduleTypeMapping = {
+      'lotteryModule': 'nineGrid',
+      'signInModule': 'signIn', 
+      'collectModule': 'collectCards',
+      'activityContentModule': 'activityContent',
+      'carouselModule': 'carousel',
+      'verticalCarouselModule': 'verticalCarousel'
+    };
+    
+    newModule.dataset.moduleType = moduleTypeMapping[moduleType] || moduleType;
+    
+    this.bindModuleEvents(newModule);
+    
+    const container = document.getElementById('modulesContainer');
+    const emptyMessage = container.querySelector('.empty-modules-message');
+    if (emptyMessage) {
+      emptyMessage.style.display = 'none';
+    }
+    
+    container.appendChild(newModule);
+    
+    this.updateModuleCount();
+    
+    // 滚动到新模块
+    requestAnimationFrame(() => {
+      newModule.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    
+    // 触发模块添加事件
+    document.dispatchEvent(new CustomEvent('moduleAdded', { 
+      detail: { moduleId } 
+    }));
+  }
+  
+  // 模块类型映射
+  getModuleTypeMapping(templateType) {
+    const typeMap = {
+      'lotteryModule': 'nineGrid',
+      'signInModule': 'signIn', 
+      'collectModule': 'collectCards',
+      'activityContentModule': 'activityContent',
+      'carouselModule': 'carousel',
+      'verticalCarouselModule': 'verticalCarousel'
+    };
+    return typeMap[templateType] || templateType;
+  }
+  
+  bindModuleEvents(moduleEl) {
+    const deleteBtn = moduleEl.querySelector('.delete-btn');
+    const collapseBtn = moduleEl.querySelector('.collapse-btn');
+    const moveUpBtn = moduleEl.querySelector('.move-up-btn');
+    const moveDownBtn = moduleEl.querySelector('.move-down-btn');
+    
+    // 为删除按钮添加事件监听器
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // 阻止默认行为
+        e.stopPropagation(); // 阻止事件冒泡
+        this.deleteModule(moduleEl); // 调用删除模块方法
+      });
+    }
+    
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        moduleEl.classList.toggle('module-collapsed');
+        collapseBtn.classList.toggle('collapsed');
+      });
+    }
+    
+    if (moveUpBtn) {
+      moveUpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.moveModuleUp(moduleEl);
+      });
+    }
+    
+    if (moveDownBtn) {
+      moveDownBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.moveModuleDown(moduleEl);
+      });
+    }
+    
+    // 绑定图片上传事件
+    this.bindModuleImageUploads(moduleEl);
+  }     
+
+  // 绑定模块内的图片上传事件
+  bindModuleImageUploads(moduleEl) {
+    const imageInputs = moduleEl.querySelectorAll('input[type="file"][accept="image/*"]');
+    imageInputs.forEach(input => {
+      // 移除现有的事件监听器（如果有）
+      const newInput = input.cloneNode(true);
+      input.parentNode.replaceChild(newInput, input);
+      
+      // 重新绑定 onchange 事件
+      if (newInput.classList.contains('prize-upload')) {
+        newInput.addEventListener('change', () => window.utilityFunctions.previewImage(newInput));
+      } else {
+        // 对于其他类型的图片上传，使用标准预览函数
+        newInput.addEventListener('change', () => {
+          const previewContainer = newInput.nextElementSibling?.querySelector('.img-preview-inline');
+          if (previewContainer) {
+            window.utilityFunctions.previewImage(newInput, previewContainer);
+          }
+        });
+      }
+    });
+  }
+  
+  deleteModule(moduleEl) {
+    if (confirm('确定要删除这个模块吗？')) {
+      const moduleId = moduleEl.id;
+      
+      // 一步完成：DOM + 数据 + 更新
+      moduleEl.remove();
+      this.cleanupModuleData(moduleId);
+      this.updateModuleCount();
+    }
+  }
+  
+  // 极简高效清理
+  cleanupModuleData(moduleId) {
+    if (!moduleId || !window.imageManager?.moduleData) return;
+    
+    // 直接过滤重建，比逐个删除更高效
+    const newData = {};
+    for (const key in window.imageManager.moduleData) {
+      if (!key.startsWith(moduleId)) {
+        newData[key] = window.imageManager.moduleData[key];
+      }
+    }
+    window.imageManager.moduleData = newData;
+  }
+  
+  moveModuleUp(moduleEl) {
+    const prevModule = moduleEl.previousElementSibling;
+    if (prevModule && !prevModule.classList.contains('empty-modules-message')) {
+      moduleEl.parentNode.insertBefore(moduleEl, prevModule);
+    }
+  }
+  
+  moveModuleDown(moduleEl) {
+    const nextModule = moduleEl.nextElementSibling;
+    if (nextModule) {
+      moduleEl.parentNode.insertBefore(nextModule, moduleEl);
+    }
+  }
+  
+  updateModuleCount() {
+    const counter = document.getElementById('moduleCounter');
+    const modules = document.querySelectorAll('#modulesContainer .module');
+    const emptyMessage = document.getElementById('emptyModulesMessage');
+    
+    if (counter) {
+      counter.textContent = modules.length;
+    }
+    
+    // 显示或隐藏空状态消息
+    if (emptyMessage) {
+      emptyMessage.style.display = modules.length === 0 ? 'block' : 'none';
+    }
+  }
+}
+
+// 创建全局模块管理器实例
+const moduleManager = new ModuleManager();
+
+// 导出供其他模块使用
+window.moduleManager = moduleManager; 
+
+/* === form-resetter.js === */
+// ==================== 表单重置器模块 ====================
+
+class FormResetter {
+  resetAll() {
+    try {
+      console.log('开始重置表单...');
+      
+      // 1. 清理图片管理器数据
+      if (window.imageManager) {
+        window.imageManager.clear();
+      }
+      
+      // 2. 立即重置表单输入
+      this.resetInputs();
+      
+      // 3. 立即重置模块
+      this.resetModules();
+      
+      // 4. 立即重置预览
+      this.resetPreviews();
+      
+      console.log('表单重置完成');
+      return true;
+    } catch (error) {
+      console.error('重置过程中发生错误:', error);
+      window.notificationSystem.show('重置时发生错误，请刷新页面', 'error');
+      return false;
+    }
+  }
+  
+  resetInputs() {
+    try {
+      // 立即重置所有输入，保持原有功能
+      // 重置文本输入框
+      document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+        input.value = '';
+      });
+      
+      // 重置文件输入框
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.value = '';
+      });
+      
+      // 重置颜色输入框到默认值
+      const colorDefaults = {
+        '#pageColor': '#D9D9D9',
+        '#gameCopyTextColor': '#FFFFFF',
+        '#iconButtonTextColor': '#FFFFFF',
+        '#singleButtonTextColor': '#FFFFFF',
+        '#leftButtonTextColor': '#FFFFFF',
+        '#rightButtonTextColor': '#FFFFFF'
+      };
+      
+      for (const [selector, defaultValue] of Object.entries(colorDefaults)) {
+        const colorInput = document.querySelector(selector);
+        if (colorInput) {
+          colorInput.value = defaultValue;
+          const textInput = colorInput.nextElementSibling;
+          if (textInput && textInput.classList.contains('color-value')) {
+            textInput.value = defaultValue;
+          }
+        }
+      }
+      
+      // 重置选择框
+      document.querySelectorAll('select').forEach(select => {
+        if (select.options.length > 0) {
+          select.selectedIndex = 0;
+        }
+      });
+      
+      // 重置数字输入框
+      document.querySelectorAll('input[type="number"]').forEach(input => {
+        const defaultValue = input.getAttribute('placeholder') || '0';
+        input.value = defaultValue;
+      });
+      
+      // 立即处理按钮版本选择器
+      const buttonVersionSelect = document.getElementById('buttonVersionSelect');
+      if (buttonVersionSelect) {
+        buttonVersionSelect.selectedIndex = 0;
+        window.utilityFunctions.switchButtonVersion(); // 直接调用函数而不是触发事件
+      }
+      
+      console.log('输入字段重置完成');
+    } catch (error) {
+      console.error('重置输入字段失败:', error);
+      throw error;
+    }
+  }
+  
+  reinitializeComponents() {
+    try {
+      console.log('重新初始化组件...');
+      
+      // 只重新绑定必要的颜色输入事件，不克隆DOM节点
+      this.rebindColorInputs();
+      
+      console.log('组件重新初始化完成');
+    } catch (error) {
+      console.error('组件重新初始化失败:', error);
+    }
+  }
+  
+  // 高效重新绑定颜色输入事件
+  rebindColorInputs() {
+    document.querySelectorAll('.color-input-group').forEach(group => {
+      const colorInput = group.querySelector('input[type="color"]');
+      const textInput = group.querySelector('.color-value');
+      
+      if (colorInput && textInput && !colorInput.dataset.bound) {
+        // 标记已绑定，避免重复绑定
+        colorInput.dataset.bound = 'true';
+        textInput.dataset.bound = 'true';
+        
+        // 直接绑定事件，不克隆节点
+        colorInput.addEventListener('input', () => {
+          textInput.value = colorInput.value.toUpperCase();
+        });
+        
+        textInput.addEventListener('input', () => {
+          if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+            colorInput.value = textInput.value;
+          }
+        });
+      }
+    });
+  }
+  
+  resetModules() {
+    const container = document.getElementById('modulesContainer');
+    if (container) {
+      // 直接移除所有模块，不使用动画
+      const modules = container.querySelectorAll('.module');
+      modules.forEach(module => module.remove());
+      
+      // 延迟清理模块数据，避免阻塞UI
+      setTimeout(() => {
+        if (window.imageManager && window.imageManager.moduleData) {
+          window.imageManager.moduleData = {};
+        }
+      }, 50);
+      
+      // 立即更新模块计数
+      if (window.moduleManager) {
+        window.moduleManager.updateModuleCount();
+      }
+    }
+  }
+  
+  resetPreviews() {
+    // 批量重置预览
+    const previews = document.querySelectorAll('.img-preview-inline, .preview-container');
+    previews.forEach(preview => {
+      preview.innerHTML = '<span class="upload-icon-inline">+</span>';
+    });
+    
+    // 特殊处理游戏icon预览
+    const gameIconPreview = document.getElementById('gameIconPreview');
+    if (gameIconPreview) {
+      gameIconPreview.innerHTML = '<span class="upload-icon-text">+</span>';
+    }
+    
+    // 批量重置按钮样式
+    document.querySelectorAll('.upload-btn, .grid-btn').forEach(btn => {
+      btn.style.border = '';
+    });
+  }
+}
+
+// 创建全局表单重置器实例
+const formResetter = new FormResetter();
+
+// 导出供其他模块使用
+window.formResetter = formResetter; 
+
+/* === ui-controller.js === */
+// ==================== UI 控制器模块 ====================
+
+class UIController {
+  constructor() {
+    this.initialized = false;
+    this.eventListeners = new Map();
+  }
+  
+  init() {
+    if (this.initialized) return;
+    
+    this.initializeComponents();
+    this.bindEvents();
+    this.initialized = true;
+  }
+  
+  // 初始化组件
+  initializeComponents() {
+    this.initializeTabs();
+    this.initializeModuleManagement();
+    this.initializeImageUploaders();
+    this.initializeThemeSystem();
+    this.initializeColorPickers();
+    this.initializeCollapsiblePanels();
+  }
+  
+  // 绑定事件
+  bindEvents() {
+    this.bindTabEvents();
+    this.bindButtonEvents();
+    this.bindVersionSelectorEvents();
+  }
+  
+  // 初始化标签页
+  initializeTabs() {
+    const activeTab = document.querySelector('.tab.active');
+    if (!activeTab) {
+      const firstTab = document.querySelector('.tab');
+      if (firstTab) {
+        firstTab.classList.add('active');
+        this.showTabContent(firstTab.dataset.tab);
+      }
+    } else {
+      this.showTabContent(activeTab.dataset.tab);
+    }
+  }
+  
+  // 显示标签页内容
+  showTabContent(tabId) {
+    // 隐藏所有内容
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    
+    // 显示目标内容
+    const targetContent = document.getElementById(`${tabId}-content`);
+    if (targetContent) {
+      targetContent.classList.add('active');
+    }
+  }
+  
+  // 绑定标签页事件
+  bindTabEvents() {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.showTabContent(tab.dataset.tab);
+      });
+    });
+  }
+  
+  // 初始化模块管理
+  initializeModuleManagement() {
+    if (window.moduleManager) {
+      window.moduleManager.init();
+    }
+  }
+  
+  // 初始化图片上传
+  initializeImageUploaders() {
+    if (window.imageUploader) {
+      window.imageUploader.init();
+    }
+  }
+  
+  // 初始化主题系统
+  initializeThemeSystem() {
+    if (window.themeManager) {
+      window.themeManager.init();
+    }
+  }
+  
+  // 初始化颜色选择器
+  initializeColorPickers() {
+    const colorInputs = document.querySelectorAll('input[type="color"]');
+    colorInputs.forEach(colorInput => {
+      const textInput = colorInput.nextElementSibling;
+      if (textInput && textInput.classList.contains('color-value')) {
+        this.syncColorInputs(colorInput, textInput);
+      }
+    });
+  }
+  
+  // 同步颜色输入
+  syncColorInputs(colorInput, textInput) {
+    colorInput.addEventListener('input', () => {
+      textInput.value = colorInput.value.toUpperCase();
+    });
+    
+    textInput.addEventListener('input', () => {
+      if (/^#[0-9A-F]{6}$/i.test(textInput.value)) {
+        colorInput.value = textInput.value;
+      }
+    });
+  }
+  
+  // 初始化折叠面板
+  initializeCollapsiblePanels() {
+    const collapseButtons = document.querySelectorAll('.collapse-btn');
+    collapseButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetId = button.getAttribute('data-target');
+        const contentElement = document.getElementById(targetId);
+        
+        if (contentElement) {
+          button.classList.toggle('collapsed');
+          contentElement.classList.toggle('collapsed');
+        }
+      });
+    });
+  }
+  
+  // 绑定按钮事件
+  bindButtonEvents() {
+    const createBtn = document.getElementById('create');
+    const resetBtn = document.getElementById('reset');
+    
+    if (createBtn) {
+      createBtn.addEventListener('click', () => this.handleCreatePrototype());
+    }
+    
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => this.handleReset());
+    }
+  }
+  
+  // 绑定版本选择器事件
+  bindVersionSelectorEvents() {
+    const selector = document.getElementById('buttonVersionSelect');
+    if (selector) {
+      selector.addEventListener('change', (e) => {
+        const contents = document.querySelectorAll('#buttonVersionContent .version-content');
+        contents.forEach(content => content.classList.remove('active'));
+        
+        const targetContent = document.getElementById(`${e.target.value}Content`);
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+      });
+    }
+  }
+  
+  // 处理创建原型
+  handleCreatePrototype() {
+    const createBtn = document.getElementById('create');
+    if (!createBtn) return;
+    
+    createBtn.disabled = true;
+    createBtn.textContent = '处理中...';
+    
+    try {
+      const config = window.dataCollector.collectFormData();
+      window.pluginComm.postMessage('create-prototype', { config });
+    } catch (error) {
+      window.notificationSystem.show(`创建失败: ${error.message}`, 'error');
+      this.resetCreateButton();
+    }
+  }
+  
+  // 处理重置
+  handleReset() {
+    if (!confirm('确定要重置所有设置吗？此操作无法撤销。')) {
+      return;
+    }
+    
+    try {
+      console.log('开始执行重置操作...');
+      
+      const success = window.formResetter.resetAll();
+      
+      if (success) {
+        // 通知插件重置已完成
+        window.pluginComm.postMessage('reset-complete', {});
+        window.notificationSystem.show('所有设置已重置', 'success');
+        console.log('重置操作完成');
+      } else {
+        window.notificationSystem.show('重置失败，请重试', 'error');
+      }
+    } catch (error) {
+      console.error('重置操作失败:', error);
+      window.notificationSystem.show(`重置失败: ${error.message}`, 'error');
+    }
+  }
+  
+  // 重置创建按钮
+  resetCreateButton() {
+    const createBtn = document.getElementById('create');
+    if (createBtn) {
+      createBtn.textContent = '创建原型';
+      createBtn.disabled = false;
+    }
+  }
+}
+
+// 创建全局UI控制器实例
+const uiController = new UIController();
+
+// 导出供其他模块使用
+window.uiController = uiController; 
+
+/* === app.js === */
+// ==================== 主应用初始化和消息处理 ====================
+
+// 应用初始化状态
+const AppState = {
+  initialized: false,
+  initializationPromise: null
+};
+
+// 等待所有模块加载完成后初始化
+function waitForModules() {
+  return new Promise((resolve) => {
+    let attempts = 0;
+    const maxAttempts = 100; // 最多等待1秒
+    
+    const checkModules = () => {
+      attempts++;
+      
+      // 检查关键模块是否已加载
+      const coreModules = [
+        'pluginComm', 'notificationSystem', 'uiController', 
+        'dataCollector', 'utilityFunctions'
+      ];
+      
+      const missingModules = coreModules.filter(module => !window[module]);
+      
+      if (missingModules.length === 0) {
+        console.log('✅ 所有核心模块加载完成');
+        resolve();
+      } else if (attempts >= maxAttempts) {
+        console.warn('⚠️ 模块加载超时，但继续初始化:', missingModules);
+        resolve(); // 即使有模块缺失也继续初始化
+      } else {
+        setTimeout(checkModules, 10);
+      }
+    };
+    checkModules();
+  });
+}
+
+// 注册消息处理器
+function registerMessageHandlers() {
+  window.pluginComm.on('init', (message) => {
+    console.log('插件初始化:', message.data);
+  });
+
+  window.pluginComm.on('prototype-created', () => {
+    window.notificationSystem.show('原型创建成功！', 'success');
+    window.uiController.resetCreateButton();
+  });
+
+  window.pluginComm.on('error', (message) => {
+    console.error('操作失败:', message);
+    
+    // 隐藏加载状态
+    window.notificationSystem.hideLoading();
+    
+    // 显示详细错误信息
+    const errorMsg = message.message || '未知错误';
+    window.notificationSystem.show(`操作失败: ${errorMsg}`, 'error');
+    
+    // 重置创建按钮状态
+    window.uiController.resetCreateButton();
+    
+    // 可选：记录错误日志或发送错误报告
+    if (message.details) {
+      console.error('错误详情:', message.details);
+    }
+    
+    // 可选：根据错误类型提供不同的用户提示
+    if (message.errorType === 'validation') {
+      window.notificationSystem.show('请检查输入的数据是否完整', 'warning', 3000);
+    } else if (message.errorType === 'network') {
+      window.notificationSystem.show('网络连接异常，请稍后重试', 'warning', 3000);
+    }
+  });
+
+  window.pluginComm.on('save-success', () => {
+    window.notificationSystem.show('配置已保存', 'success');
+  });
+
+  window.pluginComm.on('load-config-success', (message) => {
+    if (message.config) {
+      // TODO: 实现配置加载逻辑
+      window.notificationSystem.show('配置加载成功', 'success');
+    }
+  });
+
+  window.pluginComm.on('reset-acknowledged', (message) => {
+    console.log('插件确认重置完成:', message.message);
+  });
+
+  window.pluginComm.on('pong', (message) => {
+    console.log('插件连接正常:', message.message);
+  });
+
+  // 渠道生成成功处理
+  window.pluginComm.on('channel-version-generated', (message) => {
+    console.log('渠道版本生成成功:', message.message);
+    window.notificationSystem.hideLoading();
+    window.notificationSystem.show(message.message, 'success');
+  });
+}
+
+// 初始化应用 (全局函数，供global-init.js调用)
+window.initializeApp = async function() {
+  // 防止重复初始化
+  if (AppState.initialized || window._h5ToolsInitialized) {
+    console.log('⚠️ 应用已经初始化，跳过重复初始化');
+    return;
+  }
+
+  // 如果正在初始化，等待完成
+  if (AppState.initializationPromise) {
+    console.log('⚠️ 应用正在初始化，等待完成...');
+    await AppState.initializationPromise;
+    return;
+  }
+
+  try {
+    // 设置初始化Promise
+    AppState.initializationPromise = (async () => {
+    console.log('🚀 开始初始化H5Tools应用...');
+    
+    // 等待所有模块加载完成
+    await waitForModules();
+    
+    // 注册消息处理器
+    registerMessageHandlers();
+    
+    // 🎯 强制显示UI内容 - 修复空白页面问题
+    forceShowUI();
+    
+    // 初始化UI控制器
+    if (window.uiController) {
+    window.uiController.init();
+    } else {
+      console.warn('⚠️ UIController未加载，使用备用初始化');
+      fallbackUIInit();
+    }
+    
+    // 设置全局事件监听器
+    setupEventListeners();
+    
+    // 初始化主题系统（可选）
+    initializeThemeSystem();
+    
+    console.log('✅ H5Tools应用初始化完成');
+    
+      // 发送初始化完成消息（确保只发送一次）
+      if (window.pluginComm && !AppState.initialized) {
+      window.pluginComm.postMessage('ui-ready', { timestamp: Date.now() });
+    }
+    
+      // 标记初始化完成
+      AppState.initialized = true;
+      window._h5ToolsInitialized = true; // 🔒 设置全局完成标志
+      window._h5ToolsInitializing = false; // 清除正在初始化标志
+    })();
+
+    await AppState.initializationPromise;
+  } catch (error) {
+    console.error('❌ 应用初始化失败:', error);
+    // 即使初始化失败，也尝试显示基础UI
+    forceShowUI();
+    // 重置初始化状态，允许重试
+    AppState.initialized = false;
+    AppState.initializationPromise = null;
+    window._h5ToolsInitializing = false; // 清除正在初始化标志
+  }
+};
+
+// 🚨 强制显示UI内容 - 解决空白页面问题
+function forceShowUI() {
+  console.log('🔧 强制显示UI内容...');
+  
+  // 确保第一个标签页激活
+  const firstTab = document.querySelector('.tab');
+  if (firstTab && !document.querySelector('.tab.active')) {
+    firstTab.classList.add('active');
+    console.log('✅ 激活第一个标签页:', firstTab.dataset.tab);
+  }
+  
+  // 显示对应的内容区域
+  const activeTab = document.querySelector('.tab.active');
+  if (activeTab) {
+    const tabId = activeTab.dataset.tab;
+    const content = document.getElementById(`${tabId}-content`);
+    if (content) {
+      // 隐藏所有内容
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      // 显示目标内容
+      content.classList.add('active');
+      console.log('✅ 显示标签页内容:', tabId);
+    }
+  }
+  
+  // 确保必要的元素可见
+  const channelsMainView = document.getElementById('channelsMainView');
+  if (channelsMainView) {
+    channelsMainView.style.display = 'block';
+    console.log('✅ 显示渠道主视图');
+  }
+}
+
+// 备用UI初始化
+function fallbackUIInit() {
+  console.log('🔧 执行备用UI初始化...');
+  
+  // 基础标签页切换
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // 显示对应内容
+      const tabId = tab.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const content = document.getElementById(`${tabId}-content`);
+      if (content) {
+        content.classList.add('active');
+      }
+    });
+  });
+  
+  console.log('✅ 备用UI初始化完成');
+}
+
+// 设置事件监听器
+function setupEventListeners() {
+  try {
+    if (window.utilityFunctions) {
+    document.addEventListener('click', window.utilityFunctions.globalClickHandler);
+    document.addEventListener('change', window.utilityFunctions.globalChangeHandler);
+    document.addEventListener('input', window.utilityFunctions.globalInputHandler);
+    }
+  } catch (error) {
+    console.warn('⚠️ 全局事件监听器设置失败:', error);
+  }
+}
+    
+    // 初始化主题系统
+function initializeThemeSystem() {
+  try {
+    if (window.utilityFunctions) {
+    // 注意：已移除主题缓存机制，直接应用系统主题
+    window.utilityFunctions.detectAndApplySystemTheme();
+    window.utilityFunctions.setupSystemThemeListener();
+    window.utilityFunctions.bindThemeButtonEvents();
+    }
+  } catch (error) {
+    console.warn('⚠️ 主题系统初始化失败:', error);
+  }
+}
+
+// 注意：DOM事件监听器和兼容性函数现在在global-init.js中处理
+
+
+/* === global-init.js === */
+// ==================== 全局实例化和初始化管理 ====================
+
+/* eslint-disable no-undef */
+// 注意：以下类由其他文件在构建时提供，ESLint无法检测到定义
+
+// === 全局实例化代码 ===
+
+// 创建全局数据收集器实例
+window.dataCollector = new DataCollector();
+
+// 创建全局图片数据管理器实例  
+window.imageDataManager = new ImageDataManager();
+
+// 🚨 向后兼容：为imageManager创建别名
+window.imageManager = window.imageDataManager;
+
+// 创建全局渠道管理器实例
+window.channelManager = new ChannelManager();
+
+// 创建全局图片上传器实例
+window.imageUploader = new ImageUploader();
+
+// 创建全局图片切片处理器实例
+window.imageSliceHandler = new ImageSliceHandler();
+
+// 创建全局模块管理器实例
+window.moduleManager = new ModuleManager();
+
+// 创建全局表单重置器实例
+window.formResetter = new FormResetter();
+
+// 创建全局UI控制器实例
+window.uiController = new UIController();
+
+// 创建全局主题管理器实例
+window.themeManager = new ThemeManager();
+
+// 创建全局文件处理器实例
+window.fileProcessor = new FileProcessor();
+
+// 创建全局工具函数对象（已移除loadThemePreference）
+window.utilityFunctions = {
+  switchTab,
+  switchButtonVersion,
+  createPrototype,
+  getImageData,
+  collectModuleData,
+  collectModuleContent,
+  collectNineGridData,
+  collectSignInData,
+  collectCardsData,
+  collectActivityContentData,
+  getPrizePosition,
+  previewImage,
+  setupSystemThemeListener,
+  detectAndApplySystemTheme,
+  applyTheme,
+  updateThemeButtonsState,
+  switchTheme,
+  bindThemeButtonEvents,
+  globalClickHandler,
+  globalChangeHandler,
+  globalInputHandler,
+  handleFileUpload,
+  resetForm
+};
+
+console.log('✅ 所有全局实例创建完成:', {
+  storageAdapter: !!window.storageAdapter,
+  pluginComm: !!window.pluginComm,
+  notificationSystem: !!window.notificationSystem,
+  dataCollector: !!window.dataCollector,
+  imageManager: !!window.imageManager,
+  channelManager: !!window.channelManager,
+  imageUploader: !!window.imageUploader,
+  imageSliceHandler: !!window.imageSliceHandler,
+  moduleManager: !!window.moduleManager,
+  formResetter: !!window.formResetter,
+  uiController: !!window.uiController,
+  themeManager: !!window.themeManager,
+  fileProcessor: !!window.fileProcessor,
+  utilityFunctions: !!window.utilityFunctions,
+  IconManager: !!window.IconManager
+});
+
+
+
+// 🚨 重要：触发插件通信器就绪事件（告知内联脚本）
+if (window.pluginComm) {
+  // 在全局窗口对象上设置标志
+  window._h5ToolsPluginCommReady = true;
+  
+  // 触发自定义事件
+  const event = new CustomEvent('h5ToolsReady', {
+    detail: { 
+      pluginCommReady: true,
+      timestamp: Date.now(),
+      modules: Object.keys(window).filter(k => k.includes('Comm') || k.includes('Manager'))
+    }
+  });
+  window.dispatchEvent(event);
+  
+  console.log('🎯 插件通信器就绪事件已触发');
+}
+
+// 兼容性函数 - 保持向后兼容
+window.collectFormData = function() {
+  return window.dataCollector ? window.dataCollector.collectFormData() : null;
+};
+
+window.postMessageToPlugin = function(type, data) {
+  if (window.pluginComm) {
+    window.pluginComm.postMessage(type, data);
+  }
+};
+
+window.showNotification = function(message, type) {
+  if (window.notificationSystem) {
+    window.notificationSystem.show(message, type);
+  }
+};
+
+// 🚨 关键修复：确保在DOM加载完成且所有实例创建后才初始化应用
+function safeInitializeApp() {
+  console.log('🔧 安全初始化应用...');
+  
+  // 🔒 全局初始化锁 - 防止重复初始化
+  if (window._h5ToolsInitializing || window._h5ToolsInitialized) {
+    console.log('⚠️ 应用已经初始化或正在初始化，跳过重复调用');
+    return;
+  }
+  
+  // 设置初始化标志
+  window._h5ToolsInitializing = true;
+  
+  // 直接调用初始化，此时所有实例都已创建
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!window._h5ToolsInitialized) {
+        window.initializeApp();
+      }
+    });
+  } else {
+    // DOM已经加载完成，直接初始化
+    // 使用setTimeout确保当前执行栈完成后再初始化
+    setTimeout(() => {
+      if (!window._h5ToolsInitialized) {
+        window.initializeApp();
+      }
+    }, 0);
+  }
+}
+
+// 调用安全初始化
+safeInitializeApp();
+
+// 🎯 立即初始化标签页切换功能（不等待其他模块）
+(function immediateTabInit() {
+  // 防止重复初始化
+  if (window._h5ToolsTabsInitialized) {
+    console.log('⚠️ 标签页已经初始化，跳过重复初始化');
+    return;
+  }
+  
+  const initTabs = () => {
+    const tabs = document.querySelectorAll('.tab');
+    if (tabs.length === 0) {
+      // DOM可能还没有完全加载，延迟重试（最多重试5次）
+      if (!initTabs.retryCount) initTabs.retryCount = 0;
+      if (initTabs.retryCount < 5) {
+        initTabs.retryCount++;
+        setTimeout(initTabs, 100);
+      }
+      return;
+    }
+    
+    // 标记标签页已初始化
+    window._h5ToolsTabsInitialized = true;
+    
+    tabs.forEach(tab => {
+      // 检查是否已经绑定过事件
+      if (tab.dataset.tabHandlerBound === 'true') {
+        return; // 已经绑定过，跳过
+      }
+      
+      // 标记已绑定
+      tab.dataset.tabHandlerBound = 'true';
+      
+      // 创建新的事件处理器
+      tab._tabClickHandler = () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const tabId = tab.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const content = document.getElementById(`${tabId}-content`);
+        if (content) {
+          content.classList.add('active');
+        }
+        
+        console.log(`✅ 标签页切换到: ${tabId}`);
+      };
+      
+      // 绑定事件
+      tab.addEventListener('click', tab._tabClickHandler);
+    });
+    
+    console.log('✅ 立即标签页切换功能已初始化');
+  };
+  
+  // 立即尝试初始化
+  initTabs();
+})(); 
+
 
 </script>
 </body>

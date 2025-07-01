@@ -10,7 +10,6 @@
     "build:core": "cd src/core && npm run build",
     "build:plugin": "rollup -c rollup.config.js",
     "build:separate": "npm run build:core && npm run build:plugin",
-    "test:cdn": "node -e \"console.log('https://cdn.jsdelivr.net/gh/kw-96/H5Tools@main/dist/styles.min.css')\"",
     "dev": "rollup -c rollup.config.js --watch",
     "dev:core": "cd src/core && npm run dev",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules --ignore-pattern dist .",

@@ -19,6 +19,7 @@ export var ModuleType;
     ModuleType["COLLECT_CARDS"] = "collectCards";
     ModuleType["NINE_GRID"] = "nineGrid";
     ModuleType["CAROUSEL"] = "carousel";
+    ModuleType["VERTICAL_CAROUSEL"] = "verticalCarousel";
     ModuleType["RULES"] = "rules";
     ModuleType["CUSTOM"] = "custom";
 })(ModuleType || (ModuleType = {}));

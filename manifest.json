@@ -10,11 +10,7 @@
   ],
   "networkAccess": {
     "allowedDomains": [
-      "https://www.w3.org/2000/svg",
-      "https://fonts.googleapis.com",
-      "https://fonts.gstatic.com",
-      "https://cdn.jsdelivr.net",
-      "https://raw.githubusercontent.com"
+      "https://www.w3.org/2000/svg"
     ]
   }
 } 

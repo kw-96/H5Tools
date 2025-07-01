@@ -9,34 +9,20 @@
   {{EXTERNAL_CSS_LINK}}
 </head>
 <body>
-  <!-- SVG Sprite定义 -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
-
-    <!-- 模块控制图标 -->
-    <symbol id="icon-move-up" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+  <!-- SVG Sprite 定义 -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-chevron" viewBox="0 0 16 11">
+      <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z"/>
+    </symbol>
+    <symbol id="icon-move-up" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
     </symbol>
-
-    <symbol id="icon-move-down" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <symbol id="icon-move-down" viewBox="0 0 16 16">
       <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
     </symbol>
-
-    <symbol id="icon-collapse" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-    </symbol>
-
-    <symbol id="icon-delete" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <symbol id="icon-delete" viewBox="0 0 16 16">
       <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
       <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-    </symbol>
-
-    <!-- 其他图标 -->
-    <symbol id="icon-back" width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M10 12l-4-4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </symbol>
-
-    <symbol id="icon-chevron" width="12" height="7" fill="currentColor" viewBox="0 0 16 11" >
-      <path d="M0.130121 2.33086L7.44223 9.90667C7.67195 10.1374 8.03601 10.151 8.28153 9.94739L8.32611 9.90667L15.8682 2.3312C15.8992 2.29996 15.9167 2.25768 15.9167 2.21361V0.910808C15.9167 0.81876 15.8421 0.744141 15.75 0.744141C15.7057 0.744141 15.6632 0.7618 15.6319 0.793213L7.90908 8.54978L0.369491 0.801243C0.3053 0.735272 0.199782 0.73383 0.133811 0.798022C0.101565 0.829398 0.083374 0.87248 0.083374 0.917472V2.21512C0.083374 2.2583 0.100133 2.29979 0.130121 2.33086Z" fill="currentColor"/>
     </symbol>
   </svg>
 
@@ -151,7 +137,9 @@
           </div>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="buttonVersionContent" title="折叠/展开游戏信息板块" aria-label="折叠/展开游戏信息板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -325,6 +313,7 @@
               <option value="collectModule">集卡模块</option>
               <option value="activityContentModule">活动详情</option>
               <option value="carouselModule">图片轮播（横版）</option>
+              <option value="verticalCarouselModule">图片轮播（竖版）</option>
             </select>
             </div>
           </div>
@@ -361,16 +350,24 @@
             <div class="module-title">九宫格抽奖</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -539,16 +536,24 @@
             <div class="module-title">图片轮播（横版）</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -556,14 +561,14 @@
             <!-- 标题文案 -->
             <div class="form-group row-layout">
               <label>标题</label>
-              <input type="text" class="carousel-title-input text-input" placeholder="请输入标题文本">
+              <input type="text" name="carousel-title" class="carousel-title-input text-input" placeholder="请输入标题文本">
             </div>
             
             <!-- 标题背景 -->
             <div class="form-group row-layout">
               <label class="non-interactive-label">标题背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-title-bg-upload hidden-file-input" accept="image/*" title="选择标题背景图片" aria-label="标题背景图片上传">
+                <input type="file" class="carousel-title-bg-upload" data-storage-key="carousel-title-bg" accept="image/*" style="display:none">
                 <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
@@ -576,8 +581,8 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">轮播图</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-image-upload hidden-file-input" accept="image/*" title="选择轮播图片" aria-label="轮播图片上传">
-                <button class="upload-btn carousel-image-upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="carousel-image-upload" data-storage-key="carousel-image" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -589,8 +594,57 @@
             <div class="form-group row-layout">
               <label class="non-interactive-label">轮播图背景</label>
               <div class="file-upload-btn">
-                <input type="file" class="carousel-image-bg-upload hidden-file-input" accept="image/*" title="选择轮播图背景图片" aria-label="轮播图背景图片上传">
-                <button class="upload-btn carousel-image-bg-upload-btn" onclick="this.previousElementSibling.click()">
+                <input type="file" class="carousel-image-bg-upload" data-storage-key="carousel-image-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 固定模块-图片轮播（竖版）模板 -->
+        <div class="module-template" id="verticalCarouselModuleTemplate">
+          <div class="module-header">
+            <div class="module-title">图片轮播（竖版）</div>
+            <div class="module-controls">
+              <button class="control-btn move-up-btn" title="上移">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
+              </button>
+              <button class="control-btn move-down-btn" title="下移">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
+              </button>
+              <button class="control-btn collapse-btn" title="展开/收起">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
+              </button>
+              <button class="control-btn delete-btn" title="删除">
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="module-content">
+            <!-- 标题文案 -->
+            <div class="form-group row-layout">
+              <label>标题</label>
+              <input type="text" name="vertical-carousel-title" class="vertical-carousel-title-input text-input" placeholder="请输入标题文本">
+            </div>
+            
+            <!-- 标题背景 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">标题背景</label>
+              <div class="file-upload-btn">
+                <input type="file" class="vertical-carousel-title-bg-upload" data-storage-key="vertical-title-bg" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
                   <div class="img-preview-inline">
                     <span class="upload-icon-inline">+</span>
                   </div>
@@ -598,6 +652,44 @@
               </div>
             </div>
 
+            <!-- 轮播图01 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图01</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-1" data-storage-key="vertical-image-1" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 轮播图02 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图02</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-2" data-storage-key="vertical-image-2" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 轮播图03 -->
+            <div class="form-group row-layout">
+              <label class="non-interactive-label">轮播图03</label>
+              <div class="file-upload-btn">
+                                  <input type="file" class="vertical-carousel-image-upload-3" data-storage-key="vertical-image-3" accept="image/*" style="display:none">
+                <button class="upload-btn" onclick="this.previousElementSibling.click()">
+                  <div class="img-preview-inline">
+                    <span class="upload-icon-inline">+</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -608,16 +700,24 @@
             <div class="module-title">每日签到</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -688,16 +788,24 @@
             <div class="module-title">集卡活动</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -787,16 +895,24 @@
             <div class="module-title">活动详情</div>
             <div class="module-controls">
               <button class="control-btn move-up-btn" title="上移">
-                <svg><use href="#icon-move-up"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-up"/>
+                </svg>
               </button>
               <button class="control-btn move-down-btn" title="下移">
-                <svg><use href="#icon-move-down"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-move-down"/>
+                </svg>
               </button>
               <button class="control-btn collapse-btn" title="展开/收起">
-                <svg><use href="#icon-collapse"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-chevron"/>
+                </svg>
               </button>
               <button class="control-btn delete-btn" title="删除">
-                <svg><use href="#icon-delete"/></svg>
+                <svg width="14" height="14" fill="currentColor">
+                  <use href="#icon-delete"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -869,7 +985,9 @@
           <span class="section-title">活动规则</span>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="rulesContent" title="折叠/展开活动规则板块" aria-label="折叠/展开活动规则板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>
@@ -912,7 +1030,9 @@
           <span class="section-title">尾版</span>
           <div class="option-controls">
             <button class="control-btn collapse-btn" data-target="footerAreaContent" title="折叠/展开尾版板块" aria-label="折叠/展开尾版板块">
-              <svg width="12" height="7"><use href="#icon-chevron"/></svg>
+              <svg width="12" height="7" class="chevron-icon">
+                <use href="#icon-chevron"/>
+              </svg>
             </button>
           </div>
         </div>

@@ -33,6 +33,7 @@ export enum ModuleType {
   COLLECT_CARDS = 'collectCards',
   NINE_GRID = 'nineGrid',
   CAROUSEL = 'carousel',
+  VERTICAL_CAROUSEL = 'verticalCarousel',
   RULES = 'rules',
   CUSTOM = 'custom'
 }
@@ -54,7 +55,7 @@ export interface Module {
 }
 
 // 模块内容类型定义
-export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent;
+export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent | VerticalCarouselContent;
 
 // ==================== 具体模块内容接口 ====================
 
@@ -97,12 +98,19 @@ export interface NineGridContent {
   prizes: PrizeItem[];          // 奖品列表
 }
 
-// 图片轮播（横版）内容接口
+// 横版轮播内容接口
 export interface CarouselContent {
-  title: string;                // 轮播标题
-  titleBgImage: Uint8Array | ImageInfo | null;  // 标题背景图片
-  carouselImage: Uint8Array | ImageInfo | null;  // 轮播图片
-  carouselBgImage: Uint8Array | ImageInfo | null;  // 轮播图背景图片
+  title: string;                           // 标题文本
+  titleBackground: ImageInfo | null;       // 标题背景图片
+  carouselImage: ImageInfo | null;         // 轮播主图
+  carouselBackground: ImageInfo | null;    // 轮播背景图片
+}
+
+// 竖版轮播内容接口
+export interface VerticalCarouselContent {
+  title: string;                           // 标题文本
+  titleBackground: ImageInfo | null;       // 标题背景图片
+  carouselImages: [ImageInfo | null, ImageInfo | null, ImageInfo | null];      // 轮播图片元组（严格3张：[主图, 右图, 左图]）
 }
 
 // 奖品项目接口
@@ -160,8 +168,6 @@ export type PluginMessageType =
   | 'create-prototype'
   | 'save-config'
   | 'load-config'
-  | 'get-theme'
-  | 'save-theme'
   | 'close-plugin'
   | 'reset-complete'
   | 'ping'
@@ -170,6 +176,7 @@ export type PluginMessageType =
   | 'channel-generate'
   | 'channel-image-upload'
   | 'storage-set'
+  | 'storage-get'
   | 'storage-delete'
   | 'ui-loaded'
   | 'ui-ready';
@@ -190,10 +197,7 @@ export interface ConfigMessage extends BasePluginMessage {
   config?: H5Config;
 }
 
-export interface ThemeMessage extends BasePluginMessage {
-  type: 'get-theme' | 'save-theme';
-  theme?: string;
-}
+
 
 export interface ChannelImageMessage extends BasePluginMessage {
   type: 'channel-image-upload';
@@ -212,23 +216,24 @@ export interface SimpleMessage extends BasePluginMessage {
 }
 
 export type StorageMessage = {
-  type: 'storage-set' | 'storage-delete';
+  type: 'storage-set' | 'storage-get' | 'storage-delete';
   key: string;
   value?: unknown;
+  _messageId?: string;
 };
 
 // 联合类型
 export type PluginMessage = {
   type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 
-        'get-theme' | 'save-theme' | 'channel-image-upload' | 'channel-generate' |
+        'channel-image-upload' | 'channel-generate' |
         'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' |
-        'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
+        'storage-set' | 'storage-get' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
   config?: H5Config;
-  theme?: string;
   message?: string;
   data?: Record<string, unknown>;
   key?: string;
   value?: unknown;
+  _messageId?: string;
 };
 
 // ==================== H5配置接口 ====================

@@ -50,7 +50,8 @@ class ModuleManager {
       'signInModule': 'signIn', 
       'collectModule': 'collectCards',
       'activityContentModule': 'activityContent',
-      'carouselModule': 'carousel'
+      'carouselModule': 'carousel',
+      'verticalCarouselModule': 'verticalCarousel'
     };
     
     newModule.dataset.moduleType = moduleTypeMapping[moduleType] || moduleType;
@@ -85,7 +86,8 @@ class ModuleManager {
       'signInModule': 'signIn', 
       'collectModule': 'collectCards',
       'activityContentModule': 'activityContent',
-      'carouselModule': 'carousel'
+      'carouselModule': 'carousel',
+      'verticalCarouselModule': 'verticalCarousel'
     };
     return typeMap[templateType] || templateType;
   }

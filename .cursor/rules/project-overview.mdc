@@ -12,7 +12,7 @@ alwaysApply: true
 
 ## 项目概述
 
-H5Tools是一个专业的Figma插件，用于快速生成多渠道H5活动页面原型。项目采用模块化架构，支持8个主流渠道适配，具备完整的TypeScript类型定义和高级功能。
+H5Tools是一个专业的Figma插件，用于快速生成多渠道H5活动页面原型。项目采用模块化架构，支持4个主流厂商渠道适配，具备完整的TypeScript类型定义和高级功能。
 
 **版本**: 2.0.0  
 **架构**: 模块化 TypeScript + Figma Plugin API  
@@ -23,57 +23,109 @@ H5Tools是一个专业的Figma插件，用于快速生成多渠道H5活动页面
 ```
 H5Tools/
 ├── src/
-│   ├── core/                    # 🎯 核心功能库（3810行，可独立发布）
-│   │   ├── types/index.ts       # TypeScript类型定义 (252行)
-│   │   ├── utils/index.ts       # 工具函数库 (328行)
-│   │   ├── services/index.ts    # 业务服务层 (386行)
-│   │   ├── builders/            # 构建器模块 (2810行)
+│   ├── core/                    # 🎯 核心功能库（可独立发布）
+│   │   ├── types/index.ts       # TypeScript类型定义
+│   │   ├── utils/index.ts       # 工具函数库
+│   │   ├── services/            # 业务服务层
+│   │   │   ├── index.ts         # 服务统一入口
+│   │   │   ├── config.service.ts         # 配置管理服务
+│   │   │   ├── theme.service.ts          # 主题管理服务
+│   │   │   ├── channel-image.service.ts  # 渠道图片管理服务
+│   │   │   ├── validation.service.ts     # 数据验证服务
+│   │   │   ├── storage.service.ts        # 存储服务
+│   │   │   └── plugin-service.ts         # 插件服务
+│   │   ├── builders/            # 构建器模块
+│   │   │   ├── figma-utils.ts            # Figma API封装和工具函数
+│   │   │   ├── h5-prototype-builder.ts   # H5原型构建器
+│   │   │   ├── module-builders.ts        # 各种模块构建器
+│   │   │   ├── channel-generator.ts      # 渠道生成器
+│   │   │   ├── advanced-features.ts      # 高级功能
+│   │   │   └── feather-mask-utils.ts     # 羽化遮罩工具
 │   │   ├── package.json         # 核心库独立配置
 │   │   ├── tsconfig.json        # TypeScript配置
-│   │   ├── README.md            # 核心库API文档
 │   │   └── index.ts             # 核心库统一入口
-│   ├── plugin/                  # 🔧 插件主程序（精简版）
-│   │   └── code-standalone.ts   # 独立版插件 (449行)
+│   ├── plugin/                  # 🔧 插件主程序
+│   │   ├── code-standalone.ts   # 插件主程序
+│   │   └── figma-env-adapter.ts # Figma环境适配器
 │   └── ui/                      # 🎨 用户界面
-│       └── ui.html              # 完整UI界面 (5481行)
-├── dist/                        # 📦 统一构建输出
+│       ├── index.html           # UI界面模板
+│       ├── styles/              # CSS样式文件
+│       │   ├── base.css         # 基础样式
+│       │   ├── layout.css       # 布局样式
+│       │   ├── app-new.css      # 应用样式
+│       │   ├── components/      # 组件样式
+│       │   └── themes/          # 主题样式
+│       └── scripts/             # JavaScript脚本
+│           ├── app.js           # 应用主程序
+│           ├── utility-functions.js     # 工具函数
+│           ├── plugin-communicator.js   # 插件通信
+│           ├── data-manager.js          # 数据管理
+│           ├── channel-manager.js       # 渠道管理
+│           └── ...              # 其他功能模块
+├── dist/                        # 📦 构建输出
 ├── manifest.json                # Figma插件配置
-├── package.json                 # 项目主配置
-├── tsconfig.json                # TypeScript主配置
+├── package.json                 # 项目配置
 ├── build.js                     # 统一构建脚本
-├── log.md                       # 完整重构日志
-└── README.md                    # 项目说明文档
+├── rollup.config.js             # Rollup配置
+└── README.md                    # 项目文档
 ```
 
-## 核心模块说明
+## 核心模块功能
 
-### 1. 类型定义模块 (`src/core/types/`)
+### 1. 类型定义模块 (`src/core/types/index.ts`)
 - **H5Config**: H5页面配置接口
-- **ImageInfo**: 图片信息接口
-- **ModuleType**: 模块类型枚举（8种模块类型）
-- **ChannelType**: 渠道类型枚举（8个主流渠道）
+- **ImageInfo**: 图片信息接口  
+- **ModuleType**: 模块类型枚举（11种模块类型）
+- **ChannelType**: 渠道类型枚举（4个厂商渠道）
+- **PluginMessage**: 插件消息类型系统
 
-### 2. 工具函数模块 (`src/core/utils/`)
-- **Utils**: 基础工具类（延迟、数据提取、ID生成等）
-- **ImageUtils**: 图片处理工具（尺寸调整、格式转换、压缩等）
-- **ColorUtils**: 颜色处理工具（RGB转换、颜色生成、亮度调整等）
-- **FileUtils**: 文件处理工具（保存、加载、验证等）
-- **ValidationUtils**: 验证工具（数据验证、类型检查等）
+### 2. 工具函数模块 (`src/core/utils/index.ts`)
+- **Utils**: 基础工具类（延迟、数据提取、ID生成、深拷贝等）
+- **ImageUtils**: 图片处理工具（格式验证、尺寸计算、压缩等）
+- **ColorUtilsBase**: 基础颜色工具（RGB转换、亮度调整等）
+- **ValidationUtils**: 数据验证工具（必填验证、格式验证等）
 
 ### 3. 服务层模块 (`src/core/services/`)
 - **ConfigService**: 配置管理服务
 - **ThemeService**: 主题管理服务
 - **ChannelImageService**: 渠道图片管理服务
 - **ValidationService**: 数据验证服务
-- **ServiceManager**: 服务管理器
+- **StorageService**: 存储服务
+- **PluginService**: 插件通信服务
 
 ### 4. 构建器模块 (`src/core/builders/`)
-- **FigmaUtils**: Figma API封装和工具函数
+- **NodeUtils**: Figma节点创建和管理工具（位于figma-utils.ts）
+- **ColorUtils**: Figma颜色处理工具（位于figma-utils.ts）
+- **ImageNodeBuilder**: 图片节点构建器（位于figma-utils.ts）
 - **H5PrototypeBuilder**: H5原型构建器
-- **ModuleBuilders**: 各种模块构建器
-- **FeatherMaskUtils**: 羽化遮罩工具
-- **ChannelAdapter**: 渠道适配系统
+- **ModuleFactory**: 模块工厂类（位于module-builders.ts）
+- **ChannelPrototypeGenerator**: 渠道原型生成器（位于channel-generator.ts）
 - **AdvancedFeatures**: 高级功能（九宫格、批量处理等）
+- **FeatherMaskUtils**: 羽化遮罩工具
+
+## 支持的模块类型
+
+1. **头图模块** (HEADER) - 页面顶部头图和标题
+2. **游戏信息模块** (GAME_INFO) - 游戏介绍、按钮等
+3. **页脚模块** (FOOTER) - 页面底部信息
+4. **活动内容模块** (ACTIVITY_CONTENT) - 活动描述内容
+5. **签到模块** (SIGN_IN) - 签到打卡功能
+6. **集卡模块** (COLLECT_CARDS) - 集卡收集功能  
+7. **九宫格模块** (NINE_GRID) - 九宫格抽奖布局
+8. **图片轮播模块** (CAROUSEL) - 横版轮播
+9. **竖版轮播模块** (VERTICAL_CAROUSEL) - 竖版轮播
+10. **规则模块** (RULES) - 活动规则说明
+11. **自定义模块** (CUSTOM) - 可扩展的自定义模块
+
+## 支持的渠道
+
+**厂商渠道** (4个):
+- **OPPO** - OPPO游戏中心
+- **VIVO** - VIVO游戏中心  
+- **HUAWEI** - 华为应用市场
+- **XIAOMI** - 小米应用商店
+
+每个渠道都有专门的尺寸适配、样式调整和内容定制功能。
 
 
 

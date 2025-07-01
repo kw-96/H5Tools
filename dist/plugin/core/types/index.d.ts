@@ -23,6 +23,7 @@ export declare enum ModuleType {
     COLLECT_CARDS = "collectCards",
     NINE_GRID = "nineGrid",
     CAROUSEL = "carousel",
+    VERTICAL_CAROUSEL = "verticalCarousel",
     RULES = "rules",
     CUSTOM = "custom"
 }
@@ -38,7 +39,7 @@ export interface Module {
     title: string;
     content: ModuleContent;
 }
-export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent;
+export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent | VerticalCarouselContent;
 export interface ActivityContentData {
     mainTitle: string;
     mainTitleBg: Uint8Array | ImageInfo | null;
@@ -72,9 +73,14 @@ export interface NineGridContent {
 }
 export interface CarouselContent {
     title: string;
-    titleBgImage: Uint8Array | ImageInfo | null;
-    carouselImage: Uint8Array | ImageInfo | null;
-    carouselBgImage: Uint8Array | ImageInfo | null;
+    titleBackground: ImageInfo | null;
+    carouselImage: ImageInfo | null;
+    carouselBackground: ImageInfo | null;
+}
+export interface VerticalCarouselContent {
+    title: string;
+    titleBackground: ImageInfo | null;
+    carouselImages: [ImageInfo | null, ImageInfo | null, ImageInfo | null];
 }
 export interface PrizeItem {
     image: Uint8Array | ImageInfo | null;
@@ -108,7 +114,7 @@ export interface ChannelImages {
         [imageType: string]: ChannelImageData;
     };
 }
-export type PluginMessageType = 'create-prototype' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'generate' | 'channel-generate' | 'channel-image-upload' | 'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
+export type PluginMessageType = 'create-prototype' | 'save-config' | 'load-config' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'generate' | 'channel-generate' | 'channel-image-upload' | 'storage-set' | 'storage-get' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
 export interface BasePluginMessage {
     type: PluginMessageType;
 }
@@ -119,10 +125,6 @@ export interface CreatePrototypeMessage extends BasePluginMessage {
 export interface ConfigMessage extends BasePluginMessage {
     type: 'save-config' | 'load-config';
     config?: H5Config;
-}
-export interface ThemeMessage extends BasePluginMessage {
-    type: 'get-theme' | 'save-theme';
-    theme?: string;
 }
 export interface ChannelImageMessage extends BasePluginMessage {
     type: 'channel-image-upload';
@@ -138,18 +140,19 @@ export interface SimpleMessage extends BasePluginMessage {
     type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
 }
 export type StorageMessage = {
-    type: 'storage-set' | 'storage-delete';
+    type: 'storage-set' | 'storage-get' | 'storage-delete';
     key: string;
     value?: unknown;
+    _messageId?: string;
 };
 export type PluginMessage = {
-    type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 'get-theme' | 'save-theme' | 'channel-image-upload' | 'channel-generate' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'storage-set' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
+    type: 'create-prototype' | 'generate' | 'save-config' | 'load-config' | 'channel-image-upload' | 'channel-generate' | 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response' | 'storage-set' | 'storage-get' | 'storage-delete' | 'ui-loaded' | 'ui-ready';
     config?: H5Config;
-    theme?: string;
     message?: string;
     data?: Record<string, unknown>;
     key?: string;
     value?: unknown;
+    _messageId?: string;
 };
 export interface H5Config {
     pageTitle: string;
