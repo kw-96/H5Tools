@@ -205,6 +205,41 @@ async function buildPlugin() {
   }
 }
 
+// 移动类型声明文件
+async function moveTypeDefinitions() {
+  logger.info('移动类型声明文件...');
+  try {
+    const pluginTypesDir = path.join(BUILD_CONFIG.paths.dist, 'plugin', 'types');
+    const coreTypesDir = path.join(BUILD_CONFIG.paths.dist, 'core', 'types');
+    
+    if (fs.existsSync(pluginTypesDir)) {
+      // 确保目标目录存在
+      fileUtils.ensureDir(coreTypesDir);
+      
+      // 读取所有.d.ts文件
+      const files = glob.sync('**/*.d.ts', { cwd: pluginTypesDir });
+      
+      // 移动每个文件
+      files.forEach(file => {
+        const sourcePath = path.join(pluginTypesDir, file);
+        const targetPath = path.join(coreTypesDir, file);
+        
+        // 确保目标文件的目录存在
+        fileUtils.ensureDir(path.dirname(targetPath));
+        
+        // 移动文件
+        fs.renameSync(sourcePath, targetPath);
+      });
+      
+      // 删除源目录
+      fs.rmSync(pluginTypesDir, { recursive: true, force: true });
+      logger.success('类型声明文件移动完成');
+    }
+  } catch (error) {
+    throw new Error(`移动类型声明文件失败: ${error.message}`);
+  }
+}
+
 // 清理构建目录
 function clearDistDirectory() {
   logger.info('清理构建目录...');
@@ -377,18 +412,24 @@ async function build() {
   logger.log('🚀 开始H5Tools统一构建...');
   
   try {
+    // 清理构建目录
     clearDistDirectory();
-    await buildCore();
-    await buildPlugin();
-    const buildResult = buildHTML();
     
-    const duration = Date.now() - BUILD_STATE.startTime;
+    // 构建核心库
+    await buildCore();
+    
+    // 构建插件
+    await buildPlugin();
+    
+    // 移动类型声明文件
+    await moveTypeDefinitions();
+    
+    // 构建HTML文件
+    await buildHTML();
     
     // 输出构建报告
     logger.log(reportBuilder.generate());
-    
     logger.log('\n🎉 构建成功!');
-    
   } catch (error) {
     logger.error('构建失败', error);
     process.exit(1);

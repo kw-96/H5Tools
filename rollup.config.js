@@ -14,7 +14,7 @@ export default {
   },
   plugins: [
     typescript({
-      tsconfig: './tsconfig.json'
+      tsconfig: './rollup.tsconfig.json'
     }),
     resolve({
       browser: true

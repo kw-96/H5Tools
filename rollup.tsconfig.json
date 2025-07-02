@@ -1,26 +1,30 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["ES2017"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "declaration": false,
+    "target": "ES2015",
+    "module": "ES2020",
+    "lib": ["ES2015", "DOM"],
+    "declaration": true,
     "sourceMap": true,
+    "declarationDir": "./dist/plugin/types",
     "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@plugin/*": ["src/plugin/*"],
+      "@ui/*": ["src/ui/*"]
+    },
+    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/core/types"
+    ],
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "types": ["@figma/plugin-typings"]
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/plugin/**/*.ts"
   ],
   "exclude": [
     "node_modules",
