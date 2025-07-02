@@ -455,7 +455,21 @@ class GameInfoLayoutManager {
           344, 
           103
         );
+
         if (buttonBgImage) {
+          // 调整图片尺寸
+          if (buttonBgImage.height > 103) {
+            // 如果高度超过103，先按高度等比例缩放
+            const scale = 103 / buttonBgImage.height;
+            buttonBgImage.resize(buttonBgImage.width * scale, 103);
+          }
+
+          // 如果调整后宽度超过344，再按宽度等比例缩放
+          if (buttonBgImage.width > 344) {
+            const scale = 344 / buttonBgImage.width;
+            buttonBgImage.resize(344, buttonBgImage.height * scale);
+          }
+
           buttonBgImage.x = 0;
           buttonBgImage.y = 0;
           NodeUtils.safeAppendChild(buttonFrame, buttonBgImage, '图标按钮底图添加');
