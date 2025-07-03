@@ -7,30 +7,30 @@ import { NodeUtils, ColorUtils } from './figma-utils';
 
 // 全局渠道图片数据（从客户端存储中获取）
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-let channelImages: Record<string, {
-  eggBreaking?: ChannelImageData;
-  footerStyle?: ChannelImageData;
-}> = {};
+// let channelImages: Record<string, {
+//   eggBreaking?: ChannelImageData;
+//   footerStyle?: ChannelImageData;
+// }> = {};
 
 // 初始化渠道图片数据
-async function initChannelImages(): Promise<void> {
-  try {
-    // 初始化为空对象，从各个渠道的客户端存储中加载
-    channelImages = {};
+// async function initChannelImages(): Promise<void> {
+//   try {
+//     // 初始化为空对象，从各个渠道的客户端存储中加载
+//     channelImages = {};
     
-    const channels = ['oppo', 'vivo', 'huawei', 'xiaomi'];
-    for (const channel of channels) {
-      const stored = await figma.clientStorage.getAsync(`channel-images-${channel}`);
-      if (stored) {
-        channelImages[channel] = JSON.parse(stored);
-        console.log(`已加载 ${channel} 渠道图片数据`);
-      }
-    }
-  } catch (error) {
-    console.warn('获取渠道图片数据失败:', error);
-    channelImages = {};
-  }
-}
+//     const channels = ['oppo', 'vivo', 'huawei', 'xiaomi'];
+//     for (const channel of channels) {
+//       const stored = await figma.clientStorage.getAsync(`channel-images-${channel}`);
+//       if (stored) {
+//         channelImages[channel] = JSON.parse(stored);
+//         console.log(`已加载 ${channel} 渠道图片数据`);
+//       }
+//     }
+//   } catch (error) {
+//     console.warn('获取渠道图片数据失败:', error);
+//     channelImages = {};
+//   }
+// }
 
 /**
  * 渠道配置接口（原始版本，与code.ts保持一致）
@@ -44,11 +44,13 @@ async function initChannelImages(): Promise<void> {
 class ChannelPrototypeGenerator {
   private channel: string;
   private sourcePrototype: FrameNode;
+  private images: { eggBreaking?: ChannelImageData; footerStyle?: ChannelImageData };
 
   
-  constructor(channel: string, sourcePrototype: FrameNode) {
+  constructor(channel: string, sourcePrototype: FrameNode, images: { eggBreaking?: ChannelImageData; footerStyle?: ChannelImageData }) {
     this.channel = channel.toLowerCase();
     this.sourcePrototype = sourcePrototype;
+    this.images = images || {};
   }
 
   /**
@@ -358,6 +360,17 @@ class ChannelPrototypeGenerator {
   private async adjustOppoNineGridModule(nineGridFrame: FrameNode): Promise<void> {
     try {
       console.log('开始调整OPPO九宫格模块');
+
+      // 检查是否有砸蛋样式图片
+      // const channelData = channelImages[this.channel];
+      // const eggBreakingData = channelData?.eggBreaking;
+
+      const eggBreakingData = this.images.eggBreaking;
+      
+      if (!eggBreakingData) {
+        console.log('未上传砸蛋样式图片，跳过九宫格模块调整');
+        return;
+      }
       
       // 查找九宫格主体容器
       const mainContainer = this.findNineGridMainContainer(nineGridFrame);
@@ -393,6 +406,12 @@ class ChannelPrototypeGenerator {
   private async adjustOppoFooterModule(footerFrame: FrameNode): Promise<void> {
     try {
       console.log('开始调整OPPO尾版模块');
+
+      // 新增：如果没有上传尾版样式图片，直接跳过
+      if (!this.images.footerStyle) {
+        console.log('未上传尾版样式图片，跳过尾版模块调整');
+        return;
+      }
 
       // 调整尾版容器高度为807px
       footerFrame.resize(footerFrame.width, 807);
@@ -463,8 +482,10 @@ class ChannelPrototypeGenerator {
   private async insertEggBreakingImage(container: FrameNode, channel: string): Promise<void> {
     try {
       // 获取上传的砸蛋样式图片
-      const channelData = channelImages[channel];
-      const eggBreakingData = channelData?.eggBreaking;
+      // const channelData = channelImages[channel];
+      // const eggBreakingData = channelData?.eggBreaking;
+
+      const eggBreakingData = this.images.eggBreaking;
       
       if (eggBreakingData) {
         // 使用上传的图片
@@ -792,8 +813,10 @@ class ChannelPrototypeGenerator {
   private async insertFooterStyleImage(footerFrame: FrameNode, channel: string): Promise<void> {
     try {
       // 获取上传的尾版样式图片
-      const channelData = channelImages[channel];
-      const footerStyleData = channelData?.footerStyle;
+      // const channelData = channelImages[channel];
+      // const footerStyleData = channelData?.footerStyle;
+
+      const footerStyleData = this.images.footerStyle;
       
       if (footerStyleData) {
         // 使用上传的图片
@@ -926,7 +949,10 @@ class ChannelPrototypeGenerator {
  * 生成渠道特定版本的H5原型
  * @param channel 渠道名称 (oppo, vivo, xiaomi等)
  */
-export async function generateChannelVersion(channel: string): Promise<void> {
+export async function generateChannelVersion(
+  channel: string,
+  images?: { eggBreaking?: ChannelImageData; footerStyle?: ChannelImageData }
+): Promise<void> {
   try {
     console.log(`开始为${channel}渠道生成H5原型`);
     
@@ -937,7 +963,7 @@ export async function generateChannelVersion(channel: string): Promise<void> {
     }
     
     // 初始化渠道图片数据
-    await initChannelImages();
+    // await initChannelImages();
     
     // 根据H5原型容器中的文本节点加载字体
     console.log('分析H5原型容器中的文本节点并加载字体...');
@@ -945,7 +971,10 @@ export async function generateChannelVersion(channel: string): Promise<void> {
     console.log('字体加载完成');
     
     // 创建渠道专用的H5原型生成器
-    const channelGenerator = new ChannelPrototypeGenerator(channel, selectedPrototype);
+    // const channelGenerator = new ChannelPrototypeGenerator(channel, selectedPrototype);
+
+    // 创建渠道专用的H5原型生成器，传递图片数据
+    const channelGenerator = new ChannelPrototypeGenerator(channel, selectedPrototype, images || {});
     
     // 生成渠道版本
     await channelGenerator.generate();

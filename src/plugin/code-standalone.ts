@@ -170,10 +170,10 @@ class MessageHandler {
 
   private async handleGenerateChannelVersion(msg: ChannelGenerateMessage): Promise<void> {
     try {
-      console.log('开始生成渠道版本:', msg.channel);
+      console.log('开始生成渠道版本:', msg.channel, msg.images);
       
       // 调用渠道生成器
-      await generateChannelVersion(msg.channel);
+      await generateChannelVersion(msg.channel, msg.images);
       
       figma.ui.postMessage({
         type: 'channel-version-generated',

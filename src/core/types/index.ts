@@ -1,6 +1,7 @@
 // 渠道美术-H5延展工具 - 核心类型定义
 // 这个文件包含所有的接口和类型定义，将作为独立库发布到GitHub
 
+
 // ==================== 常量定义 ====================
 export const CONSTANTS = {
   H5_WIDTH: 1080,           // H5画板宽度
@@ -206,9 +207,13 @@ export interface ChannelImageMessage extends BasePluginMessage {
   imageData: ChannelImageData;
 }
 
-export interface ChannelGenerateMessage extends BasePluginMessage {
+export interface ChannelGenerateMessage {
   type: 'channel-generate';
   channel: string;
+  images?: {
+    eggBreaking?: ChannelImageData;
+    footerStyle?: ChannelImageData;
+  };
 }
 
 export interface SimpleMessage extends BasePluginMessage {

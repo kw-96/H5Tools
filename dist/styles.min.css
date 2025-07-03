@@ -1350,6 +1350,13 @@ button#cancel:hover {
   border-color: rgba(0, 0, 0, 0.2);
 }
 
+.channel-generate-btn-group {
+  display: flex;
+  gap: 20px; /* 按钮间距可调整 */
+  justify-content: center; /* 或 center/right/flex-start 根据需求 */
+  margin-top: 10px; /* 可选：与上方内容间距 */
+}
+
 .channel-generate-btn {
   background-color: #0071e3;
   color: white;

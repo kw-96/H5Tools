@@ -132,9 +132,13 @@ export interface ChannelImageMessage extends BasePluginMessage {
     imageType: string;
     imageData: ChannelImageData;
 }
-export interface ChannelGenerateMessage extends BasePluginMessage {
+export interface ChannelGenerateMessage {
     type: 'channel-generate';
     channel: string;
+    images?: {
+        eggBreaking?: ChannelImageData;
+        footerStyle?: ChannelImageData;
+    };
 }
 export interface SimpleMessage extends BasePluginMessage {
     type: 'close-plugin' | 'reset-complete' | 'ping' | 'slice-image-response';
