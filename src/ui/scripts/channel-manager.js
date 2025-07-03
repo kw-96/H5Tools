@@ -218,8 +218,7 @@ class ChannelManager {
     // 绑定事件
     this.bindSettingsEvents(channel);
     
-    // 加载已保存的图片
-    this.loadSavedChannelImages(channel);
+    // 注意：渠道设置图片不再自动加载，仅在当前会话中有效
     
     console.log('✅ 渠道设置内容生成完成');
   }
@@ -228,20 +227,20 @@ class ChannelManager {
   getChannelSettingsConfig(channel) {
     const configs = {
       'oppo': [
-        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'vivo': [
-        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'huawei': [
-        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'xiaomi': [
-        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸：864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸：1080x289px' }
+        { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
+        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ]
     };
     
@@ -252,31 +251,53 @@ class ChannelManager {
   generateSettingItemHTML(item, channel) {
     const { type, key, label, placeholder, description } = item;
     
-    let inputHTML = '';
-    
     if (type === 'text') {
-      inputHTML = `<input type="text" class="setting-input" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}">`;
+      return `
+        <div class="setting-item">
+          <div class="setting-header">
+            <label class="setting-label">${label}</label>
+          </div>
+          <div class="setting-main">
+            <input type="text" class="setting-input" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}">
+          </div>
+          ${description ? `<div class="setting-footer"><div class="setting-description">${description}</div></div>` : ''}
+        </div>
+      `;
     } else if (type === 'textarea') {
-      inputHTML = `<textarea class="setting-input setting-textarea" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}"></textarea>`;
+      return `
+        <div class="setting-item">
+          <div class="setting-header">
+            <label class="setting-label">${label}</label>
+          </div>
+          <div class="setting-main">
+            <textarea class="setting-input setting-textarea" id="${channel}-${key}" placeholder="${placeholder || ''}" data-key="${key}"></textarea>
+          </div>
+          ${description ? `<div class="setting-footer"><div class="setting-description">${description}</div></div>` : ''}
+        </div>
+      `;
     } else if (type === 'image') {
-      inputHTML = `
-        <div class="setting-upload-group">
-          <input type="file" accept="image/*" style="display:none" id="${channel}-${key}-input" data-key="${key}">
-          <button type="button" class="setting-upload-btn" onclick="document.getElementById('${channel}-${key}-input').click()">选择图片</button>
-          <div class="setting-preview" id="${channel}-${key}-preview">
-            <div class="setting-preview-placeholder">预览</div>
+      return `
+        <div class="setting-item">
+          <div class="setting-header">
+            <label class="setting-label">${label}</label>
+            ${description ? `<div class="setting-description">${description}</div>` : ''}
+          </div>
+          <div class="setting-main">
+            <div class="setting-upload-group">
+              <input type="file" accept="image/*" style="display:none" id="${channel}-${key}-input" data-key="${key}">
+              <div class="setting-preview clickable-upload" id="${channel}-${key}-preview" onclick="document.getElementById('${channel}-${key}-input').click()">
+                <div class="setting-preview-placeholder">
+                  
+                  <div class="upload-text">+</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       `;
     }
     
-    return `
-      <div class="setting-item">
-        <label class="setting-label">${label}</label>
-        ${inputHTML}
-        ${description ? `<div class="setting-description">${description}</div>` : ''}
-      </div>
-    `;
+    return '';
   }
 
   // 绑定设置事件
@@ -299,15 +320,18 @@ class ChannelManager {
         const file = e.target.files[0];
         if (file) {
           try {
-            // 处理图片文件并保存到图片管理器
+            // 处理图片文件（仅用于当前会话，不保存到存储）
             const storageKey = `${channel}-${key}`;
             const imageData = await window.fileProcessor.processImageFile(file, storageKey, true);
             
             // 更新预览
             this.updateImagePreview(channel, key, file);
             
-            // 保存到本地存储
-            this.saveChannelImageToLocal(channel, key, imageData);
+            // 仅保存到内存中用于当前会话
+            if (!this.channelImages[channel]) {
+              this.channelImages[channel] = {};
+            }
+            this.channelImages[channel][key] = imageData;
             
             // 通知主程序图片已上传
             window.pluginComm.postMessage('channel-image-uploaded', {
@@ -322,7 +346,7 @@ class ChannelManager {
               }
             });
             
-            window.notificationSystem.show(`${key === 'eggBreaking' ? '砸蛋样式' : '尾版样式'}上传成功`, 'success');
+            window.notificationSystem.show(`${key === 'eggBreaking' ? '砸蛋样式' : '尾版样式'}上传成功（仅当前会话有效）`, 'success');
           } catch (error) {
             console.error(`${channel}-${key} 图片上传失败:`, error);
             window.notificationSystem.show(`图片上传失败: ${error.message}`, 'error');
@@ -331,8 +355,7 @@ class ChannelManager {
       });
     });
     
-    // 加载已保存的图片
-    this.loadSavedChannelImages(channel);
+    // 注意：渠道设置图片不再从存储中加载，仅在当前会话中有效
   }
 
   // 更新图片预览
@@ -341,7 +364,7 @@ class ChannelManager {
     if (previewElement && file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        previewElement.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        previewElement.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: contain;" onclick="document.getElementById('${channel}-${key}-input').click()">`;
       };
       reader.readAsDataURL(file);
     }
@@ -375,232 +398,17 @@ class ChannelManager {
     }
   }
 
-  // 保存渠道图片到本地存储
-  async saveChannelImageToLocal(channel, imageType, imageData) {
-    const storageKey = `channel-image-${channel}-${imageType}`;
-    const imageInfo = {
-      data: Array.from(imageData.data),
-      width: imageData.width,
-      height: imageData.height,
-      name: imageData.name,
-      type: imageData.type,
-      timestamp: Date.now()
-    };
-    
-    try {
-      await window.storageAdapter.setItem(storageKey, JSON.stringify(imageInfo));
-      console.log(`${channel} ${imageType} 图片已保存到本地`);
-      
-      // 更新内存中的图片数据
-      if (!this.channelImages[channel]) {
-        this.channelImages[channel] = {};
-      }
-      this.channelImages[channel][imageType] = imageData;
-      
-      // 清理旧的图片数据（避免存储空间过满）
-      this.clearOldChannelImages();
-      
-    } catch (error) {
-      console.error('保存图片到本地失败:', error);
-      // 如果存储空间不足，尝试清理旧数据
-      if (error.name === 'QuotaExceededError') {
-        try {
-          await this.clearOldChannelImages();
-          await window.storageAdapter.setItem(storageKey, JSON.stringify(imageInfo));
-          console.log('清理后重新保存图片成功');
-        } catch (retryError) {
-          console.error('清理后仍然保存失败:', retryError);
-          if (window.notificationSystem) {
-            window.notificationSystem.show('存储空间不足，请清理浏览器缓存', 'error');
-          }
-        }
-      } else {
-        if (window.notificationSystem) {
-          window.notificationSystem.show('图片保存失败', 'error');
-        }
-      }
-    }
-  }
+  // 注意：saveChannelImageToLocal 函数已删除
+  // 原因：渠道设置图片不再进行持久化保存
 
-  // 加载已保存的渠道图片
-  async loadSavedChannelImages(channel) {
-    const imageTypes = ['eggBreaking', 'footerStyle'];
-    
-    for (const imageType of imageTypes) {
-      try {
-        const storageKey = `channel-image-${channel}-${imageType}`;
-        const saved = await window.storageAdapter.getItem(storageKey);
-        
-        if (saved) {
-          const imageInfo = JSON.parse(saved);
-          const imageData = {
-            data: new Uint8Array(imageInfo.data),
-            width: imageInfo.width,
-            height: imageInfo.height,
-            name: imageInfo.name,
-            type: imageInfo.type
-          };
-          
-          // 保存到图片管理器
-          const managerKey = `${channel}-${imageType}`;
-          if (window.imageManager) {
-            window.imageManager.setModule(managerKey, imageData);
-          }
-          
-          // 更新预览
-          this.updateImagePreviewFromData(channel, imageType, imageData);
-          
-          // 更新内存中的图片数据
-          if (!this.channelImages[channel]) {
-            this.channelImages[channel] = {};
-          }
-          this.channelImages[channel][imageType] = imageData;
-          
-          console.log(`已加载 ${channel} ${imageType} 图片`);
-        }
-      } catch (error) {
-        console.error(`加载 ${channel} ${imageType} 图片失败:`, error);
-      }
-    }
-  }
+  // 注意：loadSavedChannelImages 函数已删除
+  // 原因：渠道设置图片不再进行持久化保存，无需加载已保存的图片
 
-  // 清理旧的渠道图片数据
-  async clearOldChannelImages() {
-    try {
-      const MAX_STORAGE_SIZE = 50 * 1024 * 1024; // 50MB存储限制
-      const MAX_IMAGES_PER_CHANNEL_TYPE = 1; // 每个渠道每种类型最多保留1张图片
-      
-      const keys = await window.storageAdapter.getAllKeys();
-      const channelImageKeys = keys.filter(key => key.startsWith('channel-image-'));
-      
-      // 计算当前存储使用量
-      let totalSize = 0;
-      const allImageData = [];
-      
-      for (const key of channelImageKeys) {
-        try {
-          const data = await window.storageAdapter.getItem(key);
-          if (data) {
-            const parsed = JSON.parse(data);
-            const size = JSON.stringify(parsed).length * 2; // 估算字节大小
-            totalSize += size;
-            
-            allImageData.push({
-              key,
-              timestamp: parsed.timestamp || 0,
-              size,
-              channel: parsed.channel || 'unknown',
-              imageType: parsed.imageType || 'unknown'
-            });
-          }
-        } catch (error) {
-          console.warn(`解析图片数据失败: ${key}`, error);
-          // 删除损坏的数据
-          await window.storageAdapter.removeItem(key);
-        }
-      }
-      
-      console.log(`当前渠道图片存储使用量: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
-      
-      let imagesToDelete = [];
-      
-      // 1. 基于渠道类型数量的清理：每个渠道每种类型只保留1张最新的
-      const channelTypeGroups = {};
-      
-      for (const imageData of allImageData) {
-        const groupKey = `${imageData.channel}-${imageData.imageType}`;
-        if (!channelTypeGroups[groupKey]) {
-          channelTypeGroups[groupKey] = [];
-        }
-        channelTypeGroups[groupKey].push(imageData);
-      }
-      
-      // 对每个组按时间戳排序，保留最新的1张，其余标记删除
-      for (const [groupKey, images] of Object.entries(channelTypeGroups)) {
-        if (images.length > MAX_IMAGES_PER_CHANNEL_TYPE) {
-          // 按时间戳降序排序（最新的在前）
-          images.sort((a, b) => b.timestamp - a.timestamp);
-          
-          // 保留最新的1张，其余删除
-          const toDelete = images.slice(MAX_IMAGES_PER_CHANNEL_TYPE);
-          imagesToDelete.push(...toDelete);
-          
-          console.log(`渠道类型 ${groupKey}: 保留1张最新图片，删除${toDelete.length}张旧图片`);
-        }
-      }
-      
-      // 2. 基于存储容量的清理：如果总容量超过限制，继续删除最旧的图片
-      if (totalSize > MAX_STORAGE_SIZE) {
-        const remainingImages = allImageData.filter(img => 
-          !imagesToDelete.some(delImg => delImg.key === img.key)
-        );
-        
-        // 按时间戳升序排序（最旧的在前）
-        remainingImages.sort((a, b) => a.timestamp - b.timestamp);
-        
-        let currentSize = totalSize - imagesToDelete.reduce((sum, img) => sum + img.size, 0);
-        
-        for (const imageData of remainingImages) {
-          if (currentSize <= MAX_STORAGE_SIZE) break;
-          
-          imagesToDelete.push(imageData);
-          currentSize -= imageData.size;
-          console.log(`容量清理: 删除图片 ${imageData.key} (${(imageData.size / 1024).toFixed(1)}KB)`);
-        }
-      }
-      
-      // 执行删除操作
-      let deletedCount = 0;
-      let deletedSize = 0;
-      
-      for (const imageData of imagesToDelete) {
-        try {
-          await window.storageAdapter.removeItem(imageData.key);
-          deletedCount++;
-          deletedSize += imageData.size;
-          console.log(`已删除旧图片: ${imageData.key}`);
-        } catch (error) {
-          console.error(`删除图片失败: ${imageData.key}`, error);
-        }
-      }
-      
-      const finalSize = totalSize - deletedSize;
-      console.log(`清理完成: 删除${deletedCount}张图片，释放${(deletedSize / 1024 / 1024).toFixed(2)}MB空间`);
-      console.log(`当前存储使用量: ${(finalSize / 1024 / 1024).toFixed(2)}MB`);
-      
-      return {
-        deletedCount,
-        deletedSize,
-        finalSize,
-        success: true
-      };
-      
-    } catch (error) {
-      console.error('清理旧图片失败:', error);
-      return {
-        deletedCount: 0,
-        deletedSize: 0,
-        finalSize: 0,
-        success: false,
-        error: error.message
-      };
-    }
-  }
+  // 注意：clearOldChannelImages 函数已删除
+  // 原因：渠道设置图片不再进行持久化保存，无需清理旧图片数据
 
-  // 从图片数据更新预览
-  updateImagePreviewFromData(channel, imageType, imageData) {
-    try {
-      const preview = document.getElementById(`${channel}-${imageType}-preview`);
-      if (preview && imageData) {
-        const blob = new Blob([imageData.data], { type: imageData.type });
-        const url = URL.createObjectURL(blob);
-        
-        preview.innerHTML = `<img src="${url}" alt="预览" onload="URL.revokeObjectURL(this.src)">`;
-      }
-    } catch (error) {
-      console.error('更新图片预览失败:', error);
-    }
-  }
+  // 注意：updateImagePreviewFromData 函数已删除
+  // 原因：仅在 loadSavedChannelImages 中被调用，现在不再需要
 }
 
 // 创建全局渠道管理器实例

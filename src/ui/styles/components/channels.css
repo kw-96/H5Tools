@@ -41,7 +41,7 @@
 }
 
 .settings-content {
-  max-width: 600px;
+  max-width: 1200px;
 }
 
 .setting-group {
@@ -62,11 +62,46 @@
 }
 
 .setting-item {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #fafafa;
 }
 
 .setting-item:last-child {
   margin-bottom: 0;
+}
+
+.setting-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-main .setting-input {
+  max-width: 300px;
+}
+
+.setting-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .setting-label {
@@ -100,8 +135,9 @@
 
 .setting-upload-group {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 12px;
+  align-items: center;
 }
 
 .setting-upload-btn {
@@ -121,15 +157,29 @@
 }
 
 .setting-preview {
-  width: 60px;
-  height: 60px;
+  width: 120px;
+  height: 80px;
   border: 2px dashed rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fafafa;
+  background-color: #ffffff;
   overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.setting-preview.clickable-upload {
+  cursor: pointer;
+  border-color: #0071e3;
+  background-color: #f0f8ff;
+}
+
+.setting-preview.clickable-upload:hover {
+  border-color: #005bb5;
+  background-color: #e6f3ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
 }
 
 .setting-preview img {
@@ -137,12 +187,27 @@
   height: 100%;
   object-fit: cover;
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .setting-preview-placeholder {
   font-size: 12px;
   color: #86868b;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.upload-icon {
+  font-size: 20px;
+  opacity: 0.7;
+}
+
+.upload-text {
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .setting-description {

@@ -1996,5 +1996,4 @@ export class VerticalCarouselModuleBuilder {
         });
     }
 }
-// ==================== 活动详情模块构建器 ====================
 //# sourceMappingURL=module-builders.js.map
