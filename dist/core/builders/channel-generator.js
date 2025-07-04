@@ -173,6 +173,7 @@ class ChannelPrototypeGenerator {
             }
         });
     }
+    // ==================== OPPO渠道样式调整 ====================
     /**
      * OPPO渠道调整
      */
@@ -374,6 +375,7 @@ class ChannelPrototypeGenerator {
             }
         });
     }
+    // ==================== VIVO渠道样式调整 ====================
     /**
      * VIVO渠道样式调整
      */
@@ -469,22 +471,141 @@ class ChannelPrototypeGenerator {
             }
         });
     }
+    // ==================== 华为渠道样式调整 ====================
     /**
      * 华为渠道样式调整
      */
     applyHuaweiStyles(moduleFrame) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`华为样式调整: ${moduleFrame.name}`);
-            // 华为渠道特定样式调整将在后续版本实现
+            try {
+                switch (moduleFrame.name.trim()) {
+                    case '头图':
+                        yield this.adjustHuaweiHeaderModule(moduleFrame);
+                        break;
+                    // case '九宫格抽奖':
+                    //   console.log('匹配到九宫格抽奖模块，开始调整');
+                    //   await this.adjustHuaweiNineGridModule(moduleFrame);
+                    //   break;
+                    // case '尾版':
+                    //   await this.adjustHuaweiFooterModule(moduleFrame);
+                    //   break;
+                    default:
+                        console.log(`模块 "${moduleFrame.name}" 无需华为特定样式调整`);
+                        console.log('可匹配的模块名称: 头图, 九宫格抽奖, 尾版');
+                }
+            }
+            catch (error) {
+                console.error(`华为样式调整失败:`, error);
+            }
         });
     }
+    /**
+     * 调整华为头图模块
+     */
+    adjustHuaweiHeaderModule(headerFrame) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('开始调整华为头图模块');
+                // 1. 调整头图容器高度为1300px
+                headerFrame.resize(headerFrame.width, 1300);
+                // 2. 查找并调整蒙版矩形节点
+                const maskRect = findMaskRectangle(headerFrame);
+                if (maskRect) {
+                    // 高度-100px
+                    const newHeight = maskRect.height - 100;
+                    maskRect.resize(maskRect.width, newHeight);
+                    // 下移150px
+                    maskRect.y = maskRect.y + 150;
+                }
+                // 3. 查找并调整头图图片节点
+                const headerImageNode = findHeaderImageNode(headerFrame);
+                if (headerImageNode) {
+                    // 头图图片节点下移100px
+                    headerImageNode.y = headerImageNode.y + 100;
+                }
+                console.log('华为头图模块调整完成');
+            }
+            catch (error) {
+                console.error('调整华为头图模块失败:', error);
+            }
+        });
+    }
+    // ==================== 小米渠道样式调整 ====================
     /**
      * 小米渠道样式调整
      */
     applyXiaomiStyles(moduleFrame) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`小米样式调整: ${moduleFrame.name}`);
-            // 小米渠道特定样式调整将在后续版本实现
+            try {
+                switch (moduleFrame.name.trim()) {
+                    case '头图':
+                        yield this.adjustXiaomiHeaderModule(moduleFrame);
+                        break;
+                    // case '九宫格抽奖':
+                    //   console.log('匹配到九宫格抽奖模块，开始调整');
+                    //   await this.adjustXiaomiNineGridModule(moduleFrame);
+                    //   break;
+                    case '尾版':
+                        yield this.adjustXiaomiFooterModule(moduleFrame);
+                        break;
+                    default:
+                        console.log(`模块 "${moduleFrame.name}" 无需小米特定样式调整`);
+                        console.log('可匹配的模块名称: 头图, 九宫格抽奖, 尾版');
+                }
+            }
+            catch (error) {
+                console.error(`小米样式调整失败:`, error);
+            }
+        });
+    }
+    /**
+     * 调整小米头图模块
+     */
+    adjustXiaomiHeaderModule(headerFrame) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('开始调整小米头图模块');
+                // 1. 调整头图容器高度为800px
+                headerFrame.resize(headerFrame.width, 800);
+                // 2. 查找并调整蒙版矩形节点
+                const maskRect = findMaskRectangle(headerFrame);
+                if (maskRect) {
+                    // 高度-100px
+                    const newHeight = maskRect.height - 250;
+                    maskRect.resize(maskRect.width, newHeight);
+                }
+                // 3. 查找并删除标题图片图片节点
+                const headerImageNode = findTitleImageNode(headerFrame);
+                if (headerImageNode) {
+                    // 删除标题图片图片节点
+                    headerImageNode.remove();
+                }
+                console.log('小米头图模块调整完成');
+            }
+            catch (error) {
+                console.error('调整小米头图模块失败:', error);
+            }
+        });
+    }
+    /**
+     * 调整小米尾版模块
+     */
+    adjustXiaomiFooterModule(footerFrame) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('开始调整小米尾版模块');
+                // 调整尾版容器高度为550px
+                footerFrame.resize(footerFrame.width, 300);
+                // 清除尾版LOGO
+                clearFooterLogo(footerFrame);
+                console.log('小米尾版模块调整完成');
+                return;
+            }
+            catch (error) {
+                console.error('调整小米尾版模块失败:', error);
+            }
         });
     }
 }
@@ -642,6 +763,25 @@ function findHeaderImageNode(container) {
         return null;
     };
     return findHeaderImage(container);
+}
+/**
+ * 递归查找头图图片节点
+ */
+function findTitleImageNode(container) {
+    const findTitleImage = (node) => {
+        if (node.name === '标题图片') {
+            return node;
+        }
+        if ('children' in node) {
+            for (const child of node.children) {
+                const result = findTitleImage(child);
+                if (result)
+                    return result;
+            }
+        }
+        return null;
+    };
+    return findTitleImage(container);
 }
 /**
  * 清除尾版LOGO
