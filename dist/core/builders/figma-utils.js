@@ -547,4 +547,138 @@ export function createTitleContainer(title_1, bgImage_1, width_1, height_1) {
         return container;
     });
 }
+/**
+ * 递归查找"游戏信息"Frame下的"按钮底图"节点并克隆
+ * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）
+ * @returns 克隆的按钮底图RectangleNode，找不到则返回null
+ */
+export function findAndCloneButtonImageFromGameInfo(nineGridFrame) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 在自适应模块中查找游戏信息容器
+            const adaptiveModule = nineGridFrame.parent;
+            if (!adaptiveModule || adaptiveModule.type !== 'FRAME') {
+                return null;
+            }
+            const gameInfoFrame = adaptiveModule.findOne(node => node.type === 'FRAME' && node.name === '游戏信息');
+            if (!gameInfoFrame) {
+                return null;
+            }
+            // 递归查找按钮底图节点并复制
+            const findAndCloneButtonImage = (node) => {
+                if (node.name === '按钮底图') {
+                    if ('clone' in node) {
+                        const clonedNode = node.clone();
+                        return clonedNode;
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                if ('children' in node) {
+                    for (const child of node.children) {
+                        const result = findAndCloneButtonImage(child);
+                        if (result)
+                            return result;
+                    }
+                }
+                return null;
+            };
+            return findAndCloneButtonImage(gameInfoFrame);
+        }
+        catch (error) {
+            console.error('findAndCloneButtonImageFromGameInfo失败:', error);
+            return null;
+        }
+    });
+}
+/**
+ * 从游戏信息容器获取下载按钮的文本样式
+ * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）
+ * @returns 包含fontName和fills的样式对象，找不到则返回null
+ */
+export function getDownloadButtonTextStyle(nineGridFrame) {
+    try {
+        const adaptiveModule = nineGridFrame.parent;
+        if (!adaptiveModule || adaptiveModule.type !== 'FRAME') {
+            return null;
+        }
+        const gameInfoFrame = adaptiveModule.findOne(node => node.type === 'FRAME' && node.name === '游戏信息');
+        if (!gameInfoFrame) {
+            return null;
+        }
+        const findDownloadButtonText = (node) => {
+            if (node.type === 'TEXT' && node.parent && 'name' in node.parent && node.parent.name === '下载按钮') {
+                return node;
+            }
+            if ('children' in node) {
+                for (const child of node.children) {
+                    const result = findDownloadButtonText(child);
+                    if (result)
+                        return result;
+                }
+            }
+            return null;
+        };
+        const textNode = findDownloadButtonText(gameInfoFrame);
+        if (textNode) {
+            return {
+                fontName: textNode.fontName,
+                // fills: textNode.fills as Paint[]
+                fills: JSON.parse(JSON.stringify(textNode.fills))
+            };
+        }
+        return null;
+    }
+    catch (error) {
+        console.error('获取下载按钮文本样式失败:', error);
+        return null;
+    }
+}
+/**
+ * 通用按钮容器创建函数
+ * @param mainContainer 主容器
+ * @param nineGridFrame 九宫格Frame（用于递归查找按钮底图和样式）
+ * @param options  { name, text, x, y, width, height, textFontSize }
+ * @returns 创建的按钮容器FrameNode
+ */
+export function createButtonContainer(mainContainer, nineGridFrame, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const container = NodeUtils.createFrame(options.name, options.width, options.height);
+        container.x = options.x;
+        container.y = options.y;
+        container.fills = [];
+        // 统一用游戏信息中的按钮底图
+        const buttonImage = yield findAndCloneButtonImageFromGameInfo(nineGridFrame);
+        if (buttonImage) {
+            buttonImage.resize(options.width, options.height);
+            buttonImage.x = (container.width - buttonImage.width) / 2;
+            buttonImage.y = (container.height - buttonImage.height) / 2;
+            NodeUtils.safeAppendChild(container, buttonImage, `${options.text}按钮图片添加`);
+        }
+        // 获取文本样式
+        const buttonTextStyle = getDownloadButtonTextStyle(nineGridFrame);
+        // 添加文本
+        const textNode = figma.createText();
+        textNode.name = `${options.text}文本`;
+        textNode.characters = options.text;
+        if (buttonTextStyle) {
+            textNode.fontName = buttonTextStyle.fontName;
+            textNode.fills = buttonTextStyle.fills;
+        }
+        else {
+            textNode.fontName = { family: "Inter", style: "Bold" };
+            textNode.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
+        }
+        textNode.fontSize = (_a = options.textFontSize) !== null && _a !== void 0 ? _a : 50;
+        textNode.textAlignHorizontal = 'CENTER';
+        textNode.textAlignVertical = 'CENTER';
+        textNode.x = (container.width - textNode.width) / 2;
+        textNode.y = (container.height - textNode.height) / 2;
+        NodeUtils.safeAppendChild(container, textNode, `${options.text}文本添加`);
+        NodeUtils.safeAppendChild(mainContainer, container, `${options.text}容器添加`);
+        return container;
+    });
+}
 //# sourceMappingURL=figma-utils.js.map

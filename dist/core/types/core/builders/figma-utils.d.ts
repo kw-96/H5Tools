@@ -53,3 +53,34 @@ export declare class ImageNodeBuilder {
     static setImageFill(node: FrameNode | RectangleNode, imageData: ImageInfo | Uint8Array | null, scaleMode?: 'FILL' | 'FIT'): Promise<void>;
 }
 export declare function createTitleContainer(title: string, bgImage: Uint8Array | ImageInfo | null, width: number, height: number, fontSize?: number, fontWeight?: 'Regular' | 'Medium' | 'Bold'): Promise<FrameNode>;
+/**
+ * 递归查找"游戏信息"Frame下的"按钮底图"节点并克隆
+ * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）
+ * @returns 克隆的按钮底图RectangleNode，找不到则返回null
+ */
+export declare function findAndCloneButtonImageFromGameInfo(nineGridFrame: FrameNode): Promise<RectangleNode | null>;
+/**
+ * 从游戏信息容器获取下载按钮的文本样式
+ * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）
+ * @returns 包含fontName和fills的样式对象，找不到则返回null
+ */
+export declare function getDownloadButtonTextStyle(nineGridFrame: FrameNode): {
+    fontName: FontName;
+    fills: Paint[];
+} | null;
+/**
+ * 通用按钮容器创建函数
+ * @param mainContainer 主容器
+ * @param nineGridFrame 九宫格Frame（用于递归查找按钮底图和样式）
+ * @param options  { name, text, x, y, width, height, textFontSize }
+ * @returns 创建的按钮容器FrameNode
+ */
+export declare function createButtonContainer(mainContainer: FrameNode, nineGridFrame: FrameNode, options: {
+    name: string;
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    textFontSize?: number;
+}): Promise<FrameNode>;

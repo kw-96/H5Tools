@@ -5,7 +5,7 @@
 
 import { H5Config, CONSTANTS } from '../types';
 import { Utils } from '../utils';
-import { FontManager, NodeUtils, ColorUtils, ImageNodeBuilder } from './figma-utils';
+import { FontManager, NodeUtils, ColorUtils, ImageNodeBuilder, findAndCloneButtonImageFromGameInfo, getDownloadButtonTextStyle } from './figma-utils';
 import { 
   createHeaderModule, 
   createGameInfoModule, 
@@ -251,7 +251,7 @@ export class H5PrototypeBuilder {
 
   private createCustomModules(): Promise<FrameNode>[] {
     return this.config.modules?.map(async module => {
-      const moduleFrame = await createCustomModule(module);
+      const moduleFrame = await createCustomModule(module, this.h5Frame);
       return moduleFrame;
     }) || [];
   }
@@ -290,7 +290,7 @@ export class H5PrototypeBuilder {
     return null;
   }
 
-  private finalizeLayout(): void {
+  private async finalizeLayout(): Promise<void> {
     // 2. 调整H5原型容器高度
     if (this.h5Frame) {
       // 如果有自适应模块容器，调整为自适应模块容器高度
@@ -325,11 +325,15 @@ export class H5PrototypeBuilder {
       this.outerFrame.resize(CONSTANTS.H5_WIDTH, finalHeight);
       console.log(`没有模块内容，H5原型设置为最小高度: ${finalHeight}px`);
     }
+
+    // 修正九宫格抽奖按钮样式
+    await retryFixNineGridButtonStyles(this.h5Frame);
     
     // 添加到当前页面并居中显示
     NodeUtils.safeAppendChild(figma.currentPage, this.outerFrame, 'H5原型添加到当前页面');
     figma.viewport.scrollAndZoomIntoView([this.outerFrame]);
   }
+  
 }
 
 /**
@@ -341,3 +345,83 @@ export async function createH5Prototype(config: H5Config): Promise<FrameNode> {
   const builder = new H5PrototypeBuilder(config);
   return builder.build();
 } 
+
+
+// 辅助：查找所有九宫格抽奖Frame
+function findAllNineGridFrames(root: FrameNode): FrameNode[] {
+  return root.findAll(node => node.type === 'FRAME' && node.name === '九宫格抽奖') as FrameNode[];
+}
+
+// 辅助：查找按钮容器
+function findButtonContainer(nineGridFrame: FrameNode, buttonName: string): FrameNode | null {
+  return nineGridFrame.findOne(node =>
+    node.type === 'FRAME' && node.name === buttonName
+  ) as FrameNode | null;
+}
+
+// 重试修正主函数
+async function retryFixNineGridButtonStyles(
+  adaptiveModule: FrameNode,
+  maxRetries = 10,
+  delayMs = 100
+) {
+  const nineGridFrames = findAllNineGridFrames(adaptiveModule);
+
+  for (const nineGridFrame of nineGridFrames) {
+    for (const btnName of ['我的奖品', '活动规则']) {
+      const btnFrame = findButtonContainer(nineGridFrame, btnName);
+      if (btnFrame) {
+        await retryFixButtonStyle(btnFrame, adaptiveModule, btnName, maxRetries, delayMs);
+      }
+    }
+  }
+}
+
+// 单个按钮的重试修正
+async function retryFixButtonStyle(
+  btnFrame: FrameNode,
+  adaptiveModule: FrameNode,
+  btnName: string,
+  maxRetries: number,
+  delayMs: number
+) {
+  for (let i = 0; i < maxRetries; i++) {
+    // 查找游戏信息Frame
+    const gameInfoFrame = adaptiveModule.findOne(node =>
+      node.type === 'FRAME' && node.name === '游戏信息'
+    ) as FrameNode | null;
+
+    if (gameInfoFrame) {
+      // 查找并修正文本样式
+      const style = getDownloadButtonTextStyle(gameInfoFrame);
+      const textNode = btnFrame.findOne(n => n.type === 'TEXT') as TextNode | null;
+      if (style && textNode) {
+        await figma.loadFontAsync(style.fontName);
+        textNode.fontName = style.fontName;
+        // textNode.fills = style.fills;
+        // 只取第一个Paint对象，确保不是mixed
+        if (Array.isArray(style.fills) && style.fills.length > 0) {
+          textNode.fills = [Object.assign({}, style.fills[0])];
+        }
+      }
+
+      // 查找并克隆按钮底图
+      const buttonImage = await findAndCloneButtonImageFromGameInfo(gameInfoFrame);
+      if (buttonImage) {
+        buttonImage.resize(btnFrame.width, btnFrame.height);
+        buttonImage.x = 0;
+        buttonImage.y = 0;
+        btnFrame.appendChild(buttonImage);
+        // 关键：底图插入后，再将文本节点移到最顶层
+        if (textNode) {
+          btnFrame.appendChild(textNode);
+        }
+      }
+
+      return; // 成功后退出
+    }
+    // 未找到则延迟重试
+    await new Promise(res => setTimeout(res, delayMs));
+  }
+  console.warn(`[重试修正] ${btnName} 按钮样式修正失败，未找到游戏信息Frame`);
+}

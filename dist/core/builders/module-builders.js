@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 /// <reference types="@figma/plugin-typings" />
+import { createButtonContainer } from './figma-utils';
 import { ModuleType, CONSTANTS } from '../types';
 import { NodeUtils, ColorUtils, ImageNodeBuilder, createTitleContainer } from './figma-utils';
 // ==================== 头部模块 ====================
@@ -569,16 +570,15 @@ class GameInfoLayoutManager {
     }
 }
 // ==================== 自定义模块 ====================
-// 创建自定义模块的异步函数
-export function createCustomModule(module) {
+export function createCustomModule(module, mainContainer) {
     return __awaiter(this, void 0, void 0, function* () {
         const factory = new ModuleFactory();
-        return factory.createModule(module);
+        return factory.createModule(module, mainContainer);
     });
 }
 // 模块工厂类，用于创建不同类型的模块
 class ModuleFactory {
-    createModule(module) {
+    createModule(module, mainContainer) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let moduleFrame;
@@ -609,7 +609,7 @@ class ModuleFactory {
                     // 九宫格模块创建函数
                     case 'nineGrid':
                     case ModuleType.NINE_GRID:
-                        moduleFrame = yield this.createNineGridModule(module.content);
+                        moduleFrame = yield this.createNineGridModule(module.content, mainContainer);
                         break;
                     // 图片轮播模块创建函数
                     case 'carousel':
@@ -676,9 +676,9 @@ class ModuleFactory {
             return frame;
         });
     }
-    createNineGridModule(content) {
+    createNineGridModule(content, mainContainer) {
         return __awaiter(this, void 0, void 0, function* () {
-            const builder = new NineGridModuleBuilder(content);
+            const builder = new NineGridModuleBuilder(content, mainContainer);
             return builder.build();
         });
     }
@@ -977,11 +977,13 @@ class FooterBuilder {
 }
 // ==================== 九宫格抽奖模块构建器 ====================
 export class NineGridModuleBuilder {
-    constructor(content) {
+    constructor(content, mainContainer) {
         this.CELL_SIZE = 270; // 每个格子固定大小270x270px
         this.CELL_SPACING = 24; // 格子间距24px
         this.currentY = 0; // 当前Y位置
         this.content = content;
+        // 如果没有传递主容器，创建一个临时容器用于查找
+        this.mainContainer = mainContainer || NodeUtils.createFrame('临时容器', 1080, 1000);
         this.frame = NodeUtils.createFrame('九宫格抽奖', CONSTANTS.H5_WIDTH, 1000);
         this.frame.fills = []; // 背景填充为透明
     }
@@ -992,6 +994,30 @@ export class NineGridModuleBuilder {
                 yield this.addTitle();
                 // 添加九宫格主体
                 yield this.addNineGrid();
+                // 添加间距
+                this.currentY += 90;
+                // 创建我的奖品容器 - 父节点应为this.frame，查找样式用mainContainer
+                yield createButtonContainer(this.frame, this.mainContainer, {
+                    name: '我的奖品',
+                    text: '我的奖品',
+                    x: 102,
+                    y: this.currentY,
+                    width: 398,
+                    height: 112,
+                    textFontSize: 50
+                });
+                // 创建活动规则容器 - 父节点应为this.frame，查找样式用mainContainer
+                yield createButtonContainer(this.frame, this.mainContainer, {
+                    name: '活动规则',
+                    text: '活动规则',
+                    x: 580,
+                    y: this.currentY,
+                    width: 398,
+                    height: 112,
+                    textFontSize: 50
+                });
+                // 更新currentY以包含按钮高度
+                this.currentY += 112;
                 // 调整整个模块的高度
                 this.adjustFrameHeight();
                 return this.frame;
@@ -1269,13 +1295,6 @@ export class NineGridModuleBuilder {
             }
             return prizeBox;
         });
-    }
-    // 获取奖品在九宫格中的索引（跳过中间的抽奖按钮）
-    getPrizeIndex(row, col) {
-        const cellIndex = row * 3 + col;
-        if (cellIndex < 4)
-            return cellIndex;
-        return cellIndex - 1; // 跳过中间的抽奖按钮位置
     }
     adjustFrameHeight() {
         this.frame.resize(CONSTANTS.H5_WIDTH, this.currentY + 90);

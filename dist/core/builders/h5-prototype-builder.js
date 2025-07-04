@@ -12,7 +12,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 /// <reference types="@figma/plugin-typings" />
 import { CONSTANTS } from '../types';
 import { Utils } from '../utils';
-import { FontManager, NodeUtils, ColorUtils, ImageNodeBuilder } from './figma-utils';
+import { FontManager, NodeUtils, ColorUtils, ImageNodeBuilder, findAndCloneButtonImageFromGameInfo, getDownloadButtonTextStyle } from './figma-utils';
 import { createHeaderModule, createGameInfoModule, createCustomModule, createRulesModule, createFooterModule } from './module-builders';
 /**
  * H5原型构建器
@@ -223,7 +223,7 @@ export class H5PrototypeBuilder {
     createCustomModules() {
         var _a;
         return ((_a = this.config.modules) === null || _a === void 0 ? void 0 : _a.map((module) => __awaiter(this, void 0, void 0, function* () {
-            const moduleFrame = yield createCustomModule(module);
+            const moduleFrame = yield createCustomModule(module, this.h5Frame);
             return moduleFrame;
         }))) || [];
     }
@@ -262,42 +262,46 @@ export class H5PrototypeBuilder {
         });
     }
     finalizeLayout() {
-        // 2. 调整H5原型容器高度
-        if (this.h5Frame) {
-            // 如果有自适应模块容器，调整为自适应模块容器高度
-            this.outerFrame.resize(CONSTANTS.H5_WIDTH, this.h5Frame.height);
-            // 确保自适应模块容器在最上层显示（使用insertChild方法而不是remove+appendChild）
-            try {
-                if (this.h5Frame.parent === this.outerFrame) {
-                    // 获取当前子节点数量，将h5Frame移动到最后位置（最上层）
-                    const childrenCount = this.outerFrame.children.length;
-                    if (childrenCount > 1) {
-                        // 使用insertChild将节点移动到最后位置
-                        this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
+        return __awaiter(this, void 0, void 0, function* () {
+            // 2. 调整H5原型容器高度
+            if (this.h5Frame) {
+                // 如果有自适应模块容器，调整为自适应模块容器高度
+                this.outerFrame.resize(CONSTANTS.H5_WIDTH, this.h5Frame.height);
+                // 确保自适应模块容器在最上层显示（使用insertChild方法而不是remove+appendChild）
+                try {
+                    if (this.h5Frame.parent === this.outerFrame) {
+                        // 获取当前子节点数量，将h5Frame移动到最后位置（最上层）
+                        const childrenCount = this.outerFrame.children.length;
+                        if (childrenCount > 1) {
+                            // 使用insertChild将节点移动到最后位置
+                            this.outerFrame.insertChild(childrenCount - 1, this.h5Frame);
+                        }
                     }
                 }
-            }
-            catch (reorderError) {
-                console.error('重新排列H5模块容器失败:', reorderError);
-            }
-        }
-        else {
-            // 如果没有自适应模块容器，设置一个最小高度或根据背景图片调整
-            let finalHeight = 100; // 默认最小高度
-            // 如果有背景图片，根据背景图片高度调整
-            if (this.config.pageBgImage) {
-                // 查找背景图片节点
-                const bgImageNode = this.outerFrame.findOne(node => node.name === '页面背景图片');
-                if (bgImageNode && 'height' in bgImageNode) {
-                    finalHeight = Math.max(finalHeight, bgImageNode.height);
+                catch (reorderError) {
+                    console.error('重新排列H5模块容器失败:', reorderError);
                 }
             }
-            this.outerFrame.resize(CONSTANTS.H5_WIDTH, finalHeight);
-            console.log(`没有模块内容，H5原型设置为最小高度: ${finalHeight}px`);
-        }
-        // 添加到当前页面并居中显示
-        NodeUtils.safeAppendChild(figma.currentPage, this.outerFrame, 'H5原型添加到当前页面');
-        figma.viewport.scrollAndZoomIntoView([this.outerFrame]);
+            else {
+                // 如果没有自适应模块容器，设置一个最小高度或根据背景图片调整
+                let finalHeight = 100; // 默认最小高度
+                // 如果有背景图片，根据背景图片高度调整
+                if (this.config.pageBgImage) {
+                    // 查找背景图片节点
+                    const bgImageNode = this.outerFrame.findOne(node => node.name === '页面背景图片');
+                    if (bgImageNode && 'height' in bgImageNode) {
+                        finalHeight = Math.max(finalHeight, bgImageNode.height);
+                    }
+                }
+                this.outerFrame.resize(CONSTANTS.H5_WIDTH, finalHeight);
+                console.log(`没有模块内容，H5原型设置为最小高度: ${finalHeight}px`);
+            }
+            // 修正九宫格抽奖按钮样式
+            yield retryFixNineGridButtonStyles(this.h5Frame);
+            // 添加到当前页面并居中显示
+            NodeUtils.safeAppendChild(figma.currentPage, this.outerFrame, 'H5原型添加到当前页面');
+            figma.viewport.scrollAndZoomIntoView([this.outerFrame]);
+        });
     }
 }
 /**
@@ -309,6 +313,67 @@ export function createH5Prototype(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const builder = new H5PrototypeBuilder(config);
         return builder.build();
+    });
+}
+// 辅助：查找所有九宫格抽奖Frame
+function findAllNineGridFrames(root) {
+    return root.findAll(node => node.type === 'FRAME' && node.name === '九宫格抽奖');
+}
+// 辅助：查找按钮容器
+function findButtonContainer(nineGridFrame, buttonName) {
+    return nineGridFrame.findOne(node => node.type === 'FRAME' && node.name === buttonName);
+}
+// 重试修正主函数
+function retryFixNineGridButtonStyles(adaptiveModule_1) {
+    return __awaiter(this, arguments, void 0, function* (adaptiveModule, maxRetries = 10, delayMs = 100) {
+        const nineGridFrames = findAllNineGridFrames(adaptiveModule);
+        for (const nineGridFrame of nineGridFrames) {
+            for (const btnName of ['我的奖品', '活动规则']) {
+                const btnFrame = findButtonContainer(nineGridFrame, btnName);
+                if (btnFrame) {
+                    yield retryFixButtonStyle(btnFrame, adaptiveModule, btnName, maxRetries, delayMs);
+                }
+            }
+        }
+    });
+}
+// 单个按钮的重试修正
+function retryFixButtonStyle(btnFrame, adaptiveModule, btnName, maxRetries, delayMs) {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let i = 0; i < maxRetries; i++) {
+            // 查找游戏信息Frame
+            const gameInfoFrame = adaptiveModule.findOne(node => node.type === 'FRAME' && node.name === '游戏信息');
+            if (gameInfoFrame) {
+                // 查找并修正文本样式
+                const style = getDownloadButtonTextStyle(gameInfoFrame);
+                const textNode = btnFrame.findOne(n => n.type === 'TEXT');
+                if (style && textNode) {
+                    yield figma.loadFontAsync(style.fontName);
+                    textNode.fontName = style.fontName;
+                    // textNode.fills = style.fills;
+                    // 只取第一个Paint对象，确保不是mixed
+                    if (Array.isArray(style.fills) && style.fills.length > 0) {
+                        textNode.fills = [Object.assign({}, style.fills[0])];
+                    }
+                }
+                // 查找并克隆按钮底图
+                const buttonImage = yield findAndCloneButtonImageFromGameInfo(gameInfoFrame);
+                if (buttonImage) {
+                    buttonImage.resize(btnFrame.width, btnFrame.height);
+                    buttonImage.x = 0;
+                    buttonImage.y = 0;
+                    btnFrame.appendChild(buttonImage);
+                    // 关键：底图插入后，再将文本节点移到最顶层
+                    if (textNode) {
+                        btnFrame.appendChild(textNode);
+                    }
+                }
+                return; // 成功后退出
+            }
+            // 未找到则延迟重试
+            yield new Promise(res => setTimeout(res, delayMs));
+        }
+        console.warn(`[重试修正] ${btnName} 按钮样式修正失败，未找到游戏信息Frame`);
     });
 }
 //# sourceMappingURL=h5-prototype-builder.js.map

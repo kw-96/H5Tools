@@ -3,6 +3,8 @@
 
 /// <reference types="@figma/plugin-typings" />
 
+import { createButtonContainer } from './figma-utils';
+
 import { 
   H5Config, 
   ImageInfo, 
@@ -669,15 +671,14 @@ class GameInfoLayoutManager {
 
 // ==================== 自定义模块 ====================
 
-// 创建自定义模块的异步函数
-export async function createCustomModule(module: ModuleData): Promise<FrameNode> {
+export async function createCustomModule(module: ModuleData, mainContainer?: FrameNode): Promise<FrameNode> {
   const factory = new ModuleFactory();
-  return factory.createModule(module as unknown as Module);
+  return factory.createModule(module as unknown as Module, mainContainer);
 }
 
 // 模块工厂类，用于创建不同类型的模块
 class ModuleFactory {
-  async createModule(module: Module): Promise<FrameNode> {
+  async createModule(module: Module, mainContainer?: FrameNode): Promise<FrameNode> {
     try {
       let moduleFrame: FrameNode;
       
@@ -710,7 +711,7 @@ class ModuleFactory {
         // 九宫格模块创建函数
         case 'nineGrid':
         case ModuleType.NINE_GRID:
-          moduleFrame = await this.createNineGridModule(module.content as NineGridContent);
+          moduleFrame = await this.createNineGridModule(module.content as NineGridContent, mainContainer);
           break;
         // 图片轮播模块创建函数
         case 'carousel':
@@ -785,8 +786,8 @@ class ModuleFactory {
     return frame;
   }
 
-  private async createNineGridModule(content: NineGridContent): Promise<FrameNode> {
-    const builder = new NineGridModuleBuilder(content);
+  private async createNineGridModule(content: NineGridContent, mainContainer?: FrameNode): Promise<FrameNode> {
+    const builder = new NineGridModuleBuilder(content, mainContainer);
     return builder.build();
   }
 
@@ -1149,12 +1150,15 @@ class FooterBuilder {
 export class NineGridModuleBuilder {
   private frame: FrameNode;
   private content: NineGridContent; // 使用正确的类型
+  private mainContainer: FrameNode; // 新增：主容器参数
   private readonly CELL_SIZE = 270; // 每个格子固定大小270x270px
   private readonly CELL_SPACING = 24; // 格子间距24px
   private currentY = 0; // 当前Y位置
 
-  constructor(content: NineGridContent) {
+  constructor(content: NineGridContent, mainContainer?: FrameNode) {
     this.content = content;
+    // 如果没有传递主容器，创建一个临时容器用于查找
+    this.mainContainer = mainContainer || NodeUtils.createFrame('临时容器', 1080, 1000);
     this.frame = NodeUtils.createFrame('九宫格抽奖', CONSTANTS.H5_WIDTH, 1000);
     this.frame.fills = []; // 背景填充为透明
   }
@@ -1166,6 +1170,34 @@ export class NineGridModuleBuilder {
       
       // 添加九宫格主体
       await this.addNineGrid();
+
+      // 添加间距
+      this.currentY += 90;
+
+      // 创建我的奖品容器 - 父节点应为this.frame，查找样式用mainContainer
+      await createButtonContainer(this.frame, this.mainContainer, {
+        name: '我的奖品',
+        text: '我的奖品',
+        x: 102,
+        y: this.currentY,
+        width: 398,
+        height: 112,
+        textFontSize: 50
+      });
+      
+      // 创建活动规则容器 - 父节点应为this.frame，查找样式用mainContainer
+      await createButtonContainer(this.frame, this.mainContainer, {
+        name: '活动规则',
+        text: '活动规则',
+        x: 580,
+        y: this.currentY,
+        width: 398,
+        height: 112,
+        textFontSize: 50
+      });
+      
+      // 更新currentY以包含按钮高度
+      this.currentY += 112;
       
       // 调整整个模块的高度
       this.adjustFrameHeight();
@@ -1472,13 +1504,6 @@ export class NineGridModuleBuilder {
     }
 
     return prizeBox;
-  }
-
-  // 获取奖品在九宫格中的索引（跳过中间的抽奖按钮）
-  private getPrizeIndex(row: number, col: number): number {
-    const cellIndex = row * 3 + col;
-    if (cellIndex < 4) return cellIndex;
-    return cellIndex - 1; // 跳过中间的抽奖按钮位置
   }
 
   private adjustFrameHeight(): void {
