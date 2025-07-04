@@ -1,12 +1,12 @@
 /* 基础样式和重置 */
 * {
   box-sizing: border-box;
-}
-
-/* 隐藏滚动条的跨浏览器兼容方案 */
-* {
   /* IE/Edge 隐藏滚动条 */
   -ms-overflow-style: none;
+  -webkit-user-select: none; /* 兼容Safari/Chrome */
+  -moz-user-select: none;    /* 兼容Firefox */
+  -ms-user-select: none;     /* 兼容IE/Edge */
+  user-select: none;
 }
 
 /* WebKit 浏览器滚动条样式 */

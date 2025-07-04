@@ -259,6 +259,21 @@ class ChannelPrototypeGenerator {
         return;
       }
       
+      // 清除活动规则容器
+      const activityRulesContainer = findActivityRulesContainer(nineGridFrame);
+      if (activityRulesContainer) {
+        activityRulesContainer.remove(); // 直接删除整个容器
+      }
+
+      // 清除我的奖品容器
+      const myRewardsContainer = findMyRewardsContainer(nineGridFrame);
+      if (myRewardsContainer) {
+        myRewardsContainer.remove(); // 直接删除整个容器
+      }
+
+      // 调整OPPO九宫格模块高度
+      nineGridFrame.resize(nineGridFrame.width, 1263);
+
       // 查找九宫格主体容器
       const mainContainer = findNineGridMainContainer(nineGridFrame);
       if (!mainContainer) {
@@ -268,6 +283,9 @@ class ChannelPrototypeGenerator {
       
       // 清空九宫格主体容器的所有内容
       clearContainerContent(mainContainer);
+
+      // 调整九宫格主体容器高度
+      mainContainer.resize(mainContainer.width, 1053);
       
       // 插入砸蛋样式图片
       await this.insertEggBreakingImage(mainContainer, this.channel);
@@ -690,6 +708,26 @@ function clearFooterLogo(footerFrame: FrameNode): void {
 function findNineGridMainContainer(nineGridFrame: FrameNode): FrameNode | null {
   const mainContainer = nineGridFrame.findOne(node => 
     node.type === 'FRAME' && node.name === '九宫格主体'
+  ) as FrameNode;
+  return mainContainer || null;
+}
+
+/**
+ * 查找活动规则容器
+ */
+function findActivityRulesContainer(nineGridFrame: FrameNode): FrameNode | null {
+  const mainContainer = nineGridFrame.findOne(node => 
+    node.type === 'FRAME' && node.name === '活动规则'
+  ) as FrameNode;
+  return mainContainer || null;
+}
+
+/**
+ * 查找我的奖品容器
+ */
+function findMyRewardsContainer(nineGridFrame: FrameNode): FrameNode | null {
+  const mainContainer = nineGridFrame.findOne(node => 
+    node.type === 'FRAME' && node.name === '我的奖品'
   ) as FrameNode;
   return mainContainer || null;
 }
