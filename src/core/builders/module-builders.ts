@@ -846,7 +846,7 @@ class ModuleFactory {
   }
 }
 
-// ==================== 规则模块 ====================
+// ==================== 活动规则模块创建器 ====================
 
 // 活动规则内容接口
 interface ActivityRulesContent {
@@ -964,13 +964,18 @@ class ActivityRulesModuleBuilder {
     // 如果没有标题文案，使用空字符串，但仍然可以显示背景图片
     const titleText = hasRulesTitle ? this.content.rulesTitle : '';
     
+    const bgImage = hasRulesBgImage && this.content.rulesBgImage ? this.content.rulesBgImage : undefined;
     const titleContainer = await createTitleContainer(
       titleText,
-      this.content.rulesBgImage,
+      bgImage,
       1080,
       120,
-      48, // 48px字体大小
-      'Bold'
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '活动规则标题容器'
+      }
     );
     
     titleContainer.x = 0;

@@ -592,40 +592,68 @@ export class ImageNodeBuilder {
 // ==================== 标题容器创建函数 ====================
 
 export async function createTitleContainer(
-  title: string, 
-  bgImage: Uint8Array | ImageInfo | null,
+  title: string | undefined,
+  titleBackground: ImageInfo | undefined,
   width: number,
   height: number,
-  fontSize: number = 24,
-  fontWeight: 'Regular' | 'Medium' | 'Bold' = 'Bold'
-): Promise<FrameNode> {
-  // 创建容器框架
-  const container = NodeUtils.createFrame('标题容器', width, height);
-  
-  // 如果有背景图片，设置背景
-  if (bgImage) {
-    await ImageNodeBuilder.setImageFill(container, bgImage);
-  } else {
-    // 默认背景色
-    container.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+  currentY: number,
+  options?: {
+    fontSize?: number;
+    fontWeight?: 'Regular' | 'Medium' | 'Bold';
+    textColor?: RGB;
+    frameName?: string;
   }
-  
-  // 创建标题文本
-  if (title) {
+): Promise<{ container: FrameNode, newY: number } | null> {
+  if ((!title || title.trim() === '') && !titleBackground) {
+    return null;
+  }
+
+  const fontSize = options?.fontSize ?? 48;
+  const fontWeight = options?.fontWeight ?? 'Bold';
+  const textColor = options?.textColor ?? { r: 1, g: 1, b: 1 };
+  const frameName = options?.frameName ?? '标题容器';
+
+  // 创建Frame
+  const titleContainer = NodeUtils.createFrame(frameName, width, height);
+  titleContainer.fills = [];
+
+  // 背景图片
+  if (titleBackground) {
+    try {
+      const titleBgImage = await ImageNodeBuilder.insertImage(
+        titleBackground,
+        "标题背景图片",
+        width,
+        height
+      );
+      if (titleBgImage) {
+        titleBgImage.x = 0;
+        titleBgImage.y = 0;
+        NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
+      }
+    } catch (error) {
+      console.error('标题背景图片创建失败:', error);
+    }
+  }
+
+  // 标题文本
+  if (title && title.trim() !== '') {
     const titleText = await NodeUtils.createText(title, fontSize, fontWeight);
-    titleText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })];
-    titleText.textAlignHorizontal = 'CENTER';
-    titleText.textAlignVertical = 'CENTER';
-    
-    // 居中定位
-    titleText.x = (width - titleText.width) / 2;
+    titleText.fills = [ColorUtils.createSolidFill(textColor)];
+    titleText.resize(width, titleText.height);
+    titleText.textAlignHorizontal = "CENTER";
+    titleText.x = 0;
     titleText.y = (height - titleText.height) / 2;
-    
-    container.appendChild(titleText);
+    NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
   }
-  
-  return container;
+
+  // 设置Y坐标并返回新Y
+  titleContainer.x = 0;
+  titleContainer.y = currentY + 90;
+  return { container: titleContainer, newY: currentY + 90 + height };
 }
+
+// ==================== 除游戏信息容器外其他按钮容器创建函数 ====================
 
 /**
  * 递归查找"游戏信息"Frame下的"按钮底图"节点并克隆

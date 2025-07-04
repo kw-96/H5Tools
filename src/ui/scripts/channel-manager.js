@@ -214,16 +214,13 @@ class ChannelManager {
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'vivo': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'huawei': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'xiaomi': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
+
       ]
     };
     
