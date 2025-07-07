@@ -281,6 +281,7 @@ function buildHTML() {
       path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'upload.css'),
       path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'modules.css'),
       path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'channels.css'),
+      path.join(BUILD_CONFIG.paths.ui.styles, 'components', 'tools-panel.css'),
       path.join(BUILD_CONFIG.paths.ui.styles, 'themes', 'dark.css')
     ];
 

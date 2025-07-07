@@ -16,6 +16,7 @@
 @import './components/upload.css';
 @import './components/modules.css';
 @import './components/channels.css';
+@import './components/tools-panel.css';
 
 /* 主题样式 */
 @import './themes/dark.css'; 

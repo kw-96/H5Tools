@@ -1527,13 +1527,13 @@ export class CarouselModuleBuilder {
   // 添加标题容器
   private async addTitleContainer(): Promise<void> {
     if (!this.content.title && !this.content.titleBackground) return;
-  
+
     console.log('添加标题容器 - 1080x120px');
-  
+
     const result = await createTitleContainer(
       this.content.title,
       this.content.titleBackground ?? undefined,
-      1080,
+          1080,
       120,
       0, // 假设有currentY用于布局链
       {
@@ -1726,13 +1726,13 @@ export class ActivityContentBuilder {
   private async addMainTitle(): Promise<number | undefined> {
     // 如果没有大标题背景或大标题文本，则不创建大标题容器
     if (!this.content.mainTitleBg || !this.content.mainTitle) return;
-  
+
     console.log('添加大标题...');
-  
+
     const result = await createTitleContainer(
       this.content.mainTitle,
       this.content.mainTitleBg ?? undefined,
-      1080,
+        1080,
       120,
       0, // 没有currentY，直接传0
       {
@@ -1754,13 +1754,13 @@ export class ActivityContentBuilder {
   private async addSubTitle(startY: number = 0): Promise<void> {
     // 如果没有小标题背景或小标题文本，则不创建小标题容器
     if (!this.content.subTitleBg || !this.content.subTitle) return;
-  
+
     console.log('添加小标题...');
-  
+
     const result = await createTitleContainer(
       this.content.subTitle,
       this.content.subTitleBg ?? undefined,
-      1080,
+        1080,
       100,
       startY, // 让小标题紧贴大标题容器
       {
@@ -2143,7 +2143,7 @@ export class VerticalCarouselModuleBuilder {
   // 添加标题容器
   private async addTitleContainer(): Promise<void> {
     console.log('添加轮播标题容器...');
-  
+    
     const result = await createTitleContainer(
       this.content.title ?? undefined,             // 标题文本
       this.content.titleBackground ?? undefined,   // 标题背景图片

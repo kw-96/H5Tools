@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>渠道美术-H5延展工具</title>
-  
+
   <!-- 样式文件 - 外部CDN版本 -->
   <style>
 /* 基础样式和重置 */
@@ -46,6 +46,11 @@ body {
   padding-top: 46px;
   padding-bottom: 40px;
 }
+
+html, body, .container {
+    height: 100%;
+    min-height: 100%;
+  }
 
 /* 动画效果 */
 @keyframes fadeIn {
@@ -118,6 +123,28 @@ body {
 /* 隐藏元素 */
 .visually-hidden {
   display: none !important;
+}
+
+:root {
+  --panel-bg: #f5f5f7;
+  --panel-sidebar-bg: #fff;
+  --panel-sidebar-border: #e0e0e0;
+  --panel-menu-color: #666;
+  --panel-menu-hover-bg: #e6f0ff;
+  --panel-menu-hover-color: #0071e3;
+  --tool-card-bg: #fff;
+  --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --editor-preview-bg: #f0f0f0;
+  --editor-placeholder-color: #bbb;
+  --editor-slider-label: #888;
+  --editor-slider-track: #e0e0e0;
+  --editor-slider-thumb: #0071e3;
+  --editor-reset-bg: #f5f5f7;
+  --editor-reset-color: #666;
+  --editor-reset-hover-bg: #e0e0e0;
+  --editor-reset-hover-color: #0071e3;
+  --editor-confirm-bg: #0071e3;
+  --editor-confirm-hover-bg: #005bb5;
 } 
 /* 布局样式 */
 .page-footer {
@@ -232,8 +259,8 @@ body {
   width: 100%;
   justify-content: space-between;
   background-color: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 8px 0;
   position: fixed;
@@ -264,8 +291,9 @@ body {
 }
 
 .tab-label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
+  font-weight: bold;
   margin-top: 2px;
   opacity: 0.8;
 }
@@ -1391,10 +1419,423 @@ button#cancel:hover {
   transform: none;
   box-shadow: none;
 } 
+/* 工具集专属tab内容区布局修正（终极版） */
+.tools-tab-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible !important;
+  display: none; /* 默认隐藏tab内容 */
+}
+
+/* 激活状态的tab内容样式 */
+.tools-tab-content.active {
+  display: flex !important; /* 激活时显示为flex布局 */
+  flex-direction: row;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 工具面板容器 */
+.tools-panel {
+  display: flex;                /* 使用弹性布局 */
+  flex-direction: row;          /* 设置主轴方向为水平 */
+  height: 100%;                 /* 高度占满父容器 */
+  min-height: 0;                /* 最小高度为0，允许内容溢出 */
+  width: 100%;                  /* 宽度占满父容器 */
+  max-width: 100%;              /* 最大宽度不超过父容器 */
+  overflow: hidden;             /* 隐藏溢出内容 */
+  background: var(--panel-bg);  /* 使用自定义背景颜色变量 */
+  border-radius: 6px;           /* 设置圆角为6像素 */
+  margin-top: 25;               /* 顶部外边距为25像素 */
+}
+
+/* 工具面板侧边栏 */
+.tools-panel__sidebar {
+  flex-shrink: 0;                /* 禁止侧边栏缩小 */
+  width: 80px;                   /* 设置侧边栏宽度为80像素 */
+  background: var(--panel-sidebar-bg);  /* 使用自定义侧边栏背景颜色变量 */
+  border-right: 1px solid var(--panel-sidebar-border);  /* 添加右侧边框 */
+  display: flex;                 /* 使用弹性布局 */
+  flex-direction: column;        /* 设置主轴方向为垂直 */
+  overflow: hidden;              /* 隐藏溢出内容 */
+}
+
+/* 工具菜单列表 */
+.tools-menu {
+  list-style: none;              /* 移除列表项的默认样式 */
+  margin: 0;                     /* 移除外边距 */
+  padding: 8px 0;                /* 设置上下内边距为8像素，左右为0 */
+}
+
+/* 工具菜单项 */
+.tools-menu__item {
+  display: flex;                /* 使用弹性布局 */
+  align-items: center;          /* 垂直居中对齐 */
+  padding: 20px 4px;            /* 设置内边距，上下20px，左右4px */
+  cursor: pointer;              /* 鼠标悬停时显示手型光标 */
+  color: var(--panel-menu-color); /* 使用自定义菜单项文字颜色变量 */
+  transition: background 0.2s, color 0.2s; /* 添加背景和颜色的过渡效果 */
+  font-size: 12px;              /* 设置字体大小为12像素 */
+  flex-direction: column;       /* 将子元素垂直排列 */
+  text-align: center;           /* 文本居中对齐 */
+  gap: 10px;                    /* 设置子元素之间的间距为10像素 */
+}
+
+/* 活动状态和悬停状态的工具菜单项 */
+.tools-menu__item--active,
+.tools-menu__item:hover {
+  background: var(--panel-menu-hover-bg);    /* 设置悬停或活动状态的背景颜色 */
+  color: var(--panel-menu-hover-color);      /* 设置悬停或活动状态的文字颜色 */
+}
+
+/* 工具菜单图标 */
+.tools-menu__icon {
+  margin-right: 0;              /* 移除右侧外边距 */
+  font-size: clamp(22px, 60%, 38px); /* 最小22px，最大38px，60%为自适应 */
+  margin-bottom: 1px;           /* 底部外边距1像素 */
+  display: block;               /* 设置为块级元素 */
+  text-align: center;           /* 文本居中对齐 */
+  line-height: 1;               /* 行高设置为1，确保图标垂直居中 */
+}
+
+/* 工具菜单标签 */
+.tools-menu__label {
+  font-size: 12px;      /* 设置字体大小为12像素 */
+  font-weight: bold;    /* 设置字体为粗体 */
+  line-height: 1.3;     /* 设置行高为1.3倍字体大小 */
+  word-break: break-all; /* 允许在任意字符间断行 */
+  white-space: normal;  /* 允许正常的空白字符处理和换行 */
+  max-width: 75px;      /* 设置最大宽度为75像素 */
+  text-align: center;   /* 文本居中对齐 */
+  color: var(--panel-menu-color); /* 使用自定义菜单颜色变量 */
+}
+
+/* 工具面板内容区域 */
+.tools-panel__content {
+  flex: 1 1 0%;                    /* 允许内容区域灵活增长和收缩，但初始大小为0 */
+  min-width: 0;                    /* 最小宽度为0，防止内容溢出 */
+  min-height: 0;                   /* 最小高度为0，防止内容溢出 */
+  max-width: calc(100% - 85px);    /* 最大宽度为容器宽度减去85像素（可能是侧边栏宽度） */
+  overflow: auto;                  /* 内容溢出时显示滚动条 */
+  display: flex;                   /* 使用弹性布局 */
+  flex-direction: column;          /* 子元素垂直排列 */
+  margin-top: 15;                  /* 顶部外边距为25像素 */
+}
+
+/* 工具卡片样式 */
+.tool-card {
+  display: none;                /* 默认隐藏工具卡片 */
+  background: transparent;      /* 设置背景为透明 */
+  border-radius: 0;             /* 移除边框圆角 */
+  padding: 16px 20px;           /* 设置内边距，上下16px，左右20px */
+  box-shadow: none;             /* 移除阴影效果 */
+  width: 100%;                  /* 宽度占满父容器 */
+  max-width: none;              /* 移除最大宽度限制 */
+  margin: 0;                    /* 移除外边距 */
+}
+
+/* 活动状态的工具卡片 */
+.tool-card--active {
+  display: block;               /* 显示活动状态的工具卡片 */
+}
+
+/* 图像编辑器头部样式 */
+.image-editor__header {
+  display: flex;                /* 使用弹性布局 */
+  justify-content: flex-start;  /* 子元素从起始位置开始排列 */
+  margin-bottom: 20px;          /* 底部外边距10像素 */
+  gap: 5px;                     /* 子元素之间的间隔为5像素 */
+  flex-wrap: wrap;              /* 允许子元素在需要时换行 */
+}
+
+/* 图像编辑器模式按钮样式 */
+.image-editor__mode-btn {
+  background: #f5f6fa;                /* 设置按钮背景色 */
+  color: var(--primary-color, #2563eb); /* 设置文字颜色，使用变量或默认值 */
+  font-weight: 500;                   /* 设置字体粗细 */
+  border-radius: 6px;                 /* 设置圆角 */
+  padding: 8px 16px;                  /* 设置内边距 */
+  margin-right: 8px;                  /* 设置右侧外边距 */
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s; /* 添加过渡效果 */
+  position: relative;                 /* 设置相对定位 */
+  align-items: center;                /* 子元素居中显示 */
+}
+
+/* 移除最后一个模式按钮的右侧外边距 */
+.image-editor__mode-btn:last-child {
+  margin-right: 0;
+}
+
+/* 活动状态的图像编辑器模式按钮样式 */
+.image-editor__mode-btn--active {
+  background: var(--primary-color, #2563eb);  /* 设置活动按钮的背景颜色，使用变量或默认蓝色 */
+  color: #fff;                                /* 设置文字颜色为白色 */
+  font-weight: 700;                           /* 设置字体粗细为700（粗体） */
+  z-index: 1;                                 /* 设置z-index确保活动按钮在其他元素之上 */
+}
+
+/* 图像编辑器预览区域样式 */
+.image-editor__preview-area {
+  background: var(--editor-preview-bg);  /* 使用自定义背景颜色变量 */
+  border-radius: 4px;                    /* 设置4像素的圆角 */
+  height: 140px;                         /* 固定高度为140像素 */
+  display: flex;                         /* 使用弹性布局 */
+  align-items: center;                   /* 垂直居中对齐 */
+  justify-content: center;               /* 水平居中对齐 */
+  margin-bottom: 10px;                   /* 底部外边距10像素 */
+  position: relative;                    /* 相对定位 */
+  cursor: pointer;                       /* 鼠标悬停时显示指针样式 */
+  overflow: hidden;                      /* 超出部分隐藏 */
+}
+
+/* 图像编辑器预览占位符样式 */
+.image-editor__preview-placeholder {
+  color: var(--editor-placeholder-color);  /* 使用自定义占位符颜色变量 */
+  font-size: 12px;                         /* 设置字体大小为12像素 */
+  text-align: center;                      /* 文本居中对齐 */
+  padding: 0 6px;                          /* 左右内边距为6像素，上下为0 */
+  line-height: 1.3;                        /* 设置行高为字体大小的1.3倍 */
+}
+
+/* 图像编辑器画布样式 */
+.image-editor__canvas {
+  max-width: 100%;              /* 设置最大宽度为100%，确保不超过父容器 */
+  max-height: 100%;             /* 设置最大高度为100%，确保不超过父容器 */
+  display: block;               /* 将画布设置为块级元素 */
+  margin: 0 auto;               /* 水平居中画布 */
+  background: transparent;      /* 设置背景为透明 */
+}
+
+/* 图像编辑器控件容器样式 */
+.image-editor__controls {
+  margin-bottom: 10px;          /* 设置底部外边距为10像素，与其他元素保持间距 */
+}
+
+/* 图像编辑器模式切换容器样式 */
+.image-editor__mode-switch {
+  display: flex;                /* 使用弹性布局 */
+  gap: 16px;                    /* 设置子元素之间的间距为16像素 */
+  margin-bottom: 12px;          /* 底部外边距12像素 */
+  align-items: center;          /* 垂直居中对齐子元素 */
+}
+
+/* 图像编辑器单选按钮样式 */
+.image-editor__radio {
+  display: flex;                /* 使用弹性布局 */
+  align-items: center;          /* 垂直居中对齐子元素 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+  font-size: 13px;              /* 设置字体大小为13像素 */
+  color: var(--primary-color, #2563eb);  /* 使用主色变量，默认为蓝色 */
+  position: relative;           /* 设置相对定位 */
+  -webkit-user-select: none;    /* 禁止WebKit浏览器中的文本选择 */
+  user-select: none;            /* 禁止文本选择 */
+  margin-right: 10px;           /* 右侧外边距10像素 */
+}
+
+/* 图像编辑器单选按钮输入样式 */
+.image-editor__radio input[type="radio"] {
+  opacity: 0;                   /* 设置透明度为0，隐藏原生单选按钮 */
+  position: absolute;           /* 绝对定位 */
+  left: 0;                      /* 左对齐 */
+  top: 0;                       /* 顶部对齐 */
+  width: 20px;                  /* 设置宽度为20像素 */
+  height: 20px;                 /* 设置高度为20像素 */
+  margin: 0;                    /* 移除外边距 */
+  z-index: 2;                   /* 设置z-index为2，确保可点击 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+}
+
+/* 自定义单选按钮样式 */
+.image-editor__radio-custom {
+  width: 16px;                  /* 设置宽度为16像素 */
+  height: 16px;                 /* 设置高度为16像素 */
+  border: 1px solid var(--primary-color, #2563eb);  /* 设置1像素实线边框，颜色使用主色变量或默认蓝色 */
+  border-radius: 50%;           /* 设置边框为圆形 */
+  margin-right: 8px;            /* 右侧外边距8像素 */
+  background: #fff;             /* 背景色设为白色 */
+  display: inline-block;        /* 设置为行内块级元素 */
+  position: relative;           /* 相对定位 */
+  transition: border-color 0.2s, background 0.2s;  /* 添加边框颜色和背景色的过渡效果 */
+  flex-shrink: 0;               /* 防止在flex容器中缩小 */
+}
+
+/* 选中状态的单选按钮样式 */
+.image-editor__radio input[type="radio"]:checked + .image-editor__radio-custom {
+  border-color: var(--primary-color, #2563eb);  /* 设置选中状态的边框颜色，使用主色变量或默认蓝色 */
+  background: var(--primary-color, #2563eb);    /* 设置选中状态的背景颜色，使用主色变量或默认蓝色 */
+}
+
+/* 单选按钮获得焦点时的自定义样式 */
+.image-editor__radio input[type="radio"]:focus + .image-editor__radio-custom {
+  outline: 2px solid #2563eb;  /* 添加2像素宽的蓝色实线轮廓，提高可访问性和视觉反馈 */
+}
+
+/* 图像编辑器滑块组样式 */
+.image-editor__slider-group {
+  display: flex;                /* 使用弹性布局 */
+  flex-direction: column;       /* 设置主轴方向为垂直方向 */
+  align-items: stretch;         /* 子元素在交叉轴方向上被拉伸以填满容器 */
+  margin-bottom: 18px;          /* 底部外边距18像素，与其他元素保持间距 */
+}
+
+/* 图像编辑器滑块组标签样式 */
+.image-editor__slider-group label {
+  font-size: 13px;              /* 设置字体大小为13像素 */
+  margin-bottom: 6px;           /* 底部外边距6像素，与滑块保持间距 */
+  font-weight: normal;          /* 设置字体粗细为正常 */
+  color: var(--editor-slider-label); /* 使用自定义变量设置标签颜色 */
+}
+
+/* 图像编辑器滑块样式 */
+.image-editor__slider {
+  width: 100%;                  /* 设置滑块宽度为100% */
+  height: 3px;                  /* 设置滑块高度为3像素 */
+  margin: 0;                    /* 移除外边距 */
+  background: var(--editor-slider-track, #e0e0e0);  /* 设置滑块轨道背景色，使用自定义变量或默认灰色 */
+  border-radius: 2px;           /* 设置边框圆角为2像素 */
+  outline: none;                /* 移除焦点时的轮廓 */
+  accent-color: var(--editor-slider-thumb, #2563eb);  /* 设置滑块拇指颜色，使用自定义变量或默认蓝色 */
+  -webkit-appearance: none;     /* 移除WebKit浏览器的默认样式 */
+  appearance: none;             /* 移除默认外观样式 */
+}
+
+/* 图像编辑器滑块拇指（WebKit浏览器）样式 */
+.image-editor__slider::-webkit-slider-thumb {
+  width: 16px;                  /* 设置拇指宽度为16像素 */
+  height: 16px;                 /* 设置拇指高度为16像素 */
+  border-radius: 50%;           /* 设置边框圆角为50%，使其呈现为圆形 */
+  background: var(--editor-slider-thumb, #2563eb);  /* 设置背景色，使用自定义变量或默认蓝色 */
+  border: 2px solid #fff;       /* 添加2像素宽的白色实线边框 */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);  /* 添加轻微阴影效果 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+  transition: background 0.2s;  /* 添加背景色变化的过渡效果 */
+  -webkit-appearance: none;     /* 移除WebKit浏览器的默认样式 */
+  appearance: none;             /* 移除默认外观样式 */
+  margin-top: -6.5px;           /* 调整拇指垂直位置，使其居中对齐 */
+}
+
+/* 图像编辑器滑块拇指获得焦点时的样式（WebKit浏览器） */
+.image-editor__slider:focus::-webkit-slider-thumb {
+  outline: 2px solid #2563eb;   /* 添加2像素宽的蓝色实线轮廓，提高可访问性和视觉反馈 */
+}
+
+/* 图像编辑器滑块拇指（Mozilla Firefox浏览器）样式 */
+.image-editor__slider::-moz-range-thumb {
+  width: 16px;                  /* 设置拇指宽度为16像素 */
+  height: 16px;                 /* 设置拇指高度为16像素 */
+  border-radius: 50%;           /* 设置边框圆角为50%，使其呈现为圆形 */
+  background: var(--editor-slider-thumb, #2563eb);  /* 设置背景色，使用自定义变量或默认蓝色 */
+  border: 2px solid #fff;       /* 添加2像素宽的白色实线边框 */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);  /* 添加轻微阴影效果 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+  -moz-appearance: none;        /* 移除Firefox浏览器的默认样式 */
+  appearance: none;             /* 移除默认外观样式 */
+}
+
+/* 图像编辑器滑块拇指（Microsoft Internet Explorer浏览器）样式 */
+.image-editor__slider::-ms-thumb {
+  width: 16px;                  /* 设置拇指宽度为16像素 */
+  height: 16px;                 /* 设置拇指高度为16像素 */
+  border-radius: 50%;           /* 设置边框圆角为50%，使其呈现为圆形 */
+  background: var(--editor-slider-thumb, #2563eb);  /* 设置背景色，使用自定义变量或默认蓝色 */
+  border: 2px solid #fff;       /* 添加2像素宽的白色实线边框 */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);  /* 添加轻微阴影效果 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+}
+
+/* 图像编辑器滑块轨道（WebKit浏览器）样式 */
+.image-editor__slider::-webkit-slider-runnable-track {
+  height: 3px;                  /* 设置轨道高度为3像素 */
+  border-radius: 2px;           /* 设置边框圆角为2像素 */
+  background: var(--editor-slider-track, #e0e0e0);  /* 设置背景色，使用自定义变量或默认浅灰色 */
+}
+
+/* 图像编辑器滑块填充区域（Microsoft Internet Explorer浏览器）样式 */
+.image-editor__slider::-ms-fill-lower,
+.image-editor__slider::-ms-fill-upper {
+  background: var(--editor-slider-track, #e0e0e0);  /* 设置填充区域背景色，使用自定义变量或默认浅灰色 */
+  border-radius: 2px;                               /* 设置边框圆角为2像素 */
+}
+
+/* 图像编辑器滑块获得焦点时的样式 */
+.image-editor__slider:focus {
+  outline: none;                /* 移除默认的焦点轮廓，保持滑块外观的一致性 */
+}
+
+/* 图像编辑器操作按钮容器样式 */
+.image-editor__actions {
+  display: flex;                /* 使用弹性布局 */
+  justify-content: flex-end;    /* 将内容对齐到容器的右端 */
+  gap: 6px;                     /* 设置子元素之间的间距为6像素 */
+}
+
+/* 图像编辑器重置和确认按钮的通用样式 */
+.image-editor__reset-btn,
+.image-editor__confirm-btn {
+  font-size: 14px;              /* 设置字体大小为14像素 */
+  height: 36px;                 /* 设置按钮高度为36像素 */
+  padding: 0 24px;              /* 设置内边距，左右各24像素，上下为0 */
+  min-width: 80px;              /* 设置最小宽度为80像素 */
+  border-radius: 6px;           /* 设置边框圆角为6像素 */
+  border: none;                 /* 移除边框 */
+  cursor: pointer;              /* 鼠标悬停时显示指针样式 */
+  transition: background 0.2s, color 0.2s;  /* 添加背景色和文字颜色的过渡效果，持续0.2秒 */
+}
+
+.image-editor__reset-btn {
+  background: var(--editor-reset-bg);
+  color: var(--editor-reset-color);
+}
+
+.image-editor__reset-btn:hover {
+  background: var(--editor-reset-hover-bg);
+  color: var(--editor-reset-hover-color);
+}
+
+.image-editor__confirm-btn {
+  background: var(--editor-confirm-bg);
+  color: #fff;
+}
+
+.image-editor__confirm-btn:hover {
+  background: var(--editor-confirm-hover-bg);
+}
+
+.image-editor__actions--centered {
+  justify-content: center !important;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
 /* 深色主题样式 */
 body.dark-theme {
   color: #f5f5f7;
   background-color: #1d1d1f;
+  --panel-bg: #232323;
+  --panel-sidebar-bg: #181818;
+  --panel-sidebar-border: #2c2c2c;
+  --panel-menu-color: #bbb;
+  --panel-menu-hover-bg: #282828;
+  --panel-menu-hover-color: #fff;
+  --tool-card-bg: #222;
+  --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --editor-preview-bg: #111;
+  --editor-placeholder-color: #666;
+  --editor-slider-label: #aaa;
+  --editor-slider-track: #48484a;
+  --editor-slider-thumb: #4f8cff;
+  --editor-reset-bg: #333;
+  --editor-reset-color: #bbb;
+  --editor-reset-hover-bg: #444;
+  --editor-reset-hover-color: #fff;
+  --editor-confirm-bg: #4f8cff;
+  --editor-confirm-hover-bg: #357ae8;
 }
 
 /* 标签页深色主题 */
@@ -1724,6 +2165,7 @@ body.dark-theme .upload-icon-inline {
   color: #a1a1a6;
 }
 </style>
+
 </head>
 <body>
   <!-- SVG Sprite 定义 -->
@@ -1749,40 +2191,33 @@ body.dark-theme .upload-icon-inline {
     <div class="tab-container">
       <!-- 创建原型标签页 -->
       <div class="tab active" data-tab="prototype">
-        <!-- SVG图标：创建原型 -->
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9.4375 8C10.3004 8 11 8.69956 11 9.5625V18.4375C11 19.3004 10.3004 20 9.4375 20H1.5625C0.699555 20 0 19.3004 0 18.4375V9.5625C0 8.69956 0.699555 8 1.5625 8H9.4375Z" />
-          <path d="M18.4375 8C19.3004 8 20 8.69956 20 9.5625V18.4375C20 19.3004 19.3004 20 18.4375 20H14.5625C13.6996 20 13 19.3004 13 18.4375V9.5625C13 8.69956 13.6996 8 14.5625 8H18.4375Z" />
-          <path d="M18.4375 0C19.3004 0 20 0.699555 20 1.5625V4.6875C20 5.55044 19.3004 6.25 18.4375 6.25H1.5625C0.699555 6.25 0 5.55044 0 4.6875V1.5625C0 0.699555 0.699555 0 1.5625 0H18.4375Z" />
-        </svg>
+        <span class="tab-bar__icon">
+          <svg width="24" height="24" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M436.992 140.288a153.7024 153.7024 0 0 1 146.5856 0l9.6256 5.632 352.6144 226.2528a51.2 51.2 0 0 1-55.296 86.1696L870.4 445.44V870.4a51.2 51.2 0 0 1-51.2 51.2H204.8a51.2 51.2 0 0 1-51.2-51.2V443.1872l-23.552 15.1552-4.5568 2.6112a51.2 51.2 0 0 1-54.9888-85.76l4.2496-3.072 352.6144-226.1504 9.6256-5.7344zM409.6 716.8a51.2 51.2 0 1 0 0 102.4h204.8a51.2 51.2 0 1 0 0-102.4H409.6z"/></svg>
+        </span>
         <span class="tab-label">创建原型</span>
       </div>
 
       <!-- 延展渠道标签页 -->
       <div class="tab" data-tab="extension">
-        <!-- SVG图标：延展渠道 -->
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1.6875 3.09375V7.25175H0V3.09375C0 2.27324 0.325948 1.48633 0.906138 0.906138C1.48633 0.325948 2.27324 0 3.09375 0H7.25175V1.6875H3.09375C2.3175 1.6875 1.6875 2.3175 1.6875 3.09375ZM16.3125 3.09375V7.25175H18V3.09375C18 2.27324 17.6741 1.48633 17.0939 0.906138C16.5137 0.325948 15.7268 0 14.9063 0H10.7483V1.6875H14.9063C14.9738 1.6875 15.0413 1.692 15.1054 1.701L11.3175 5.49113L12.51 6.68363L16.3001 2.89462C16.3091 2.95988 16.3136 3.02625 16.3136 3.09375H16.3125ZM7.26638 11.9273L2.89462 16.299C2.95875 16.308 3.02625 16.3136 3.09375 16.3136H7.25175V18H3.09375C2.27324 18 1.48633 17.6741 0.906138 17.0939C0.325948 16.5137 0 15.7268 0 14.9063V10.7471H1.6875V14.9063C1.6875 14.9738 1.692 15.039 1.701 15.1043L6.07275 10.7325L7.26525 11.925L7.26638 11.9273ZM16.3125 14.9063C16.3125 15.6836 15.6825 16.3125 14.9063 16.3125H10.7483V18H14.9063C15.7268 18 16.5137 17.6741 17.0939 17.0939C17.6741 16.5137 18 15.7268 18 14.9063V10.7483H16.3125V14.9074V14.9063Z" />
-        </svg>
+        <span class="tab-bar__icon">
+          <svg width="24" height="24" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M955.6992 54.272c-16.7936-8.3968-33.536-8.3968-41.9328 0L75.9808 473.088c-16.7424 0-25.1392 16.7424-25.1392 33.536 0 16.7424 8.3968 33.4848 16.7424 33.4848l201.0624 125.6448c16.7936 8.3968 33.536 8.3968 50.2784-8.3456l444.0576-402.1248 16.7424 8.3456-402.1248 427.3152c-8.3968 8.3456-8.3968 16.7424-8.3968 25.088v184.32a46.08 46.08 0 0 0 25.1392 41.8816c16.7424 8.3968 33.536 0 41.8816-8.3456l100.5568-100.5568 201.0624 134.0928c8.3968 8.3456 16.7424 8.3456 25.1392 8.3456h16.7424c16.7936-8.3456 25.1392-16.7424 25.1392-33.4848L972.4416 104.448c0-25.088 0-41.8816-16.7424-50.2784z"/></svg>
+        </span>
         <span class="tab-label">延展渠道</span>
       </div>
 
       <!-- 工具集标签页 -->
       <div class="tab" data-tab="tools">
-        <!-- SVG图标：工具集 -->
-        <svg width="20" height="20" viewBox="0 0 18 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9.0211 0.000215872C8.85591 -0.00344549 8.69292 0.0395296 8.55 0.124432L0.450001 4.91307C0.313036 4.99406 0.199328 5.11059 0.120328 5.25091C0.0413283 5.39123 -0.000174042 5.5504 5.4908e-07 5.71237V15.2896C-0.000174121 15.4516 0.0413281 15.6108 0.120328 15.7511C0.199328 15.8914 0.313036 16.008 0.450001 16.0889L8.54121 20.8722C8.54449 20.8742 8.54669 20.8774 8.55 20.8794C8.55608 20.8831 8.56315 20.8848 8.56934 20.8884C8.62739 20.9204 8.68869 20.9457 8.75215 20.964C8.76179 20.9667 8.77056 20.9707 8.78027 20.973C8.85101 20.9909 8.92361 21 8.99649 21H9H9.00352C9.07521 20.9997 9.14662 20.9906 9.21621 20.973C9.22527 20.9709 9.23358 20.9682 9.24258 20.9658H9.2461C9.31219 20.9463 9.37589 20.9191 9.43594 20.8848C9.44029 20.8822 9.4457 20.882 9.45 20.8794L17.55 16.0871C17.829 15.9212 18 15.6158 18 15.2932V5.70877V5.70697C17.9994 5.62978 17.9894 5.55297 17.9701 5.47834C17.9695 5.47594 17.969 5.47354 17.9684 5.47114C17.9677 5.46876 17.9673 5.46632 17.9666 5.46394C17.9469 5.39105 17.9186 5.32091 17.8822 5.25511L17.8805 5.25331L17.8787 5.24971C17.7998 5.10996 17.6865 4.99387 17.55 4.91307L9.45 0.124432C9.31946 0.0468548 9.17197 0.00413969 9.0211 0.000215872ZM9 1.98588L15.3 5.71237L8.55 9.6999C8.271 9.86581 8.1 10.1692 8.1 10.501V18.4833L1.8 14.7586V6.24344L9 1.98588ZM16 8.5V15L11.5 17.5V11L16 8.5Z" />
-        </svg>
+        <span class="tab-bar__icon">
+          <svg width="24" height="24" viewBox="0 0 1024 1024" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M628.5312 579.6864h207.9232a92.672 92.672 0 0 1 92.7232 92.672v207.7696c0 24.7296-9.7792 47.7696-27.0848 65.6384a92.8768 92.8768 0 0 1-65.6384 27.0336h-207.9232c-24.7808 0-47.8208-9.7792-65.6384-27.0336a92.7744 92.7744 0 0 1-27.136-65.6384v-207.7696c0-24.7296 9.8304-47.7696 27.136-65.5872 17.8176-17.3056 41.472-27.0848 65.6384-27.0848z m-276.992-92.672H143.5136c-24.7296 0-47.7696-9.728-65.6384-27.0336a92.416 92.416 0 0 1-27.0848-65.024v-208.384c0-24.7296 9.7792-47.7696 27.0848-65.5872a92.8768 92.8768 0 0 1 65.6384-27.0848h207.9232a92.672 92.672 0 0 1 92.7232 92.672v207.7696c0 24.7808-9.728 47.7696-27.0336 65.6384-17.92 17.2544-41.472 27.0336-65.6896 27.0336z m0 485.2224H143.5136c-24.7296 0-47.7696-9.7792-65.6384-27.0848a90.368 90.368 0 0 1-27.0848-65.5872V671.744c0-24.7808 9.7792-47.7696 27.0848-65.6384a92.8768 92.8768 0 0 1 65.6384-27.0336h207.9232a92.672 92.672 0 0 1 92.7232 92.672v207.7696c0 24.7296-9.728 47.7696-27.0336 65.5872-17.92 17.3056-41.472 27.0848-65.6896 27.0848z m593.7664-616.448l-146.8928 146.7904a92.16 92.16 0 0 1-130.7136 0l-147.456-146.7904a92.0576 92.0576 0 0 1 0-130.6624l146.8928-146.7392a92.16 92.16 0 0 1 130.7136 0l146.8928 146.7392c36.864 36.3008 36.864 94.976 0.5632 130.6624z"/></svg>
+        </span>
         <span class="tab-label">工具集</span>
       </div>
       
       <!-- 设置标签页 -->
       <div class="tab" data-tab="settings">
-        <!-- SVG图标：设置 -->
-        <svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M9 5.375C9.96141 5.375 10.8837 5.7567 11.5635 6.43652C12.2433 7.11634 12.625 8.03859 12.625 9C12.625 9.96141 12.2433 10.8837 11.5635 11.5635C10.8837 12.2433 9.96141 12.625 9 12.625C8.52396 12.625 8.05211 12.5308 7.6123 12.3486C7.17272 12.1665 6.77299 11.8999 6.43652 11.5635C6.10005 11.227 5.83354 10.8273 5.65137 10.3877C5.46919 9.94789 5.375 9.47604 5.375 9C5.375 8.52396 5.46919 8.05211 5.65137 7.6123C5.83354 7.17272 6.10005 6.773 6.43652 6.43652C6.77299 6.10005 7.17272 5.83354 7.6123 5.65137C8.05211 5.46919 8.52396 5.375 9 5.375ZM9 6.625C8.37011 6.625 7.76571 6.87491 7.32031 7.32031C6.87491 7.76571 6.625 8.37011 6.625 9C6.625 9.62989 6.87491 10.2343 7.32031 10.6797C7.76571 11.1251 8.37011 11.375 9 11.375C9.31189 11.375 9.62103 11.3137 9.90918 11.1943C10.1972 11.075 10.4592 10.9002 10.6797 10.6797C10.9002 10.4592 11.075 10.1972 11.1943 9.90918C11.3137 9.62103 11.375 9.31189 11.375 9C11.375 8.68811 11.3137 8.37897 11.1943 8.09082C11.075 7.80276 10.9002 7.5408 10.6797 7.32031C10.4592 7.09983 10.1972 6.92502 9.90918 6.80566C9.62103 6.68631 9.31189 6.625 9 6.625Z" />
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9033 0.875C13.0982 0.875123 14.1924 1.5455 14.7363 2.6084L17.2627 7.55176C17.7277 8.46176 17.7277 9.53924 17.2627 10.4482L14.7363 15.3916C14.4696 15.9134 14.0634 16.3514 13.5635 16.6572C13.0637 16.963 12.4892 17.1251 11.9033 17.125H6.15039C5.56895 17.1249 4.99815 16.9655 4.50098 16.6641C4.00384 16.3626 3.59895 15.9305 3.33008 15.415L0.75 10.4717C0.512884 10.0173 0.388672 9.5125 0.388672 9C0.388672 8.4875 0.512884 7.98266 0.75 7.52832L3.33008 2.58398C3.59902 2.06878 4.00399 1.63721 4.50098 1.33594C4.99814 1.03464 5.56905 0.874986 6.15039 0.875H11.9033ZM6.15039 2.125C5.43044 2.125 4.7705 2.52516 4.43848 3.16309L1.8584 8.10645C1.71432 8.38235 1.63867 8.68874 1.63867 9C1.63867 9.31126 1.71432 9.61765 1.8584 9.89355L4.43848 14.8369C4.60171 15.1498 4.84762 15.4117 5.14941 15.5947C5.45122 15.7777 5.79746 15.875 6.15039 15.875H11.9033C12.6291 15.8749 13.2931 15.469 13.623 14.8232L16.1504 9.87891C16.2894 9.60685 16.3613 9.30553 16.3613 9C16.3613 8.69447 16.2894 8.39315 16.1504 8.12109L13.623 3.17676C13.4611 2.86011 13.2145 2.59478 12.9111 2.40918C12.6077 2.2236 12.259 2.12494 11.9033 2.125H6.15039Z" />
-        </svg>
+        <span class="tab-bar__icon">
+          <svg width="24" height="24" viewBox="0 0 1024 1024" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M421.7856 60.5696c-11.264 2.56-18.432 13.312-18.432 25.088a137.6256 137.6256 0 0 1-68.608 119.296 137.5232 137.5232 0 0 1-138.24-0.512 27.4432 27.4432 0 0 0-33.28 6.144 464.7424 464.7424 0 0 0-87.04 151.552c-3.584 11.264 0.512 24.064 10.752 29.696 41.984 24.064 70.656 68.608 70.656 120.32a136.7552 136.7552 0 0 1-70.144 119.808c-10.752 5.632-14.848 18.944-11.264 29.696a464.7424 464.7424 0 0 0 87.04 151.552c8.192 9.216 22.528 12.8 33.28 6.144a138.8032 138.8032 0 0 1 138.24 0 137.6256 137.6256 0 0 1 68.608 119.296c0 11.776 7.168 22.528 18.432 25.088 29.5936 6.144 59.8016 9.2672 90.112 9.216 30.72 0 60.928-3.584 90.112-9.216 11.264-2.56 18.432-13.312 18.432-25.088 0-47.616 24.576-94.208 68.608-119.808a137.5744 137.5744 0 0 1 138.24 0.512c10.752 6.144 25.088 3.072 33.28-6.144a464.64 464.64 0 0 0 87.04-151.552c3.584-11.264-0.512-24.064-10.752-29.696a136.704 136.704 0 0 1-70.144-119.808c0-51.712 28.16-96.256 70.144-119.808a24.4736 24.4736 0 0 0 10.752-29.696 464.64 464.64 0 0 0-87.04-151.552c-8.192-9.216-22.528-12.8-33.28-6.144a137.5232 137.5232 0 0 1-138.24 0.512 138.4448 138.4448 0 0 1-68.608-119.808c0-11.776-7.168-22.528-18.432-25.088a437.4016 437.4016 0 0 0-90.112-9.216c-30.72 0-60.928 3.072-90.112 9.216z m227.84 451.584a137.728 137.728 0 0 1-275.456 0 138.0864 138.0864 0 0 1 190.464-127.3344 137.4208 137.4208 0 0 1 84.992 127.3344z"/></svg>
+        </span>
         <span class="tab-label">设置</span>
       </div>
     </div>
@@ -2916,11 +3351,80 @@ body.dark-theme .upload-icon-inline {
     </div>
     
     <!-- 工具集内容 -->
-    <div class="tab-content" id="tools-content">
-      <div class="empty-state">
-        <h3>工具库开发中</h3>
-        <p>更多实用设计工具正在开发中</p>
-        <p class="gray-text">敬请期待</p>
+    <div class="tab-content  active tools-tab-content" id="tools-content">
+      <div class="tools-panel">
+        <!-- 左侧菜单栏 -->
+        <aside class="tools-panel__sidebar">
+          <ul class="tools-menu">
+            <li class="tools-menu__item tools-menu__item--active" data-tool="image-editor">
+              <span class="tools-menu__icon">🎨</span>
+              <span class="tools-menu__label">调整图像</span>
+            </li>
+            <!-- 未来可扩展更多工具 -->
+            <!-- <li class="tools-menu__item" data-tool="other-tool">...</li> -->
+          </ul>
+        </aside>
+      
+        <!-- 右侧内容区 -->
+        <section class="tools-panel__content">
+          <!-- 图片调色工具卡片 -->
+          <div class="tool-card tool-card--active" id="image-editor-tool">
+            <div class="image-editor__header image-editor__mode-switch">
+              <label class="image-editor__radio">
+                <input type="radio" name="image-mode" value="upload" checked>
+                <span class="image-editor__radio-custom"></span>
+                上传图片
+              </label>
+              <label class="image-editor__radio">
+                <input type="radio" name="image-mode" value="figma">
+                <span class="image-editor__radio-custom"></span>
+                加载图片
+              </label>
+            </div>
+            <div class="image-editor__preview-area" id="image-preview-area">
+              <input type="file" accept="image/*" class="image-editor__file-input" id="image-upload-input" hidden title="上传图片" aria-label="上传图片">
+              <div class="image-editor__preview-placeholder" id="image-preview-placeholder">
+                <span>点击上传图片或获取Figma图片</span>
+              </div>
+              <canvas class="image-editor__canvas" id="image-preview-canvas" style="display:none;"></canvas>
+            </div>
+            <div class="image-editor__controls">
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">曝光</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="brightness" title="曝光" aria-label="曝光">
+              </div>
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">对比度</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="contrast" title="对比度" aria-label="对比度">
+              </div>
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">饱和度</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="saturate" title="饱和度" aria-label="饱和度">
+              </div>
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">白平衡</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="temperature" title="白平衡" aria-label="白平衡">
+              </div>
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">色相</label>
+                <input type="range" min="-180" max="180" value="0" class="image-editor__slider" data-prop="hue" title="色相" aria-label="色相">
+              </div>
+              <div class="image-editor__slider-group">
+                <label style="font-size:13px;margin-bottom:6px;">高光</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="highlight" title="高光" aria-label="高光">
+              </div>
+              <div class="image-editor__slider-group" style="margin-bottom:18px;">
+                <label style="font-size:13px;margin-bottom:6px;">阴影</label>
+                <input type="range" min="-100" max="100" value="0" class="image-editor__slider" data-prop="shadow" title="阴影" aria-label="阴影">
+              </div>
+            </div>
+            <div class="image-editor__actions image-editor__actions--centered">
+              <button class="image-editor__reset-btn">重置</button>
+              <button class="image-editor__confirm-btn">确认</button>
+            </div>
+          </div>
+          <!-- 未来可扩展更多工具卡片 -->
+        </section>
       </div>
     </div>
 
@@ -6677,5 +7181,6 @@ safeInitializeApp();
 
 
 </script>
+
 </body>
 </html> 

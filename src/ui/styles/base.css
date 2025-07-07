@@ -38,6 +38,11 @@ body {
   padding-bottom: 40px;
 }
 
+html, body, .container {
+    height: 100%;
+    min-height: 100%;
+  }
+
 /* 动画效果 */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
@@ -109,4 +114,26 @@ body {
 /* 隐藏元素 */
 .visually-hidden {
   display: none !important;
+}
+
+:root {
+  --panel-bg: #f5f5f7;
+  --panel-sidebar-bg: #fff;
+  --panel-sidebar-border: #e0e0e0;
+  --panel-menu-color: #666;
+  --panel-menu-hover-bg: #e6f0ff;
+  --panel-menu-hover-color: #0071e3;
+  --tool-card-bg: #fff;
+  --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --editor-preview-bg: #f0f0f0;
+  --editor-placeholder-color: #bbb;
+  --editor-slider-label: #888;
+  --editor-slider-track: #e0e0e0;
+  --editor-slider-thumb: #0071e3;
+  --editor-reset-bg: #f5f5f7;
+  --editor-reset-color: #666;
+  --editor-reset-hover-bg: #e0e0e0;
+  --editor-reset-hover-color: #0071e3;
+  --editor-confirm-bg: #0071e3;
+  --editor-confirm-hover-bg: #005bb5;
 } 

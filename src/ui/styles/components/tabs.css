@@ -4,8 +4,8 @@
   width: 100%;
   justify-content: space-between;
   background-color: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 8px 0;
   position: fixed;
@@ -36,8 +36,9 @@
 }
 
 .tab-label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 500;
+  font-weight: bold;
   margin-top: 2px;
   opacity: 0.8;
 }

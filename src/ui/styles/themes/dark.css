@@ -2,6 +2,25 @@
 body.dark-theme {
   color: #f5f5f7;
   background-color: #1d1d1f;
+  --panel-bg: #232323;
+  --panel-sidebar-bg: #181818;
+  --panel-sidebar-border: #2c2c2c;
+  --panel-menu-color: #bbb;
+  --panel-menu-hover-bg: #282828;
+  --panel-menu-hover-color: #fff;
+  --tool-card-bg: #222;
+  --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --editor-preview-bg: #111;
+  --editor-placeholder-color: #666;
+  --editor-slider-label: #aaa;
+  --editor-slider-track: #48484a;
+  --editor-slider-thumb: #4f8cff;
+  --editor-reset-bg: #333;
+  --editor-reset-color: #bbb;
+  --editor-reset-hover-bg: #444;
+  --editor-reset-hover-color: #fff;
+  --editor-confirm-bg: #4f8cff;
+  --editor-confirm-hover-bg: #357ae8;
 }
 
 /* 标签页深色主题 */
