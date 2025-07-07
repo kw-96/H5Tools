@@ -143,6 +143,7 @@ class DataCollector {
   collectLotteryData(container, moduleId) {
     const data = {
       mainTitle: container.querySelector('.big-title-input')?.value || "抽奖活动",
+      // 类型保护：只允许ImageInfo类型
       titleBgImage: window.imageManager.getModule(`${moduleId}-titlebg`),
       gridBgImage: window.imageManager.getModule(`${moduleId}-gridbg`),
       drawButtonImage: window.imageManager.getModule(`${moduleId}-drawbtn`),

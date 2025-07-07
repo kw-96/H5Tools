@@ -650,7 +650,7 @@ export async function createTitleContainer(
   // 设置Y坐标并返回新Y
   titleContainer.x = 0;
   titleContainer.y = currentY + 90;
-  return { container: titleContainer, newY: currentY + 90 + height };
+  return { container: titleContainer, newY: currentY + height };
 }
 
 // ==================== 除游戏信息容器外其他按钮容器创建函数 ====================

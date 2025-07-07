@@ -24,7 +24,6 @@ export declare class NineGridModuleBuilder {
 export declare class CarouselModuleBuilder {
     private frame;
     private content;
-    private readonly TITLE_HEIGHT;
     private readonly CAROUSEL_AREA_HEIGHT;
     private readonly CAROUSEL_BG_WIDTH;
     private readonly CAROUSEL_BG_HEIGHT;

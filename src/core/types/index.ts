@@ -63,26 +63,28 @@ export type ModuleContent = ActivityContentData | SignInContent | CollectCardsCo
 // 活动内容接口（区别于活动规则）
 export interface ActivityContentData {
   mainTitle: string;            // 主标题
-  mainTitleBg: Uint8Array | ImageInfo | null; // 主标题背景图片
+  mainTitleBg: ImageInfo | null; // 主标题背景图片
   subTitle: string;             // 副标题
-  subTitleBg: Uint8Array | ImageInfo | null;  // 副标题背景图片
+  subTitleBg: ImageInfo | null;  // 副标题背景图片
   text: string;                 // 活动内容文本
   image: Uint8Array | ImageInfo | null;     // 活动内容插图
 }
 
 // 签到内容接口
 export interface SignInContent {
-  titleImage: Uint8Array | null;  // 标题图片
-  bgImage: Uint8Array | null;     // 背景图片
+  title: string;                // 标题文本
+  titleImage: ImageInfo | null;  // 标题图片
+  bgImage: ImageInfo | null;     // 背景图片
   daysCount: number;              // 签到天数
-  dayIcon: Uint8Array | null;     // 每日图标
-  signButton: Uint8Array | null;  // 签到按钮图片
+  dayIcon: ImageInfo | null;     // 每日图标
+  signButton: ImageInfo | null;  // 签到按钮图片
 }
 
 // 集卡内容接口
 export interface CollectCardsContent {
-  titleImage: Uint8Array | null;    // 标题图片
-  bgImage: Uint8Array | null;       // 背景图片
+  title: string;                // 标题文本
+  titleImage: ImageInfo | null;  // 标题图片
+  bgImage: ImageInfo | null;     // 背景图片
   cardsCount: number;               // 卡片数量
   cardStyle: 'style1' | 'style2' | 'style3';  // 卡片样式
   cardBg: Uint8Array | null;        // 卡片背景图片
@@ -90,12 +92,13 @@ export interface CollectCardsContent {
 }
 
 // 九宫格内容接口
+// 所有图片字段只允许ImageInfo类型，严禁Uint8Array，上传处理已保证类型安全
 export interface NineGridContent {
   mainTitle: string;            // 主标题
-  titleBgImage: Uint8Array | ImageInfo | null;  // 标题背景图片
-  gridBgImage: Uint8Array | ImageInfo | null;   // 九宫格背景图片
-  drawButtonImage: Uint8Array | ImageInfo | null;  // 抽奖按钮图片
-  prizeBgImage: Uint8Array | ImageInfo | null;     // 奖品背景图片
+  titleBgImage: ImageInfo | null;  // 标题背景图片
+  gridBgImage: ImageInfo | null;   // 九宫格背景图片
+  drawButtonImage: ImageInfo | null;  // 抽奖按钮图片
+  prizeBgImage: ImageInfo | null;     // 奖品背景图片
   prizes: PrizeItem[];          // 奖品列表
 }
 

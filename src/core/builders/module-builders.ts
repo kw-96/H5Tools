@@ -949,27 +949,14 @@ class ActivityRulesModuleBuilder {
     }
   }
 
-  // 添加标题
+  // 添加活动规则标题
   private async addTitle(): Promise<void> {
-    const hasRulesTitle = this.content.rulesTitle && this.content.rulesTitle.trim() !== '';
-    const hasRulesBgImage = this.content.rulesBgImage !== null && this.content.rulesBgImage !== undefined;
-    
-    // 如果既没有标题文案也没有标题背景，直接返回
-    if (!hasRulesTitle && !hasRulesBgImage) return;
-
-    // 添加上边距
-    this.currentY += 90;
-
-    // 使用统一的标题容器创建函数
-    // 如果没有标题文案，使用空字符串，但仍然可以显示背景图片
-    const titleText = hasRulesTitle ? this.content.rulesTitle : '';
-    
-    const bgImage = hasRulesBgImage && this.content.rulesBgImage ? this.content.rulesBgImage : undefined;
-    const titleContainer = await createTitleContainer(
-      titleText,
-      bgImage,
+    const result = await createTitleContainer(
+      this.content.rulesTitle,
+      this.content.rulesBgImage ?? undefined, // 如果规则标题背景图片为空，则使用undefined
       1080,
       120,
+      this.currentY,
       {
         fontSize: 48,
         fontWeight: 'Bold',
@@ -977,12 +964,10 @@ class ActivityRulesModuleBuilder {
         frameName: '活动规则标题容器'
       }
     );
-    
-    titleContainer.x = 0;
-    titleContainer.y = this.currentY;
-    
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '活动规则标题容器添加');
-    this.currentY += 120;
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '活动规则标题容器添加');
+      this.currentY = result.newY;
+    }
   }
 
   // 添加规则内容
@@ -1214,48 +1199,25 @@ export class NineGridModuleBuilder {
     }
   }
 
-  // 添加标题
+  // 添加九宫格标题
   private async addTitle(): Promise<void> {
-    // 如果没有主标题，直接返回
-    if (!this.content.mainTitle) return;
-
-    // 创建标题容器：1080宽，高度120
-    const titleContainer = NodeUtils.createFrame("九宫格标题", CONSTANTS.H5_WIDTH, 120);
-    titleContainer.x = 0;
-    titleContainer.y = this.currentY + 90;
-    titleContainer.fills = []; // 透明背景
-
-    // 添加标题背景图片节点（如果有）
-    if (this.content.titleBgImage) {
-      try {
-        const titleBgImage = await ImageNodeBuilder.insertImage(
-          this.content.titleBgImage,
-          "标题背景图片",
-          CONSTANTS.H5_WIDTH,
-          120
-        );
-      
-        if (titleBgImage) {
-          titleBgImage.x = 0;
-          titleBgImage.y = 0;
-          NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
-        }
-      } catch (error) {
-        console.error('标题背景图片创建失败:', error);
+    const result = await createTitleContainer(
+      this.content.mainTitle,
+      this.content.titleBgImage ?? undefined, // null转undefined，防止类型报错
+      1080,
+      120,
+      this.currentY,
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '九宫格标题容器'
       }
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '九宫格标题容器添加');
+      this.currentY = result.newY;
     }
-
-    // 添加标题文本节点
-    const titleText = await NodeUtils.createText(this.content.mainTitle, 48, 'Bold');
-    titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-    titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
-    titleText.textAlignHorizontal = "CENTER";
-    titleText.x = 0;
-    titleText.y = (120 - titleText.height) / 2; // 垂直居中
-
-    NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '标题容器添加');
-    this.currentY += 120;
   }
 
   // 添加九宫格主体
@@ -1526,7 +1488,6 @@ export class CarouselModuleBuilder {
   private content: CarouselContent;
   
   // 根据Figma设计的精确尺寸
-  private readonly TITLE_HEIGHT = 120;       // 标题容器高度
   private readonly CAROUSEL_AREA_HEIGHT = 607; // 轮播区域高度
   private readonly CAROUSEL_BG_WIDTH = 1000;   // 轮播图背景宽度
   private readonly CAROUSEL_BG_HEIGHT = 540;   // 轮播图背景高度
@@ -1563,49 +1524,28 @@ export class CarouselModuleBuilder {
     NodeUtils.setupAutoLayout(this.frame, 'VERTICAL', 30, 90);
   }
 
-  // 添加标题容器 - 与活动内容模块保持一致
+  // 添加标题容器
   private async addTitleContainer(): Promise<void> {
     if (!this.content.title && !this.content.titleBackground) return;
-
+  
     console.log('添加标题容器 - 1080x120px');
-
-    // 创建标题容器：1080x120px
-    const titleContainer = NodeUtils.createFrame("标题容器", 1080, this.TITLE_HEIGHT);
-    titleContainer.fills = []; // 透明背景
-
-    // 添加标题背景图片 - 1080x120px（与活动内容模块一致）
-    if (this.content.titleBackground) {
-      try {
-        const titleBgImage = await ImageNodeBuilder.insertImage(
-          this.content.titleBackground,
-          "标题背景图片",
-          1080,
-          120
-        );
-      
-        if (titleBgImage) {
-          titleBgImage.x = 0;
-          titleBgImage.y = 0;
-          NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
-        }
-      } catch (error) {
-        console.error('标题背景图片创建失败:', error);
+  
+    const result = await createTitleContainer(
+      this.content.title,
+      this.content.titleBackground ?? undefined,
+      1080,
+      120,
+      0, // 假设有currentY用于布局链
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '标题容器'
       }
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '标题容器添加');
     }
-
-    // 添加标题文本 - 48px字体，白色，垂直居中（与活动内容模块一致）
-    if (this.content.title) {
-      const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
-      titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })]; // 白色
-      titleText.resize(1080, titleText.height);
-      titleText.textAlignHorizontal = "CENTER";
-      titleText.x = 0;
-      titleText.y = (120 - titleText.height) / 2; // 垂直居中（与活动内容模块一致）
-
-      NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
-    }
-
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '标题容器添加');
   }
 
   // 添加轮播预览区域 - 精确按Figma设计实现
@@ -1783,85 +1723,56 @@ export class ActivityContentBuilder {
   }
 
   // 添加大标题
-  private async addMainTitle(): Promise<void> {
-    // 如果没有大标题背景，则不创建大标题容器
+  private async addMainTitle(): Promise<number | undefined> {
+    // 如果没有大标题背景或大标题文本，则不创建大标题容器
     if (!this.content.mainTitleBg || !this.content.mainTitle) return;
-
+  
     console.log('添加大标题...');
-
-    // 创建大标题容器：1080宽，高度120
-    const titleContainer = NodeUtils.createFrame("活动内容大标题容器", 1080, 120);
-    titleContainer.fills = []; // 透明背景
-
-    // 添加大标题背景图片节点
-    try {
-      const titleBgImage = await ImageNodeBuilder.insertImage(
-        this.content.mainTitleBg,
-        "大标题背景图片",
-        1080,
-        120
-      );
-    
-      if (titleBgImage) {
-        titleBgImage.x = 0;
-        titleBgImage.y = 0;
-        NodeUtils.safeAppendChild(titleContainer, titleBgImage, '活动内容标题背景图片添加');
+  
+    const result = await createTitleContainer(
+      this.content.mainTitle,
+      this.content.mainTitleBg ?? undefined,
+      1080,
+      120,
+      0, // 没有currentY，直接传0
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '活动内容大标题容器'
       }
-    } catch (error) {
-      console.error('大标题背景图片创建失败:', error);
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '活动内容标题容器添加');
+      // 如有后续内容需要链式布局，可用 result.newY
+      return result.newY;
     }
-
-    // 添加大标题文本节点
-    const titleText = await NodeUtils.createText(this.content.mainTitle, 48, 'Bold');
-    titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-    titleText.resize(CONSTANTS.H5_WIDTH, titleText.height);
-    titleText.textAlignHorizontal = "CENTER";
-    titleText.x = 0;
-    titleText.y = (120 - titleText.height) / 2; // 垂直居中
-
-    NodeUtils.safeAppendChild(titleContainer, titleText, '活动内容标题文本添加');
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '活动内容标题容器添加');
+    return;
   }
 
   // 添加小标题
-  private async addSubTitle(): Promise<void> {
-    // 如果没有小标题背景，则不创建小标题容器
+  private async addSubTitle(startY: number = 0): Promise<void> {
+    // 如果没有小标题背景或小标题文本，则不创建小标题容器
     if (!this.content.subTitleBg || !this.content.subTitle) return;
-
+  
     console.log('添加小标题...');
-
-    // 创建小标题容器：1080宽，高度100
-    const subTitleContainer = NodeUtils.createFrame("活动内容小标题容器", 1080, 100);
-    subTitleContainer.fills = []; // 透明背景
-
-    // 添加小标题背景图片节点
-    try {
-      const subTitleBgImage = await ImageNodeBuilder.insertImage(
-        this.content.subTitleBg,
-        "小标题背景图片",
-        1080,
-        100
-      );
-    
-      if (subTitleBgImage) {
-        subTitleBgImage.x = 0;
-        subTitleBgImage.y = 0;
-        NodeUtils.safeAppendChild(subTitleContainer, subTitleBgImage, '小标题背景图片添加');
+  
+    const result = await createTitleContainer(
+      this.content.subTitle,
+      this.content.subTitleBg ?? undefined,
+      1080,
+      100,
+      startY, // 让小标题紧贴大标题容器
+      {
+        fontSize: 44,
+        fontWeight: 'Medium',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '活动内容小标题容器'
       }
-    } catch (error) {
-      console.error('小标题背景图片创建失败:', error);
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '小标题容器添加');
     }
-
-    // 添加小标题文本节点 - 44大小，Medium
-    const subTitleText = await NodeUtils.createText(this.content.subTitle, 44, 'Medium');
-    subTitleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-    subTitleText.resize(CONSTANTS.H5_WIDTH, subTitleText.height);
-    subTitleText.textAlignHorizontal = "CENTER"; // 设置小标题文本水平居中对齐
-    subTitleText.x = 0;
-    subTitleText.y = (100 - subTitleText.height) / 2; // 垂直居中
-
-    NodeUtils.safeAppendChild(subTitleContainer, subTitleText, '小标题文本添加');
-    NodeUtils.safeAppendChild(this.frame, subTitleContainer, '小标题容器添加');
   }
 
   // 添加正文
@@ -1940,17 +1851,26 @@ export class SignInModuleBuilder {
   }
 
   private async addTitle(): Promise<void> {
-    const titleFrame = NodeUtils.createFrame("签到标题", 500, 100);
-    titleFrame.x = (CONSTANTS.H5_WIDTH - 500) / 2;
-    titleFrame.y = 20;
-
-    if (this.content.titleImage) {
-      await ImageNodeBuilder.setImageFill(titleFrame, this.content.titleImage, 'FIT');
-    } else {
-      await this.addDefaultTitle(titleFrame);
+    // 如果没有标题图片且没有标题文本，则不创建标题容器
+    if (!this.content.title && !this.content.titleImage) return;
+  
+    const result = await createTitleContainer(
+      this.content.title,                // 标题文本
+      this.content.titleImage ?? undefined,           // 标题背景（图片）
+      1080,                                           // 宽度
+      120,                                            // 高度
+      0,                                              // currentY
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '标题容器'
+      }
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '标题容器添加');
+      // 如有后续内容需要链式布局，可用 result.newY
     }
-
-    NodeUtils.safeAppendChild(this.frame, titleFrame, '签到标题添加');
   }
 
   private async addDefaultTitle(titleFrame: FrameNode): Promise<void> {
@@ -2070,16 +1990,25 @@ export class CollectCardsModuleBuilder {
 
     let currentY = 20;
 
-    // 添加标题
-    if (this.content.titleImage) {
-      const titleFrame = NodeUtils.createFrame("集卡标题", 400, 80);
-      titleFrame.x = (CONSTANTS.H5_WIDTH - 400) / 2;
-      titleFrame.y = currentY;
-      
-      await ImageNodeBuilder.setImageFill(titleFrame, this.content.titleImage, 'FIT');
-      
-      NodeUtils.safeAppendChild(this.frame, titleFrame, '集卡标题添加');
-      currentY += 100;
+    // 添加标题容器
+    if (this.content.titleImage || this.content.title) {
+      const result = await createTitleContainer(
+        this.content.title,      // 标题文本
+        this.content.titleImage ?? undefined, // 标题背景（图片）
+        1080,                                 // 宽度
+        120,                                  // 高度
+        currentY,                            // 当前Y坐标
+        {
+          fontSize: 48,                      // 可根据UI风格调整
+          fontWeight: 'Bold',
+          textColor: { r: 1, g: 1, b: 1 },
+          frameName: '标题容器'
+        }
+      );
+      if (result) {
+        NodeUtils.safeAppendChild(this.frame, result.container, '标题容器添加');
+        currentY = result.newY;
+      }
     }
 
     // 创建卡片容器
@@ -2214,45 +2143,24 @@ export class VerticalCarouselModuleBuilder {
   // 添加标题容器
   private async addTitleContainer(): Promise<void> {
     console.log('添加轮播标题容器...');
-    
-    const titleContainer = NodeUtils.createFrame("轮播标题容器", 1080, this.TITLE_HEIGHT);
-    titleContainer.x = 0;
-    titleContainer.y = 0;
-    titleContainer.fills = []; // 透明背景
-
-    // 添加标题背景图片
-    if (this.content.titleBackground) {
-      try {
-        const titleBgImage = await ImageNodeBuilder.insertImage(
-          this.content.titleBackground,
-          "轮播标题背景",
-          1080,
-          this.TITLE_HEIGHT
-        );
-        
-        if (titleBgImage) {
-          titleBgImage.x = 0;
-          titleBgImage.y = 0;
-          NodeUtils.safeAppendChild(titleContainer, titleBgImage, '轮播标题背景图片添加');
-        }
-      } catch (error) {
-        console.error('轮播标题背景图片创建失败:', error);
+  
+    const result = await createTitleContainer(
+      this.content.title ?? undefined,             // 标题文本
+      this.content.titleBackground ?? undefined,   // 标题背景图片
+      1080,                                       // 宽度
+      120,                                        // 高度
+      0,                                          // currentY
+      {
+        fontSize: 48,
+        fontWeight: 'Bold',
+        textColor: { r: 1, g: 1, b: 1 },
+        frameName: '轮播标题容器'
       }
+    );
+    if (result) {
+      NodeUtils.safeAppendChild(this.frame, result.container, '标题容器添加');
+      // 如有后续内容需要链式布局，可用 result.newY
     }
-
-    // 添加标题文本
-    if (this.content.title) {
-      const titleText = await NodeUtils.createText(this.content.title, 48, 'Bold');
-      titleText.fills = [ColorUtils.createSolidFill({ r: 1, g: 1, b: 1 })];
-      titleText.resize(1080, titleText.height);
-      titleText.textAlignHorizontal = "CENTER";
-      titleText.x = 0;
-      titleText.y = (this.TITLE_HEIGHT - titleText.height) / 2;
-      
-      NodeUtils.safeAppendChild(titleContainer, titleText, '轮播标题文本添加');
-    }
-
-    NodeUtils.safeAppendChild(this.frame, titleContainer, '轮播标题容器添加');
   }
 
   // 添加轮播预览

@@ -521,32 +521,50 @@ export class ImageNodeBuilder {
     }
 }
 // ==================== 标题容器创建函数 ====================
-export function createTitleContainer(title_1, bgImage_1, width_1, height_1) {
-    return __awaiter(this, arguments, void 0, function* (title, bgImage, width, height, fontSize = 24, fontWeight = 'Bold') {
-        // 创建容器框架
-        const container = NodeUtils.createFrame('标题容器', width, height);
-        // 如果有背景图片，设置背景
-        if (bgImage) {
-            yield ImageNodeBuilder.setImageFill(container, bgImage);
+export function createTitleContainer(title, titleBackground, width, height, currentY, options) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d;
+        if ((!title || title.trim() === '') && !titleBackground) {
+            return null;
         }
-        else {
-            // 默认背景色
-            container.fills = [ColorUtils.createSolidFill({ r: 0.95, g: 0.95, b: 0.95 })];
+        const fontSize = (_a = options === null || options === void 0 ? void 0 : options.fontSize) !== null && _a !== void 0 ? _a : 48;
+        const fontWeight = (_b = options === null || options === void 0 ? void 0 : options.fontWeight) !== null && _b !== void 0 ? _b : 'Bold';
+        const textColor = (_c = options === null || options === void 0 ? void 0 : options.textColor) !== null && _c !== void 0 ? _c : { r: 1, g: 1, b: 1 };
+        const frameName = (_d = options === null || options === void 0 ? void 0 : options.frameName) !== null && _d !== void 0 ? _d : '标题容器';
+        // 创建Frame
+        const titleContainer = NodeUtils.createFrame(frameName, width, height);
+        titleContainer.fills = [];
+        // 背景图片
+        if (titleBackground) {
+            try {
+                const titleBgImage = yield ImageNodeBuilder.insertImage(titleBackground, "标题背景图片", width, height);
+                if (titleBgImage) {
+                    titleBgImage.x = 0;
+                    titleBgImage.y = 0;
+                    NodeUtils.safeAppendChild(titleContainer, titleBgImage, '标题背景图片添加');
+                }
+            }
+            catch (error) {
+                console.error('标题背景图片创建失败:', error);
+            }
         }
-        // 创建标题文本
-        if (title) {
+        // 标题文本
+        if (title && title.trim() !== '') {
             const titleText = yield NodeUtils.createText(title, fontSize, fontWeight);
-            titleText.fills = [ColorUtils.createSolidFill({ r: 0, g: 0, b: 0 })];
-            titleText.textAlignHorizontal = 'CENTER';
-            titleText.textAlignVertical = 'CENTER';
-            // 居中定位
-            titleText.x = (width - titleText.width) / 2;
+            titleText.fills = [ColorUtils.createSolidFill(textColor)];
+            titleText.resize(width, titleText.height);
+            titleText.textAlignHorizontal = "CENTER";
+            titleText.x = 0;
             titleText.y = (height - titleText.height) / 2;
-            container.appendChild(titleText);
+            NodeUtils.safeAppendChild(titleContainer, titleText, '标题文本添加');
         }
-        return container;
+        // 设置Y坐标并返回新Y
+        titleContainer.x = 0;
+        titleContainer.y = currentY + 90;
+        return { container: titleContainer, newY: currentY + height };
     });
 }
+// ==================== 除游戏信息容器外其他按钮容器创建函数 ====================
 /**
  * 递归查找"游戏信息"Frame下的"按钮底图"节点并克隆
  * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）

@@ -42,22 +42,24 @@ export interface Module {
 export type ModuleContent = ActivityContentData | SignInContent | CollectCardsContent | NineGridContent | CarouselContent | VerticalCarouselContent;
 export interface ActivityContentData {
     mainTitle: string;
-    mainTitleBg: Uint8Array | ImageInfo | null;
+    mainTitleBg: ImageInfo | null;
     subTitle: string;
-    subTitleBg: Uint8Array | ImageInfo | null;
+    subTitleBg: ImageInfo | null;
     text: string;
     image: Uint8Array | ImageInfo | null;
 }
 export interface SignInContent {
-    titleImage: Uint8Array | null;
-    bgImage: Uint8Array | null;
+    title: string;
+    titleImage: ImageInfo | null;
+    bgImage: ImageInfo | null;
     daysCount: number;
-    dayIcon: Uint8Array | null;
-    signButton: Uint8Array | null;
+    dayIcon: ImageInfo | null;
+    signButton: ImageInfo | null;
 }
 export interface CollectCardsContent {
-    titleImage: Uint8Array | null;
-    bgImage: Uint8Array | null;
+    title: string;
+    titleImage: ImageInfo | null;
+    bgImage: ImageInfo | null;
     cardsCount: number;
     cardStyle: 'style1' | 'style2' | 'style3';
     cardBg: Uint8Array | null;
@@ -65,10 +67,10 @@ export interface CollectCardsContent {
 }
 export interface NineGridContent {
     mainTitle: string;
-    titleBgImage: Uint8Array | ImageInfo | null;
-    gridBgImage: Uint8Array | ImageInfo | null;
-    drawButtonImage: Uint8Array | ImageInfo | null;
-    prizeBgImage: Uint8Array | ImageInfo | null;
+    titleBgImage: ImageInfo | null;
+    gridBgImage: ImageInfo | null;
+    drawButtonImage: ImageInfo | null;
+    prizeBgImage: ImageInfo | null;
     prizes: PrizeItem[];
 }
 export interface CarouselContent {

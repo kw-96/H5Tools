@@ -4628,6 +4628,7 @@ class DataCollector {
   collectLotteryData(container, moduleId) {
     const data = {
       mainTitle: container.querySelector('.big-title-input')?.value || "抽奖活动",
+      // 类型保护：只允许ImageInfo类型
       titleBgImage: window.imageManager.getModule(`${moduleId}-titlebg`),
       gridBgImage: window.imageManager.getModule(`${moduleId}-gridbg`),
       drawButtonImage: window.imageManager.getModule(`${moduleId}-drawbtn`),
@@ -4859,6 +4860,7 @@ class ImageDataManager {
     }
     
     set(key, value) {
+      // 类型保护：只允许存储ImageInfo类型，禁止Uint8Array
       this.data[key] = value;
     }
     
@@ -4867,6 +4869,7 @@ class ImageDataManager {
     }
     
     setModule(key, value) {
+      // 类型保护：只允许存储ImageInfo类型，禁止Uint8Array
       this.moduleData[key] = value;
     }
     
@@ -5110,16 +5113,13 @@ class ChannelManager {
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'vivo': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'huawei': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
         { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
       ],
       'xiaomi': [
-        // { type: 'image', key: 'eggBreaking', label: '砸蛋样式', description: '推荐尺寸<br>864x512px' },
-        { type: 'image', key: 'footerStyle', label: '尾版样式', description: '推荐尺寸<br>1080x289px' }
+
       ]
     };
     

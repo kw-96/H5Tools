@@ -52,7 +52,15 @@ export declare class ImageNodeBuilder {
     private static createPlaceholderRect;
     static setImageFill(node: FrameNode | RectangleNode, imageData: ImageInfo | Uint8Array | null, scaleMode?: 'FILL' | 'FIT'): Promise<void>;
 }
-export declare function createTitleContainer(title: string, bgImage: Uint8Array | ImageInfo | null, width: number, height: number, fontSize?: number, fontWeight?: 'Regular' | 'Medium' | 'Bold'): Promise<FrameNode>;
+export declare function createTitleContainer(title: string | undefined, titleBackground: ImageInfo | undefined, width: number, height: number, currentY: number, options?: {
+    fontSize?: number;
+    fontWeight?: 'Regular' | 'Medium' | 'Bold';
+    textColor?: RGB;
+    frameName?: string;
+}): Promise<{
+    container: FrameNode;
+    newY: number;
+} | null>;
 /**
  * 递归查找"游戏信息"Frame下的"按钮底图"节点并克隆
  * @param nineGridFrame 九宫格Frame节点（其parent应为自适应模块Frame）

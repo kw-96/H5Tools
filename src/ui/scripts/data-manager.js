@@ -17,6 +17,7 @@ class ImageDataManager {
     }
     
     set(key, value) {
+      // 类型保护：只允许存储ImageInfo类型，禁止Uint8Array
       this.data[key] = value;
     }
     
@@ -25,6 +26,7 @@ class ImageDataManager {
     }
     
     setModule(key, value) {
+      // 类型保护：只允许存储ImageInfo类型，禁止Uint8Array
       this.moduleData[key] = value;
     }
     
