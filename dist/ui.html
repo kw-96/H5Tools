@@ -134,7 +134,10 @@ html, body, .container {
   --panel-menu-hover-color: #0071e3;
   --tool-card-bg: #fff;
   --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  --editor-preview-bg: #f0f0f0;
+  --editor-preview-bg: #f5f5f7;
+  --editor-preview-border: rgba(0, 0, 0, 0.1);
+  --editor-preview-bg-hover: #efefef;
+  --editor-preview-border-hover: rgba(0, 0, 0, 0.2);
   --editor-placeholder-color: #bbb;
   --editor-slider-label: #888;
   --editor-slider-track: #e0e0e0;
@@ -145,6 +148,7 @@ html, body, .container {
   --editor-reset-hover-color: #0071e3;
   --editor-confirm-bg: #0071e3;
   --editor-confirm-hover-bg: #005bb5;
+
 } 
 /* 布局样式 */
 .page-footer {
@@ -1564,20 +1568,20 @@ button#cancel:hover {
 .image-editor__preview-area {
   width: 100%;
   height: 140px;
-  border: 2px dashed rgba(0, 0, 0, 0.1);
+  border: 2px dashed var(--editor-preview-border, rgba(0, 0, 0, 0.1));
+  background-color: var(--editor-preview-bg, #f5f5f7);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f5f5f7;
   position: relative;
   transition: all 0.2s;
   margin-bottom: 20px;
 }
 
 .image-editor__preview-area:hover {
-  border-color: rgba(0, 0, 0, 0.2);
-  background-color: #efefef;
+  border-color: var(--editor-preview-border-hover, rgba(0, 0, 0, 0.2));
+  background-color: var(--editor-preview-bg-hover, #efefef);
 }
 
 .image-editor__preview-placeholder {
@@ -1622,8 +1626,9 @@ button#cancel:hover {
 .image-editor__mode-switch {
   display: flex;                /* 使用弹性布局 */
   gap: 16px;                    /* 设置子元素之间的间距为16像素 */
-  margin-bottom: 12px;          /* 底部外边距12像素 */
+  margin-bottom: 20px;          /* 底部外边距12像素 */
   align-items: center;          /* 垂直居中对齐子元素 */
+  justify-content: center;
 }
 
 /* 图像编辑器单选按钮样式 */
@@ -1636,7 +1641,7 @@ button#cancel:hover {
   position: relative;           /* 设置相对定位 */
   -webkit-user-select: none;    /* 禁止WebKit浏览器中的文本选择 */
   user-select: none;            /* 禁止文本选择 */
-  margin-right: 10px;           /* 右侧外边距10像素 */
+  
 }
 
 /* 图像编辑器单选按钮输入样式 */
@@ -1656,7 +1661,6 @@ button#cancel:hover {
 .image-editor__radio-custom {
   width: 16px;                  /* 设置宽度为16像素 */
   height: 16px;                 /* 设置高度为16像素 */
-  border: 1px solid var(--primary-color, #2563eb);  /* 设置1像素实线边框，颜色使用主色变量或默认蓝色 */
   border-radius: 50%;           /* 设置边框为圆形 */
   margin-right: 8px;            /* 右侧外边距8像素 */
   background: #fff;             /* 背景色设为白色 */
@@ -1666,15 +1670,28 @@ button#cancel:hover {
   flex-shrink: 0;               /* 防止在flex容器中缩小 */
 }
 
-/* 选中状态的单选按钮样式 */
-.image-editor__radio input[type="radio"]:checked + .image-editor__radio-custom {
-  border-color: var(--primary-color, #2563eb);  /* 设置选中状态的边框颜色，使用主色变量或默认蓝色 */
-  background: var(--primary-color, #2563eb);    /* 设置选中状态的背景颜色，使用主色变量或默认蓝色 */
+.image-editor__radio-custom::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;   /* 小圆直径，可根据实际调整 */
+  height: 8px;
+  background: #fff; /* 小圆颜色，深色主题可用变量 */
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.2s;
+  pointer-events: none;
 }
 
-/* 单选按钮获得焦点时的自定义样式 */
-.image-editor__radio input[type="radio"]:focus + .image-editor__radio-custom {
-  outline: 2px solid #2563eb;  /* 添加2像素宽的蓝色实线轮廓，提高可访问性和视觉反馈 */
+.image-editor__radio input[type="radio"]:checked + .image-editor__radio-custom::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* 选中状态的单选按钮样式 */
+.image-editor__radio input[type="radio"]:checked + .image-editor__radio-custom {
+  background: var(--primary-color, #2563eb);    /* 设置选中状态的背景颜色，使用主色变量或默认蓝色 */
 }
 
 /* 图像编辑器滑块组样式 */
@@ -1826,7 +1843,10 @@ body.dark-theme {
   --panel-menu-hover-color: #fff;
   --tool-card-bg: #222;
   --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --editor-preview-bg: #111;
+  --editor-preview-bg: #232323;
+  --editor-preview-border: rgba(255, 255, 255, 0.08);
+  --editor-preview-bg-hover: #2a2a2e;
+  --editor-preview-border-hover: rgba(255, 255, 255, 0.16);
   --editor-placeholder-color: #666;
   --editor-slider-label: #aaa;
   --editor-slider-track: #48484a;

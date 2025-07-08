@@ -10,7 +10,10 @@ body.dark-theme {
   --panel-menu-hover-color: #fff;
   --tool-card-bg: #222;
   --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --editor-preview-bg: #111;
+  --editor-preview-bg: #232323;
+  --editor-preview-border: rgba(255, 255, 255, 0.08);
+  --editor-preview-bg-hover: #2a2a2e;
+  --editor-preview-border-hover: rgba(255, 255, 255, 0.16);
   --editor-placeholder-color: #666;
   --editor-slider-label: #aaa;
   --editor-slider-track: #48484a;

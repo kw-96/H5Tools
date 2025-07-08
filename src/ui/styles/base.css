@@ -125,7 +125,10 @@ html, body, .container {
   --panel-menu-hover-color: #0071e3;
   --tool-card-bg: #fff;
   --tool-card-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  --editor-preview-bg: #f0f0f0;
+  --editor-preview-bg: #f5f5f7;
+  --editor-preview-border: rgba(0, 0, 0, 0.1);
+  --editor-preview-bg-hover: #efefef;
+  --editor-preview-border-hover: rgba(0, 0, 0, 0.2);
   --editor-placeholder-color: #bbb;
   --editor-slider-label: #888;
   --editor-slider-track: #e0e0e0;
@@ -136,4 +139,5 @@ html, body, .container {
   --editor-reset-hover-color: #0071e3;
   --editor-confirm-bg: #0071e3;
   --editor-confirm-hover-bg: #005bb5;
+
 } 
